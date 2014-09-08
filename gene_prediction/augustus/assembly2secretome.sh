@@ -175,3 +175,10 @@ qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysi
 qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/sp_rxlr/F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa dna assembly/velvet/F.oxysporum_fsp_cepae/Fus2/Fus2_assembly.81/sorted_contigs.fa
 qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/sp_rxlr/F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa dna assembly/velvet/F.oxysporum_fsp_cepae/HB17/HB17_assembly.51/sorted_contigs.fa
 qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/sp_rxlr/F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa dna assembly/velvet/F.oxysporum_fsp_cepae/PG/PG_assembly.81/sorted_contigs.fa
+
+
+# /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_differentials.pl analysis/blast_homology/F.oxysporum_fsp_cepae/*/*_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv
+# mv *.csv analysis/blast_homology/sp_rxlr/dna/.
+/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/blast_homology/identify_differentials/homolog_grp_srt.pl analysis/blast_homology/F.oxysporum_fsp_cepae/125/125_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/55/55_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/A23/A23_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/A28/A28_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/D2/D2_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/HB17/HB17_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv analysis/blast_homology/F.oxysporum_fsp_cepae/PG/PG_F.oxysporum_fsp_cepae_sp_rxlr_nuc.fa_homologs.csv
+mv *.csv analysis/blast_homology/sp_rxlr/dna/.
+

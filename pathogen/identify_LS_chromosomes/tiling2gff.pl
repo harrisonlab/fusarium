@@ -3,13 +3,14 @@ use strict;
 
 # This program will parse .tiling files outputted from MUMmer to .gff files.
 
-my $usage = "tiling2gff.pl <MUMmer_outfile.tiling> > <outfile.gff>";
+my $usage = "tiling2gff.pl <feature_name> <MUMmer_outfile.tiling> > <outfile.gff>";
 
-my $infile = shift;
+my $feature_name = shift or die $usage;
+my $infile = shift or die $usage;
 my @ao_line;
 my $col1 = "";
 my $col2 = "MUMmer";
-my $col3 = "ls_homolog";
+my $col3 = "$feature_name";
 my $col4 = "";
 my $col5 = "";
 my $col6 = "";

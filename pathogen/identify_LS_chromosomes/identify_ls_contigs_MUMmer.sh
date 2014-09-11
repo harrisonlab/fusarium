@@ -1,16 +1,35 @@
-nucmer --prefix=ref_qry analysis/identify_LS_contigs/F.oxysporum_fsp.lycopersici/4287/F.oxysporum_fsp.lycopersici_4287_LS_contigs.fasta assembly/velvet/F.oxysporum_fsp_cepae/125/125_assembly.71/sorted_contigs.fa 
+#!/bin/bash
+#$ -S /bin/bash
+#$ -cwd
+#$ -pe smp 1
+#$ -l virtual_free=0.9G
 
-show-coords -rcl ref_qry.delta > ref_qry.coords
+USAGE="identify_ls_contigs_MUMmer.sh <reference_contigs.fa> <assembled_contigs.fa>"
 
-mv ref* analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/.
-mkdir -p analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/aligns/
+CUR_PATH=$PWD
 
+REF_CONTIGS=$1
+QRY_CONTIGS=$2
 
-show-tiling  analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/ref_qry.delta > analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/ref_qry.tiling
+IN_REF=$(echo $REF_CONTIGS | rev | cut -d "/" -f1 | rev)
 
-# .tiling file format
-#	start	end	gap_to_next	length	%_query	%_id	orientation	contig_ID	
-#	108102  134159  72266   26058   96.68   96.47   +       NODE_41_length_25988_cov_33.290710
+ORGANISM=$(echo $QRY_CONTIGS | rev | cut -d "/" -f4 | rev)
+STRAIN=$(echo $QRY_CONTIGS | rev | cut -d "/" -f3 | rev)
+IN_QRY=$(echo $QRY_CONTIGS | rev | cut -d "/" -f1 | rev)
+OUTFILE=$(echo $QRY_CONTIGS | sed s/.aa//)
+
+WORK_DIR=$TMPDIR/"$STRAIN"_MUMmer
+mkdir -p $WORK_DIR
+cd $WORK_DIR
+
+cp $CUR_PATH/$REF_CONTIGS .
+cp $CUR_PATH/$QRY_CONTIGS .
+
+nucmer --prefix="$STRAIN"_MUMmer $IN_REF $IN_QRY 
+show-coords -rcl "$STRAIN"_MUMmer.delta > "$STRAIN"_MUMmer.coords
+show-tiling "$STRAIN"_MUMmer.delta > "$STRAIN"_MUMmer.tiling
+
+mkdir MUMmer_alignments
 
 while read line; do
 	if [ $(echo $line | head -c 1) = ">" ]; then
@@ -19,12 +38,13 @@ while read line; do
 	else
 		QRY_SEQ=$(echo $line | cut -d ' ' -f 8)
 		echo "qry_seq set to: $QRY_SEQ"
-		show-aligns analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/ref_qry.delta $REF_SEQ $QRY_SEQ > analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/aligns/ref_qry_"$REF_SEQ"_"$QRY_SEQ".aligns
+		show-aligns "$STRAIN"_MUMmer.delta $REF_SEQ $QRY_SEQ > MUMmer_alignments/"$REF_SEQ"_"$QRY_SEQ".aligns
 	fi
-done<analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/ref_qry.tiling
+done<"$STRAIN"_MUMmer.tiling
 
-# for PAIR in $(tail -n +6 analysis/identify_LS_contigs/F.oxysporum_fsp_cepae/125/ref_qry.coords | cut -d '|' -f 7 | sed 's/\s/:/g' | sort | uniq); do
-# 	REF_SEQ=$(printf $PAIR | cut -d ':' -f 2)
-# 	QRY_SEQ=$(printf $PAIR | cut -d ':' -f 3)
-# #	echo "$REF_SEQ dont take no shit from $QRY_SEQ"
-# done
+mkdir -p $CUR_PATH/analysis/identify_LS_contigs/$ORGANISM/$STRAIN/
+rm $IN_REF $IN_QRY
+cp -r $WORK_DIR/ $CUR_PATH/analysis/identify_LS_contigs/$ORGANISM/$STRAIN/.
+rm -r $TMPDIR
+
+exit

@@ -27,11 +27,11 @@ while (my $line = <INFILE>) {
 		print "\n";
 	}
 	else {
-		$col4 = @ao_line[0];
-		$col5 = @ao_line[1];
-		$col6 = @ao_line[5];
-		$col7 = @ao_line[6];
-		$col9 = @ao_line[7];
+		$col4 = $ao_line[0];
+		$col5 = $ao_line[1];
+		$col6 = $ao_line[5];
+		$col7 = $ao_line[6];
+		$col9 = "ID=$ao_line[7];";
 	print "$col1\t$col2\t$col3\t$col4\t$col5\t$col6\t$col7\t$col8\t$col9\n";
 	}
 }

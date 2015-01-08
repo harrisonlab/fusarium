@@ -13,6 +13,11 @@ done
 #-------
 # moved functionality in commands below to an external program
 #-------
+for strain_path in $(ls -d gene_pred/interproscan/*/*); do
+	STRAIN=$(basename $strain_path)
+	ORGANISM=$(echo $strain_path | rev | cut -d "/" -f2 | rev)
+	$SCRIPT_DIR/append_interpro.sh gene_pred/"$ORGANISM"/"$STRAIN"/"$STRAIN"_aug_out.aa gene_pred/interproscan/"$ORGANISM"/"$STRAIN"/raw
+done
 
 # for strain_path in $(ls -d gene_pred/interproscan/*/*); do 
 # 	STRAIN=$(basename $strain_path)

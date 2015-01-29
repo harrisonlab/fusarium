@@ -56,3 +56,24 @@ bowtie2 -x Fus2_bowtie_index -1 ../qc_rna/paired/Fus2/96/F/96_qc_F.fastq -2 ../q
 # 13.23% overall alignment rate
 mkdir -p F.oxysporum_fsp_cepae/Fus2/96
 mv * F.oxysporum_fsp_cepae/Fus2/96/.
+
+for PATHZ in $(ls -d qc_rna/paired/Fus2/*); do
+	GENOME=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
+	F_FILE=$(ls $PATHZ/*/*_qc_F.fastq)
+	R_FILE=$(ls $PATHZ/*/*_qc_R.fastq)
+	qsub /home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq/bowtie_alignment.sh $GENOME $F_FILE $R_FILE
+done
+
+
+mkdir -p qc_rna/paired/Fus2/aligned_appended
+for FILE in $(ls -d alignment/Fus2/*); do
+	cat $FILE/aligned_paired.1.fastq >> qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq
+	cat $FILE/aligned_paired.2.fastq >> qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq
+done
+
+cat qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq > qc_rna/paired/Fus2/aligned_appended/appended_paired.fastq
+for GENOME in $(ls repeat_masked/F.oxysporum_fsp_cepae/*/*/*_contigs_unmasked.fa); do 
+	echo $GENOME
+	qsub /home/armita/git_repos/emr_repos/tools/gene_prediction/augustus/augustus_pipe.sh $GENOME qc_rna/paired/Fus2/aligned_appended/appended_paired.fastq
+done
+

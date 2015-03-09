@@ -59,11 +59,15 @@ mv * F.oxysporum_fsp_cepae/Fus2/96/.
 
 for PATHZ in $(ls -d qc_rna/paired/Fus2/*); do
 	GENOME=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
-	F_FILE=$(ls $PATHZ/*/*_qc_F.fastq)
-	R_FILE=$(ls $PATHZ/*/*_qc_R.fastq)
+	F_FILE=$(ls qc_rna/paired/Fus2/*/*/*_qc_F.fastq)
+	R_FILE=$(ls qc_rna/paired/Fus2/*/*/*_qc_R.fastq)
 	qsub /home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq/bowtie_alignment.sh $GENOME $F_FILE $R_FILE
 done
 
+for PATHZ in $(ls -d alignment/Fus2/*); do
+		
+	$PATHZ
+done
 
 mkdir -p qc_rna/paired/Fus2/aligned_appended
 for FILE in $(ls -d alignment/Fus2/*); do
@@ -71,9 +75,49 @@ for FILE in $(ls -d alignment/Fus2/*); do
 	cat $FILE/aligned_paired.2.fastq >> qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq
 done
 
-cat qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq > qc_rna/paired/Fus2/aligned_appended/appended_paired.fastq
-for GENOME in $(ls repeat_masked/F.oxysporum_fsp_cepae/*/*/*_contigs_unmasked.fa); do 
-	echo $GENOME
-	qsub /home/armita/git_repos/emr_repos/tools/gene_prediction/augustus/augustus_pipe.sh $GENOME qc_rna/paired/Fus2/aligned_appended/appended_paired.fastq
-done
+/home/armita/git_repos/emr_repos/scripts/alternaria/gene_pred/Gene_pred_pipe.sh assembly/trinity/paired/Fus2/Fus2_rna_contigs/Trinity.fasta repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
 
+# before optimisation
+
+# ---------------------------------------------\
+#                  | sensitivity | specificity |
+# ---------------------------------------------|
+# nucleotide level |       0.921 |        0.37 |
+# ---------------------------------------------/
+# 
+# ----------------------------------------------------------------------------------------------------------\
+#            |  #pred |  #anno |      |    FP = false pos. |    FN = false neg. |             |             |
+#            | total/ | total/ |   TP |--------------------|--------------------| sensitivity | specificity |
+#            | unique | unique |      | part | ovlp | wrng | part | ovlp | wrng |             |             |
+# ----------------------------------------------------------------------------------------------------------|
+#            |        |        |      |               8686 |               2078 |             |             |
+# exon level |  10569 |   3961 | 1883 | ------------------ | ------------------ |       0.475 |       0.178 |
+#            |  10569 |   3961 |      | 1674 |  152 | 6860 | 1673 |  131 |  274 |             |             |
+# ----------------------------------------------------------------------------------------------------------/
+# 
+# ----------------------------------------------------------------------------\
+# transcript | #pred | #anno |   TP |   FP |   FN | sensitivity | specificity |
+# ----------------------------------------------------------------------------|
+# gene level |  4254 |  1793 |    0 | 4254 | 1793 |           0 |           0 |
+# ----------------------------------------------------------------------------/
+# 
+# ------------------------------------------------------------------------\
+#             UTR | total pred | CDS bnd. corr. |   meanDiff | medianDiff |
+# ------------------------------------------------------------------------|
+#             TSS |        117 |              0 |         -1 |         -1 |
+#             TTS |        126 |              0 |         -1 |         -1 |
+# ------------------------------------------------------------------------|
+#             UTR | uniq. pred |    unique anno |      sens. |      spec. |
+# ------------------------------------------------------------------------|
+#                 |  true positive = 1 bound. exact, 1 bound. <= 20bp off |
+#  UTR exon level |          0 |              0 |       -nan |       -nan |
+# ------------------------------------------------------------------------|
+#  UTR base level |          0 |              0 |       -nan |       -nan |
+# ------------------------------------------------------------------------
+
+# Perform gene prediction for Fusarium
+
+for GENOME in $(ls repeat_masked/F.oxysporum_fsp_cepae/*/*/*_contigs_unmasked.fa); do  
+	echo $GENOME
+	qsub /home/armita/git_repos/emr_repos/tools/gene_prediction/augustus/augustus_pipe.sh $GENOME qc_rna/paired/Fus2/aligned_appended/appended_paired.fastq F.oxysporum_fsp_cepae_Fus2
+done

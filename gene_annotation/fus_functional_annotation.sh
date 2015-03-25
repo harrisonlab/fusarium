@@ -152,3 +152,17 @@ OUTFILE=$(echo $INFILE | sed 's/.csv/.gff/g')
 echo "$OUTFILE" 
 $SCRIPT_DIR/blast2gff.pl Fo_Path_gene 1 "$INFILE" > $OUTFILE
 done
+
+
+
+
+# Genes flanking Mimps
+ProgPath=/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder
+for Pathz in $(ls -d analysis/mimps/F.oxysporum_fsp_cepae/*); do
+Strain=$(echo "$Pathz" | cut -f4 -d '/')
+echo "$Strain"
+"$ProgPath"/gffexpander.pl + 1000 "$Pathz"/"$Strain"_mimps.gff3 > "$Pathz"/"$Strain"_mimps_exp.gff3
+StrainModels=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae/"$Strain"/*_augustus_preds.gtf) 
+bedtools intersect -s -a "$StrainModels"  -b "$Pathz"/"$Strain"_mimps_exp.gff3> "$Pathz"/"$Strain"_mimps_ass_genes.bed
+cat "$Pathz"/*_mimps_ass_genes.bed | grep 'gene' | wc -l
+done

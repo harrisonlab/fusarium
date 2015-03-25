@@ -166,3 +166,16 @@ StrainModels=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae/"$Strain"/*_augustus_
 bedtools intersect -s -a "$StrainModels"  -b "$Pathz"/"$Strain"_mimps_exp.gff3> "$Pathz"/"$Strain"_mimps_ass_genes.bed
 cat "$Pathz"/*_mimps_ass_genes.bed | grep 'gene' | wc -l
 done
+
+
+
+
+
+# Identify Small secreted cysteine rich proteins.
+
+ProgPath=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+for Filez in $(ls gene_pred/sigP/F.oxysporum_fsp_cepae/*/*_sp.aa | grep -v _neg_sp.aa); do
+	echo "$Filez"
+	qsub "$ProgPath"/sub_sscp.sh "$Filez"
+done
+

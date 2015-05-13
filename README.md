@@ -71,6 +71,7 @@ This process was repeated for RNAseq data:
 	cp $RawDatDir/9_S4_L001_R1_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/F/.
 	cp $RawDatDir/9_S4_L001_R2_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/R/.
 ```
+<!-- 
 
 
 #Data qc
@@ -574,3 +575,4 @@ The number of bp unique to each assembly were identified.
 This did not give clear results.
 
 Contigs that had no reads align to them were identified.
+ -->

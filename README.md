@@ -38,6 +38,8 @@ Assembly of remaining reads
 Sequence data was moved into the appropriate directories
 
 ```shell
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/HAPI_seq_3
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	cp $RawDatDir/Fproliferatum_S1_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.proliferatum/A8/F/.
 	cp $RawDatDir/Fproliferatum_S1_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.proliferatum/A8/R/.
 	cp $RawDatDir/FoxysporumN139_S2_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/N139/F/.
@@ -71,7 +73,7 @@ This process was repeated for RNAseq data:
 	cp $RawDatDir/9_S4_L001_R1_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/F/.
 	cp $RawDatDir/9_S4_L001_R2_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/R/.
 ```
-<!-- 
+
 
 
 #Data qc
@@ -83,7 +85,7 @@ programs:
 
 Data quality was visualised using fastqc:
 ```shell
-	for RawData in raw_dna/paired/*/*/*/*.fastq*?; do 
+	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz | grep -v 'cepae'); do 
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData; 
 		qsub $ProgDir/run_fastqc.sh $RawData
@@ -94,7 +96,7 @@ Trimming was performed on data to trim adapters from
 sequences and remove poor quality data. This was done with fastq-mcf
 
 ```shell
-	for StrainPath in raw_dna/paired/*/*; do 
+	for StrainPath in $(ls -d raw_dna/paired/*/* | grep -v 'cepae'); do 
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
 		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/illumina_full_adapters.fa
 		ReadsF=$(ls $StrainPath/F/*.fastq*)
@@ -104,6 +106,8 @@ sequences and remove poor quality data. This was done with fastq-mcf
 		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
 	done
 ```
+
+
 
 Data quality was visualised once again following trimming:
 ```shell
@@ -135,87 +139,47 @@ Assembly was performed using Velvet
 A range of hash lengths were used and the best assembly selected for subsequent analysis
 
 ```shell
-	for TrimPath in qc_dna/paired/*/*; do
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/velvet
-	Strain=$(printf $TrimPath | rev | cut -f1 -d '/' | rev)
-	
-	MinHash=41
-	MaxHash=81
-	HashStep=2
-	TrimF=$(ls $TrimPath/F/*.fastq*)
-	TrimR=$(ls $TrimPath/R/*.fastq*)
-	GenomeSz=36
+	for TrimPath in $(ls -d qc_dna/paired/*/* | grep -v 'cepae'); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/velvet
+		Strain=$(printf $TrimPath | rev | cut -f1 -d '/' | rev)
 
-	echo $Strain
-	if [ "$Strain" == '675' ]; then 
-		ExpCov=27
-		MinCov=9
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '97.0013' ]; then
-		ExpCov=30
-		MinCov=10
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '97.0016' ]; then
-		ExpCov=23
-		MinCov=8
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '650' ]; then
-		ExpCov=27
-		MinCov=9
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '1082' ]; then
-		ExpCov=16
-		MinCov=6
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '1164' ]; then
-		ExpCov=24
-		MinCov=8
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '1166' ]; then
-		ExpCov=34
-		MinCov=11
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '1177' ]; then
-		ExpCov=50
-		MinCov=17
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '24350' ]; then
-		ExpCov=30
-		MinCov=10
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '635' ]; then
-		ExpCov=21
-		MinCov=7
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '648' ]; then
-		ExpCov=43
-		MinCov=14
-		InsLgth=600
-		echo "$Strain set"
-	elif [ "$Strain" == '743' ]; then
-		ExpCov=32
-		MinCov=11
-		InsLgth=600
-		echo "$Strain set"
-	fi
-	
-	qsub $ProgDir/submit_velvet_range.sh $MinHash $MaxHash $HashStep \
-	$TrimF $TrimR $GenomeSz $ExpCov $MinCov $InsLgth
+		MinHash=41
+		MaxHash=81
+		HashStep=2
+		TrimF=$(ls $TrimPath/F/*.fastq*)
+		TrimR=$(ls $TrimPath/R/*.fastq*)
+		GenomeSz=65
+
+		echo $Strain
+		if [ "$Strain" == 'PG18' ]; then 
+			ExpCov=24
+			MinCov=8
+			InsLgth=600
+			echo "$Strain set"
+		elif [ "$Strain" == 'PG3' ]; then
+			ExpCov=27
+			MinCov=9
+			InsLgth=600
+			echo "$Strain set"
+		elif [ "$Strain" == 'N139' ]; then
+			ExpCov=26
+			MinCov=9
+			InsLgth=600
+			echo "$Strain set"
+		elif [ "$Strain" == 'A8' ]; then
+			ExpCov=20
+			MinCov=7
+			InsLgth=600
+			echo "$Strain set"
+		fi
+
+		qsub $ProgDir/submit_velvet_range.sh $MinHash $MaxHash $HashStep \
+		$TrimF $TrimR $GenomeSz $ExpCov $MinCov $InsLgth
 	done
 	
 ```
 
-
+<!--
 Assemblies were summarised to allow the best assembly to be determined by eye
 
 ```shell

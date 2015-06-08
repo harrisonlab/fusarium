@@ -179,18 +179,25 @@ A range of hash lengths were used and the best assembly selected for subsequent 
 	
 ```
 
-<!--
-Assemblies were summarised to allow the best assembly to be determined by eye
+
+Assemblies were summarised to allow the best assembly to be determined by eye.
+Although flashed reads and additional datasets were not used in this set of analyses, there were
+some results from previous assemblies in the destination folders that needed to be excluded.
+In the for loop that cycled through the stats file from each assembly correctly the following 
+commands was added: | grep -v 'flash' | grep -v 'combined' . This prevented assemblies
+using flashed reads or additional datasets from being included in this summary. These 
+two grep expressions can be excluded if copying and pasting these commands for a different project.
 
 ```shell
-	for StrainPath in $(ls -d assembly/velvet/A.alternata_ssp._*/*); do
+	for StrainPath in $(ls -d assembly/velvet/F*/* ); do
 		printf "N50\tMax_contig_size\tNumber of bases in contigs\tNumber of contigs\tNumber of contigs >=1kb\tNumber of contigs in N50\tNumber of bases in contigs >=1kb\tGC Content of contigs\n" > $StrainPath/assembly_stats.csv
-		for StatsFile in $(ls $StrainPath/*/stats.txt); do 
-			cat $StatsFile | rev | cut -f1 -d ' ' | rev | paste -d '\t' -s >> $StrainPath/assembly_stats.csv
+		for StatsFile in $(ls $StrainPath/*/stats.txt | grep -v 'flash' | grep -v 'combined'); do
+		cat $StatsFile | rev | cut -f1 -d ' ' | rev | paste -d '\t' -s >> $StrainPath/assembly_stats.csv
 		done
 	done
-	tail -n+1 assembly/velvet/A.alternata_ssp._*/*/assembly_stats.csv > assembly/velvet/alternaria_assembly_stats.csv
+	tail -n+1 assembly/velvet/F*/*/assembly_stats.csv > assembly/velvet/Fusarium_assembly_stats.csv
 ```
+
 
 
 #Repeatmasking
@@ -203,46 +210,24 @@ The best assemblies were used to perform repeatmasking
 	
 ```shell
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	BestAss675=assembly/velvet/A.alternata_ssp._arborescens/675/A.alternata_ssp._arborescens_675_69/sorted_contigs.fa
-	BestAss970013=assembly/velvet/A.alternata_ssp._arborescens/97.0013/A.alternata_ssp._arborescens_97.0013_59/sorted_contigs.fa
-	BestAss970016=assembly/velvet/A.alternata_ssp._arborescens/97.0016/A.alternata_ssp._arborescens_97.0016_77/sorted_contigs.fa
-	BestAss650=assembly/velvet/A.alternata_ssp._gaisen/650/A.alternata_ssp._gaisen_650_67/sorted_contigs.fa
-	BestAss1082=assembly/velvet/A.alternata_ssp._tenuissima/1082/A.alternata_ssp._tenuissima_1082_49/sorted_contigs.fa
-	BestAss1164=assembly/velvet/A.alternata_ssp._tenuissima/1164/A.alternata_ssp._tenuissima_1164_67/sorted_contigs.fa
-	BestAss1166=assembly/velvet/A.alternata_ssp._tenuissima/1166/A.alternata_ssp._tenuissima_1166_43/sorted_contigs.fa
-	BestAss1177=assembly/velvet/A.alternata_ssp._tenuissima/1177/A.alternata_ssp._tenuissima_1177_63/sorted_contigs.fa
-	BestAss24350=assembly/velvet/A.alternata_ssp._tenuissima/24350/A.alternata_ssp._tenuissima_24350_63/sorted_contigs.fa
-	BestAss635=assembly/velvet/A.alternata_ssp._tenuissima/635/A.alternata_ssp._tenuissima_635_59/sorted_contigs.fa
-	BestAss648=assembly/velvet/A.alternata_ssp._tenuissima/648/A.alternata_ssp._tenuissima_648_45/sorted_contigs.fa
-	BestAss743=assembly/velvet/A.alternata_ssp._tenuissima/743/A.alternata_ssp._tenuissima_743_69/sorted_contigs.fa
+	BestAssPG18=assembly/velvet/F.*/PG18/F.*_PG18_53/sorted_contigs.fa
+	BestAssPG3=assembly/velvet/F.*/PG3/F.*_PG3_79/sorted_contigs.fa
+	BestAssN139=assembly/velvet/F.*/N139/F.*_N139_59/sorted_contigs.fa
+	BestAssA8=assembly/velvet/F.*/A8/F.*_A8_51/sorted_contigs.fa
+		
+	qsub $ProgDir/rep_modeling.sh $BestAssPG18
+	qsub $ProgDir/rep_modeling.sh $BestAssPG3
+	qsub $ProgDir/rep_modeling.sh $BestAssN139
+	qsub $ProgDir/rep_modeling.sh $BestAssA8
 
-	qsub $ProgDir/rep_modeling.sh $BestAss675
-	qsub $ProgDir/rep_modeling.sh $BestAss970013
-	qsub $ProgDir/rep_modeling.sh $BestAss970016
-	qsub $ProgDir/rep_modeling.sh $BestAss650
-	qsub $ProgDir/rep_modeling.sh $BestAss1082
-	qsub $ProgDir/rep_modeling.sh $BestAss1164
-	qsub $ProgDir/rep_modeling.sh $BestAss1166
-	qsub $ProgDir/rep_modeling.sh $BestAss1177
-	qsub $ProgDir/rep_modeling.sh $BestAss24350
-	qsub $ProgDir/rep_modeling.sh $BestAss635
-	qsub $ProgDir/rep_modeling.sh $BestAss648
-	qsub $ProgDir/rep_modeling.sh $BestAss743
+	qsub $ProgDir/transposonPSI.sh $BestAssPG18
+	qsub $ProgDir/transposonPSI.sh $BestAssPG3
+	qsub $ProgDir/transposonPSI.sh $BestAssN139
+	qsub $ProgDir/transposonPSI.sh $BestAssA8
 
-	qsub $ProgDir/transposonPSI.sh $BestAss675
-	qsub $ProgDir/transposonPSI.sh $BestAss970013
-	qsub $ProgDir/transposonPSI.sh $BestAss970016
-	qsub $ProgDir/transposonPSI.sh $BestAss650
-	qsub $ProgDir/transposonPSI.sh $BestAss1082
-	qsub $ProgDir/transposonPSI.sh $BestAss1164
-	qsub $ProgDir/transposonPSI.sh $BestAss1166
-	qsub $ProgDir/transposonPSI.sh $BestAss1177
-	qsub $ProgDir/transposonPSI.sh $BestAss24350
-	qsub $ProgDir/transposonPSI.sh $BestAss635
-	qsub $ProgDir/transposonPSI.sh $BestAss648
-	qsub $ProgDir/transposonPSI.sh $BestAss743
 ```
-	
+
+<!--	
 #Gene Prediction
 
 

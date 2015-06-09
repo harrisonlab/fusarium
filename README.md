@@ -349,36 +349,38 @@ Outputs were summarised using the commands:
 	
 	less gene_pred/cegma/cegma_results_rna_summary.txt
 ```
+ -->
+
+
+
+
 	
+
 #Gene prediction
 
-Gene prediction was performed for A. alternata isolates. 
+Gene prediction was performed for Fusarium genomes. 
 RNAseq reads were used as Hints for the location of CDS. 
-A concatenated dataset of both ssp. tenuissima and ssp. gaisen RNAseq reads were used as hints for all strains.
-Genes were predicted for ssp. tenuissima using the gene model trained to ssp. tenunissima. 
-Genes were predicted for ssp. gaisen using the gene model trained to ssp. gaisen. 
-Genes were predicted for ssp. arborescens using the gene model trained to ssp. tenuisima.
 
+A concatenated dataset of RNAseq reads from F. oxysporum fsp. cepae isolate Fus2
+were used as hints for these predictions.
+A gene model trained for F.oxysporum fsp. cepae was used to describe the structure of a gene.
 
 ```shell
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
 	mkdir -p qc_rna/concatenated
-	RnaFiles=$(ls qc_rna/paired/A.alternata_ssp._*/*/*/*.fastq.gz | paste -s -d ' ')
-	ConcatRna=qc_rna/concatenated/A.alternata_RNA_650_1166.fa.gz
-	cat $RnaFiles > $ConcatRna
-	
-	for Genome in repeat_masked/A.alternata_ssp._*/*/*/*_contigs_unmasked.fa; do
-		Species=$(printf $Genome | rev | cut -f4 -d '/' | rev)
-		if [ "$Species" == 'A.alternata_ssp._tenuissima' ]; then 
-			GeneModel=A.alternata_ssp._tenuissima_1166
-		elif [ "$Species" == 'A.alternata_ssp._gaisen' ]; then 
-			GeneModel=A.alternata_ssp._gaisen_650
-		elif [ "$Species" == 'A.alternata_ssp._arborescens' ]; then 
-			GeneModel=A.alternata_ssp._tenuissima_1166
-		fi
+	RnaFiles=$(ls qc_rna/paired/._*/*/*/*.fastq.gz | paste -s -d ' ')
+	RnaF=qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq
+	RnaR=qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq
+	mkdir -p qc_rna/concatenated/F.oxysporum/Fus2
+	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_appended.fa.gz
+	cat $RnaF $RnaR | gzip -fc > $ConcatRna
+	GeneModel=F.oxysporum_fsp_cepae_Fus2
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'cepae'); do 
 		qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel
 	done
 ```
+
+<!-- 
 
 #Functional annotation
 

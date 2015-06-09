@@ -377,21 +377,31 @@ A gene model trained for F.oxysporum fsp. cepae was used to describe the structu
 	done
 ```
 
-<!-- 
+
 
 #Functional annotation
 
-Interproscan was used to give gene models functional annotations.
+Interproscan was used to give gene models functional annotations. 
+Annotation was run using the commands below:
+
+Note: This is a long-running script. As such, these commands were run using 
+'screen' to allow jobs to be submitted and monitored in the background. 
+This allows the session to be disconnected and reconnected over time.
+
+Screen ouput detailing the progress of submission of interporscan jobs 
+was redirected to a temporary output file named interproscan_submission.log . 
 
 ```shell
+	screen -a
+	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/
-	for Genes in $(ls gene_pred/augustus/A.alternata_ssp._*/*/*_augustus_preds.aa); do
+	for Genes in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v 'cepae'); do
 		echo $Genes
 		$ProgDir/sub_interproscan.sh $Genes
-	done
+	done 2>&1 |  tee -a interproscan_submisison.log
 ```
 
-
+<!-- 
 
 
 

@@ -227,7 +227,7 @@ The best assemblies were used to perform repeatmasking
 
 ```
 
-<!--	
+	
 #Gene Prediction
 
 
@@ -244,12 +244,15 @@ Gene prediction followed three steps:
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 ```shell
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
-	cd /home/groups/harrisonlab/project_files/alternaria/
-	for Genome in $(ls repeat_masked/A.*/*/*/*_contigs_unmasked.fa); do 
+	cd /home/groups/harrisonlab/project_files/fusarium
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'cepae'); do 
 		echo $Genome; 
 		qsub $ProgDir/sub_cegma.sh $Genome dna;
 	done
 ```
+
+
+<!-- 
 Outputs were summarised using the commands:
 ```shell
 	for File in $(ls gene_pred/cegma/A.alternata_ssp._*/*/*_dna_cegma.completeness_report); do 
@@ -261,8 +264,9 @@ Outputs were summarised using the commands:
 	
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
+ -->
 
-
+<!--
 #Gene model training
 
 Data quality was visualised using fastqc:

@@ -251,20 +251,17 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 	done
 ```
 
-
-<!-- 
 Outputs were summarised using the commands:
 ```shell
-	for File in $(ls gene_pred/cegma/A.alternata_ssp._*/*/*_dna_cegma.completeness_report); do 
+	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report | grep -v 'cepae'); do 
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev); 
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev); 
 		printf "$Species\t$Strain\n"; 
 		cat $File | head -n18 | tail -n+4;printf "\n"; 
-	done > gene_pred/cegma/cegma_results_dna_summary.txt
+	done >> gene_pred/cegma/cegma_results_dna_summary.txt
 	
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
- -->
 
 <!--
 #Gene model training

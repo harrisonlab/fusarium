@@ -23,7 +23,7 @@ Assembly of remaining reads
 
 
 #Building of directory structure
-```shell
+```bash
 	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/HAPI_seq_3/
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	mkdir -p $ProjectDir/raw_dna/paired/F.proliferatum/A8/F
@@ -37,7 +37,7 @@ Assembly of remaining reads
 ```
 Sequence data was moved into the appropriate directories
 
-```shell
+```bash
 	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/HAPI_seq_3
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	cp $RawDatDir/Fproliferatum_S1_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.proliferatum/A8/F/.
@@ -52,7 +52,7 @@ Sequence data was moved into the appropriate directories
 
 This process was repeated for RNAseq data:
 
-```shell
+```bash
 	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/rna_seq
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDB/F
@@ -84,7 +84,7 @@ programs:
   kmc
 
 Data quality was visualised using fastqc:
-```shell
+```bash
 	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz | grep -v 'cepae'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
@@ -95,7 +95,7 @@ Data quality was visualised using fastqc:
 Trimming was performed on data to trim adapters from
 sequences and remove poor quality data. This was done with fastq-mcf
 
-```shell
+```bash
 	for StrainPath in $(ls -d raw_dna/paired/*/* | grep -v 'cepae'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
 		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/illumina_full_adapters.fa
@@ -110,7 +110,7 @@ sequences and remove poor quality data. This was done with fastq-mcf
 
 
 Data quality was visualised once again following trimming:
-```shell
+```bash
 	for RawData in qc_dna/paired/*/*/*/*.fastq*; do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
@@ -121,7 +121,7 @@ Data quality was visualised once again following trimming:
 kmer counting was performed using kmc
 This allowed estimation of sequencing depth and total genome size
 
-```shell
+```bash
 	for TrimPath in qc_dna/paired/*/*; do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		TrimF=$(ls $TrimPath/F/*.fastq*)
@@ -138,7 +138,7 @@ Assembly was performed using Velvet
 
 A range of hash lengths were used and the best assembly selected for subsequent analysis
 
-```shell
+```bash
 	for TrimPath in $(ls -d qc_dna/paired/*/* | grep -v 'cepae'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/velvet
 		Strain=$(printf $TrimPath | rev | cut -f1 -d '/' | rev)
@@ -188,7 +188,7 @@ commands was added: | grep -v 'flash' | grep -v 'combined' . This prevented asse
 using flashed reads or additional datasets from being included in this summary. These
 two grep expressions can be excluded if copying and pasting these commands for a different project.
 
-```shell
+```bash
 	for StrainPath in $(ls -d assembly/velvet/F*/* ); do
 		printf "N50\tMax_contig_size\tNumber of bases in contigs\tNumber of contigs\tNumber of contigs >=1kb\tNumber of contigs in N50\tNumber of bases in contigs >=1kb\tGC Content of contigs\n" > $StrainPath/assembly_stats.csv
 		for StatsFile in $(ls $StrainPath/*/stats.txt | grep -v 'flash' | grep -v 'combined'); do
@@ -208,7 +208,7 @@ Repeat masking was performed and used the following programs:
 
 The best assemblies were used to perform repeatmasking
 
-```shell
+```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
 	BestAssPG18=assembly/velvet/F.*/PG18/F.*_PG18_53/sorted_contigs.fa
 	BestAssPG3=assembly/velvet/F.*/PG3/F.*_PG3_79/sorted_contigs.fa
@@ -242,7 +242,7 @@ Gene prediction followed three steps:
 #Pre-gene prediction
 
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
-```shell
+```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 	cd /home/groups/harrisonlab/project_files/fusarium
 	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'cepae'); do
@@ -252,7 +252,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 ```
 
 Outputs were summarised using the commands:
-```shell
+```bash
 	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report | grep -v 'cepae'); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
@@ -267,7 +267,7 @@ Outputs were summarised using the commands:
 #Gene model training
 
 Data quality was visualised using fastqc:
-```shell
+```bash
 	for RawData in raw_rna/paired/*/*/*/*.fastq.gz; do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
@@ -278,7 +278,7 @@ Data quality was visualised using fastqc:
 Trimming was performed on data to trim adapters from
 sequences and remove poor quality data. This was done with fastq-mcf
 
-```shell
+```bash
 	for StrainPath in raw_rna/paired/*/*; do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
 		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/illumina_full_adapters.fa
@@ -291,7 +291,7 @@ sequences and remove poor quality data. This was done with fastq-mcf
 ```
 
 Data quality was visualised once again following trimming:
-```shell
+```bash
 	for TrimData in qc_rna/paired/*/*/*/*.fastq.gz; do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
@@ -300,7 +300,7 @@ Data quality was visualised once again following trimming:
 ```
 
 RNAseq data was assembled into transcriptomes using Trinity
-```shell
+```bash
 	for StrainPath in qc_rna/paired/*/*; do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/transcriptome_assembly
 		ReadsF=$(ls $StrainPath/F/*.fastq.gz)
@@ -313,7 +313,7 @@ RNAseq data was assembled into transcriptomes using Trinity
 Gene training was performed using RNAseq data. The cluster can not run this script using qlogin. As such it was run on the head node (-naughty) using screen.
 Training for 650 and 1166 was performed in two instances of screen and occassionally viewed to check progress over time.
 (screen is detached after opening using ctrl+a then ctrl+d. - if just ctrl+d is pressed the instance of screen is deleted. - be careful)
-```shell
+```bash
 	screen -a
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
 	Assembly650=assembly/trinity/A.alternata_ssp._gaisen/650/650_rna_contigs/Trinity.fasta
@@ -328,7 +328,7 @@ Training for 650 and 1166 was performed in two instances of screen and occassion
 ```
 
 Quality of Trinity assemblies were assessed using Cegma to assess gene-space within the transcriptome
-```shell
+```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 	for Transcriptome in $(ls assembly/trinity/A.*/*/*_rna_contigs/Trinity.fasta); do  
 		echo $Transcriptome;  
@@ -336,7 +336,7 @@ Quality of Trinity assemblies were assessed using Cegma to assess gene-space wit
 	done
 ```
 Outputs were summarised using the commands:
-```shell
+```bash
 	for File in $(ls gene_pred/cegma/A.alternata_ssp._*/*/*_rna_cegma.completeness_report); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
@@ -362,7 +362,7 @@ A concatenated dataset of RNAseq reads from F. oxysporum fsp. cepae isolate Fus2
 were used as hints for these predictions.
 A gene model trained for F.oxysporum fsp. cepae was used to describe the structure of a gene.
 
-```shell
+```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
 	mkdir -p qc_rna/concatenated
 	RnaFiles=$(ls qc_rna/paired/._*/*/*/*.fastq.gz | paste -s -d ' ')
@@ -391,7 +391,7 @@ This allows the session to be disconnected and reconnected over time.
 Screen ouput detailing the progress of submission of interporscan jobs
 was redirected to a temporary output file named interproscan_submission.log .
 
-```shell
+```bash
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/
@@ -405,7 +405,6 @@ Following interproscan annotation split files were combined using the following
 commands:
 
 ```bash
-
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
 	for StrainPath in $(ls -d gene_pred/interproscan/F.*/*); do
 		Strain=$(basename $StrainPath)
@@ -417,15 +416,266 @@ commands:
 	done
 ```
 
+#Genomic analysis
 
+## RxLR genes
+
+Putative RxLR genes were identified within Augustus gene models using a number
+of approaches:
+
+A) From Augustus gene models - Signal peptide & RxLR motif
+B) From Augustus gene models - Hmm evidence of WY domains
+C) From Augustus gene models - Hmm evidence of RxLR effectors
+D) From ORF fragments - Signal peptide & RxLR motif
+E) From ORF fragments - Hmm evidence of WY domains
+F) From ORF fragments - Hmm evidence of RxLR effectors
+
+
+### A) From Augustus gene models - Signal peptide & RxLR motif
+
+Required programs:
+SigP
+biopython
+
+
+Proteins that were predicted to contain signal peptides were identified using
+the following commands:
+
+```bash
+	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+	CurPath=$PWD
+	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
+		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		SplitDir=gene_pred/augustus_split/$Organism/$Strain
+		mkdir -p $SplitDir
+		BaseName="$Organism""_$Strain"_augustus_preds
+		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+		for File in $(ls $SplitDir/*_augustus_preds_*); do
+			Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+			while [ $Jobs -ge 32 ]; do
+				sleep 10
+				printf "."
+				Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+			done
+			printf "\n"
+			echo $File
+			qsub $ProgDir/pred_sigP.sh $File
+		done
+	done
+```
+
+The batch files of predicted secreted proteins needed to be combined into a
+single file for each strain. This was done with the following commands:
+```bash
+	for SplitDir in $(ls -d gene_pred/sigP/F.*/*/split); do
+		Strain=$(echo $SplitDir | cut -d '/' -f4)
+		Organism=$(echo $SplitDir | cut -d '/' -f3)
+		InStringAA=''
+		InStringNeg=''
+		InStringTab=''
+		InStringTxt=''
+		for GRP in $(ls -l $SplitDir/*_augustus_preds_*_sp.aa | rev | cut -d '_' -f2 | rev | sort -n); do  
+		InStringAA="$InStringAA gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
+		InStringNeg="$InStringNeg gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
+		InStringTab="$InStringTab gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
+		InStringTxt="$InStringTxt gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+		done
+		cat $InStringAA > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.aa
+		cat $InStringNeg > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+		tail -n +2 -q $InStringTab > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.tab
+		cat $InStringTxt > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.txt
+	done
+```
+The regular expression R.LR.{,40}[ED][ED][KR] has previously been used to identfy RxLR effectors. The addition of an EER motif is significant as it has been shown as required for host uptake of the protein.
+
+The RxLR_EER_regex_finder.py script was used to search for this regular expression and annotate the EER domain where present.
+
+```bash
+	for Secretome in $(ls gene_pred/sigP/F.*/*/*_aug_sp.aa); do
+		ProgDir=~/git_repos/emr_repos/tools/pathogen/RxLR_effectors;
+		Strain=$(echo $Secretome | cut -d '/' -f4);
+		Organism=$(echo $Secretome | cut -d '/' -f3) ;
+		OutDir=analysis/RxLR_effectors/RxLR_EER_regex_finder/"$Organism"/"$Strain";
+		mkdir -p $OutDir;
+		printf "\nstrain: $Strain\tspecies: $Organism\n";
+		printf "the number of SigP gene is:\t";
+		cat $Secretome | grep '>' | wc -l;
+		printf "the number of SigP-RxLR genes are:\t";
+		$ProgDir/RxLR_EER_regex_finder.py $Secretome > $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa;
+		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_regex.txt
+		cat $OutDir/"$Strain"_Aug_RxLR_regex.txt | wc -l
+		printf "the number of SigP-RxLR-EER genes are:\t";
+		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt
+		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt | wc -l
+		printf "\n"
+	# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+	# Col2=RxLR_EER_regex_finder.py
+	# GeneNames=$OutDir/"$Strain"_Aug_RxLR_regex.txt
+	# GeneModels=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
+	# $ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_Aug_RxLR_regex.gff3
+	done
+```
+
+The results were as follows:
+
+strain: 125	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1340
+the number of SigP-RxLR genes are:	13
+the number of SigP-RxLR-EER genes are:	1
+
+strain: 55	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1333
+the number of SigP-RxLR genes are:	12
+the number of SigP-RxLR-EER genes are:	1
+
+strain: A23	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1335
+the number of SigP-RxLR genes are:	13
+the number of SigP-RxLR-EER genes are:	2
+
+strain: A28	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1354
+the number of SigP-RxLR genes are:	16
+the number of SigP-RxLR-EER genes are:	1
+
+strain: D2	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1156
+the number of SigP-RxLR genes are:	8
+the number of SigP-RxLR-EER genes are:	0
+
+strain: Fus2	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1346
+the number of SigP-RxLR genes are:	13
+the number of SigP-RxLR-EER genes are:	1
+
+strain: HB17	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1350
+the number of SigP-RxLR genes are:	13
+the number of SigP-RxLR-EER genes are:	1
+
+strain: PG	species: F.oxysporum_fsp_cepae
+the number of SigP gene is:	1334
+the number of SigP-RxLR genes are:	11
+the number of SigP-RxLR-EER genes are:	0
+
+strain: N139	species: F.oxysporum_fsp_narcissi
+the number of SigP gene is:	1765
+the number of SigP-RxLR genes are:	22
+the number of SigP-RxLR-EER genes are:	1
+
+strain: PG18	species: F.oxysporum_fsp_pisi
+the number of SigP gene is:	1807
+the number of SigP-RxLR genes are:	28
+the number of SigP-RxLR-EER genes are:	1
+
+strain: PG3	species: F.oxysporum_fsp_pisi
+the number of SigP gene is:	1386
+the number of SigP-RxLR genes are:	11
+the number of SigP-RxLR-EER genes are:	0
+
+strain: A8	species: F.proliferatum
+the number of SigP gene is:	1975
+the number of SigP-RxLR genes are:	40
+the number of SigP-RxLR-EER genes are:	3
+
+
+
+### B) From Augustus gene models - Hmm evidence of WY domains
+Hmm models for the WY domain contained in many RxLRs were used to search gene models predicted with Augustus. These were run with the following commands:
+
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
+	HmmModel=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer/WY_motif.hmm
+	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
+	Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+	OutDir=analysis/RxLR_effectors/hmmer_WY/$Organism/$Strain
+	mkdir -p $OutDir
+	HmmResults="$Strain"_Aug_WY_hmmer.txt
+	hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
+	echo "$Organism $Strain"
+	cat $OutDir/$HmmResults | sed '1,/Scores for complete sequences/d' |  sed '/inclusion threshold/q' | tail -n +5 | head -n -1 | wc -l
+	cat $OutDir/$HmmResults | sed '1,/inclusion threshold/d' | sed '/Domain annotation for each sequence/q' | tail -n +2 | head -n -3 | wc -l
+	HmmFasta="$Strain"_Aug_WY_hmmer.fa
+	$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
+	done
+```
+
+Results were as follows:
+
+F.oxysporum_fsp_cepae 125
+20
+0
+F.oxysporum_fsp_cepae 55
+20
+0
+F.oxysporum_fsp_cepae A23
+20
+0
+F.oxysporum_fsp_cepae A28
+20
+0
+F.oxysporum_fsp_cepae D2
+20
+0
+F.oxysporum_fsp_cepae Fus2
+20
+0
+F.oxysporum_fsp_cepae HB17
+20
+0
+F.oxysporum_fsp_cepae PG
+20
+0
+F.oxysporum_fsp_narcissi N139
+20
+0
+F.oxysporum_fsp_pisi PG18
+20
+0
+F.oxysporum_fsp_pisi PG3
+20
+0
+F.proliferatum A8
+0
+0
+
+
+
+### C) From Augustus gene models - Hmm evidence of RxLR effectors
+```bash
+
+```
+
+
+### D) From ORF fragments - Signal peptide & RxLR motif
+```bash
+
+```
+
+
+### E) From ORF fragments - Hmm evidence of WY domains
+```bash
+
+```
+
+
+### F) From ORF fragments - Hmm evidence of RxLR effectors
+```bash
+
+```
+
+
+
+
+## Mimps
+
+The presence of Mimp promotors in Fusarium genomes were identified. Following
+this, genes downstream of these mimps were also identified.
 
 <!--
-
-
-
-
-
-
 
 #Genomic analysis
 
@@ -433,7 +683,7 @@ commands:
 The first analysis was based upon BLAST searches for genes known to be involved in toxin production
 
 #BLAST Searches
-```shell
+```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast/
 	Query=analysis/blast_homology/CDC_genes/A.alternata_CDC_genes.fa
 	BestAss675=assembly/velvet/A.alternata_ssp._arborescens/675/A.alternata_ssp._arborescens_675_69/sorted_contigs.fa
@@ -465,7 +715,7 @@ BLAST search results were summarised into a presence/absence table
 
 The presence /absence table determines presence if a hit is present and the alignment represents >50% of the query sequence.
 This thresholding means that some hits have not been summarised including AMT11, AMT15 and ALT1.
-```shell
+```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast/
 	InFiles=$(ls analysis/blast_homology/A.alternata_ssp._*/*/*_A.alternata_CDC_genes.fa_homologs.csv | paste -s -d ' ')
 	echo $InFiles
@@ -481,7 +731,7 @@ This thresholding means that some hits have not been summarised including AMT11,
 #CDC Assembly
 
 Raw reads were aligned against assembled genomes to identify contigs that were unique to a isolate or clade
-```shell
+```bash
 	for Pathz in $(ls -d qc_dna/paired/A.alternata_ssp._*/*); do  
 		Strain=$(echo $Pathz | cut -d '/' -f4)
 		echo "using reads for $Strain"
@@ -497,7 +747,7 @@ Raw reads were aligned against assembled genomes to identify contigs that were u
 A summary file was made from the alignment logs.
 The percentage of reads aligning to each set of assembled contigs was determined.
 
-```shell
+```bash
 	SummaryFile=analysis/ls_contigs/alignment_summaries.txt
 	printf "" > "$SummaryFile"
 	for OUTPUT in $(ls bowtie2_alignment_pipe.sh.e*); do
@@ -511,7 +761,7 @@ The percentage of reads aligning to each set of assembled contigs was determined
 These are the reads percentages reported by bowtie but do not actually reflect the percentage unaligned reads where neither pair matched.
 
 These were identified using SAM FLAGS to extract unaligned pairs.
-```shell
+```bash
 	for Pathz in $(ls assembly/ls_contigs/A.alternata_ssp._*/*/vs_*/*_sorted.bam); do  
 		OutFileF=$(echo $Pathz | sed 's/.bam/_unaligned_F.txt/g')
 		OutFileR=$(echo $Pathz | sed 's/.bam/_unaligned_R.txt/g')
@@ -533,7 +783,7 @@ These were identified using SAM FLAGS to extract unaligned pairs.
 The number of reads aligning per bp of assembly was determined. Typical alignment values were 0.20 reads per bp. Contigs were detemined as unique to that alignment if they contained an average of 0 reads per bp.
 The number of bp unique to each assembly were identified.
 
-```shell
+```bash
 	mkdir -p analysis/ls_contigs
 	Outfile=analysis/ls_contigs/ls_contig_size.csv
 	printf "Reads" > $Outfile

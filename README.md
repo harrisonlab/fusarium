@@ -355,7 +355,16 @@ Outputs were summarised using the commands:
 
 #Gene prediction
 
-Gene prediction was performed for Fusarium genomes.
+Gene prediction was performed for Fusarium genomes. Two gene prediction
+approaches were used:
+
+Gene prediction using Augustus
+Prediction of all putative ORFs in the genome using the ORF finder (atg.pl)
+approach.
+
+## Augustus
+
+
 RNAseq reads were used as Hints for the location of CDS.
 
 A concatenated dataset of RNAseq reads from F. oxysporum fsp. cepae isolate Fus2
@@ -377,6 +386,21 @@ A gene model trained for F.oxysporum fsp. cepae was used to describe the structu
 	done
 ```
 
+## ORF finder
+
+The genome was searched in six reading frames for any start codon and following
+translated identification of a start codon translating sequence until a stop
+codon was found. This is based upon the atg.pl script used in paper describing
+the P. infestans genome. Additional functionality was added to this script by
+also printing ORFs in .gff format.
+
+
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+		qsub $ProgDir/run_ORF_finder.sh $Genome
+	done
+```
 
 
 #Functional annotation
@@ -520,65 +544,65 @@ The RxLR_EER_regex_finder.py script was used to search for this regular expressi
 
 The results were as follows:
 
-strain: 125	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1340
-the number of SigP-RxLR genes are:	13
-the number of SigP-RxLR-EER genes are:	1
+strain: 125	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1340  
+the number of SigP-RxLR genes are:	13  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: 55	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1333
-the number of SigP-RxLR genes are:	12
-the number of SigP-RxLR-EER genes are:	1
+strain: 55	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1333  
+the number of SigP-RxLR genes are:	12  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: A23	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1335
-the number of SigP-RxLR genes are:	13
-the number of SigP-RxLR-EER genes are:	2
+strain: A23	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1335  
+the number of SigP-RxLR genes are:	13  
+the number of SigP-RxLR-EER genes are:	2  
 
-strain: A28	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1354
-the number of SigP-RxLR genes are:	16
-the number of SigP-RxLR-EER genes are:	1
+strain: A28	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1354  
+the number of SigP-RxLR genes are:	16  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: D2	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1156
-the number of SigP-RxLR genes are:	8
-the number of SigP-RxLR-EER genes are:	0
+strain: D2	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1156  
+the number of SigP-RxLR genes are:	8  
+the number of SigP-RxLR-EER genes are:	0  
 
-strain: Fus2	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1346
-the number of SigP-RxLR genes are:	13
-the number of SigP-RxLR-EER genes are:	1
+strain: Fus2	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1346  
+the number of SigP-RxLR genes are:	13  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: HB17	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1350
-the number of SigP-RxLR genes are:	13
-the number of SigP-RxLR-EER genes are:	1
+strain: HB17	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1350  
+the number of SigP-RxLR genes are:	13  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: PG	species: F.oxysporum_fsp_cepae
-the number of SigP gene is:	1334
-the number of SigP-RxLR genes are:	11
-the number of SigP-RxLR-EER genes are:	0
+strain: PG	species: F.oxysporum_fsp_cepae  
+the number of SigP gene is:	1334  
+the number of SigP-RxLR genes are:	11  
+the number of SigP-RxLR-EER genes are:	0  
 
-strain: N139	species: F.oxysporum_fsp_narcissi
-the number of SigP gene is:	1765
-the number of SigP-RxLR genes are:	22
-the number of SigP-RxLR-EER genes are:	1
+strain: N139	species: F.oxysporum_fsp_narcissi  
+the number of SigP gene is:	1765  
+the number of SigP-RxLR genes are:	22  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: PG18	species: F.oxysporum_fsp_pisi
-the number of SigP gene is:	1807
-the number of SigP-RxLR genes are:	28
-the number of SigP-RxLR-EER genes are:	1
+strain: PG18	species: F.oxysporum_fsp_pisi  
+the number of SigP gene is:	1807  
+the number of SigP-RxLR genes are:	28  
+the number of SigP-RxLR-EER genes are:	1  
 
-strain: PG3	species: F.oxysporum_fsp_pisi
-the number of SigP gene is:	1386
-the number of SigP-RxLR genes are:	11
-the number of SigP-RxLR-EER genes are:	0
+strain: PG3	species: F.oxysporum_fsp_pisi  
+the number of SigP gene is:	1386  
+the number of SigP-RxLR genes are:	11  
+the number of SigP-RxLR-EER genes are:	0  
 
-strain: A8	species: F.proliferatum
-the number of SigP gene is:	1975
-the number of SigP-RxLR genes are:	40
-the number of SigP-RxLR-EER genes are:	3
+strain: A8	species: F.proliferatum  
+the number of SigP gene is:	1975  
+the number of SigP-RxLR genes are:	40  
+the number of SigP-RxLR-EER genes are:	3  
 
 
 
@@ -603,44 +627,45 @@ Hmm models for the WY domain contained in many RxLRs were used to search gene mo
 	done
 ```
 
-Results were as follows:
+Results were as follows:  
 
 F.oxysporum_fsp_cepae 125
-Initial search space (Z):              11203  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae 55
-Initial search space (Z):              11047  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae A23
-Initial search space (Z):              11108  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae A28
-Initial search space (Z):              11131  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae D2
-Initial search space (Z):              10632  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae Fus2
-Initial search space (Z):              11104  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae HB17
-Initial search space (Z):              11126  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae PG
-Initial search space (Z):              11011  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_narcissi N139
-Initial search space (Z):              14757  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_pisi PG18
-Initial search space (Z):              14859  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.oxysporum_fsp_pisi PG3
-Initial search space (Z):              11517  [actual number of targets]
-Domain search space  (domZ):               0  [number of targets reported over threshold]
-F.proliferatum A8
-Initial search space (Z):              15034  [actual number of targets]
-Domain search space  (domZ):               1  [number of targets reported over threshold]
+Initial search space (Z):              11203  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae 55  
+Initial search space (Z):              11047  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae A23  
+Initial search space (Z):              11108  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae A28  
+Initial search space (Z):              11131  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae D2  
+Initial search space (Z):              10632  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae Fus2  
+Initial search space (Z):              11104  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae HB17  
+Initial search space (Z):              11126  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae PG  
+Initial search space (Z):              11011  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_narcissi N139  
+Initial search space (Z):              14757  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_pisi PG18  
+Initial search space (Z):              14859  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.oxysporum_fsp_pisi PG3  
+Initial search space (Z):              11517  [actual number of targets]  
+Domain search space  (domZ):               0  [number of targets reported over threshold]  
+F.proliferatum A8  
+Initial search space (Z):              15034  [actual number of targets]  
+Domain search space  (domZ):               1  [number of targets reported over threshold]  
+
 
 
 ### C) From Augustus gene models - Hmm evidence of RxLR effectors
@@ -662,42 +687,42 @@ Domain search space  (domZ):               1  [number of targets reported over t
 	done
 ```
 
-F.oxysporum_fsp_cepae 125
-Initial search space (Z):              11203  [actual number of targets]
-Domain search space  (domZ):               3  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae 55
-Initial search space (Z):              11047  [actual number of targets]
-Domain search space  (domZ):               3  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae A23
-Initial search space (Z):              11108  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae A28
-Initial search space (Z):              11131  [actual number of targets]
-Domain search space  (domZ):               1  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae D2
-Initial search space (Z):              10632  [actual number of targets]
-Domain search space  (domZ):               1  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae Fus2
-Initial search space (Z):              11104  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae HB17
-Initial search space (Z):              11126  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
-F.oxysporum_fsp_cepae PG
-Initial search space (Z):              11011  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
-F.oxysporum_fsp_narcissi N139
-Initial search space (Z):              14757  [actual number of targets]
-Domain search space  (domZ):               1  [number of targets reported over threshold]
-F.oxysporum_fsp_pisi PG18
-Initial search space (Z):              14859  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
-F.oxysporum_fsp_pisi PG3
-Initial search space (Z):              11517  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
-F.proliferatum A8
-Initial search space (Z):              15034  [actual number of targets]
-Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae 125  
+Initial search space (Z):              11203  [actual number of targets]  
+Domain search space  (domZ):               3  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae 55  
+Initial search space (Z):              11047  [actual number of targets]  
+Domain search space  (domZ):               3  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae A23  
+Initial search space (Z):              11108  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae A28  
+Initial search space (Z):              11131  [actual number of targets]  
+Domain search space  (domZ):               1  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae D2  
+Initial search space (Z):              10632  [actual number of targets]  
+Domain search space  (domZ):               1  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae Fus2  
+Initial search space (Z):              11104  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae HB17  
+Initial search space (Z):              11126  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
+F.oxysporum_fsp_cepae PG  
+Initial search space (Z):              11011  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
+F.oxysporum_fsp_narcissi N139  
+Initial search space (Z):              14757  [actual number of targets]  
+Domain search space  (domZ):               1  [number of targets reported over threshold]  
+F.oxysporum_fsp_pisi PG18  
+Initial search space (Z):              14859  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
+F.oxysporum_fsp_pisi PG3  
+Initial search space (Z):              11517  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
+F.proliferatum A8  
+Initial search space (Z):              15034  [actual number of targets]  
+Domain search space  (domZ):               2  [number of targets reported over threshold]  
 
 ### D) From ORF fragments - Signal peptide & RxLR motif
 ```bash

@@ -447,19 +447,19 @@ commands:
 Putative RxLR genes were identified within Augustus gene models using a number
 of approaches:
 
-A) From Augustus gene models - Signal peptide & RxLR motif
-B) From Augustus gene models - Hmm evidence of WY domains
-C) From Augustus gene models - Hmm evidence of RxLR effectors
-D) From ORF fragments - Signal peptide & RxLR motif
-E) From ORF fragments - Hmm evidence of WY domains
-F) From ORF fragments - Hmm evidence of RxLR effectors
+ * A) From Augustus gene models - Signal peptide & RxLR motif  
+ * B) From Augustus gene models - Hmm evidence of WY domains  
+ * C) From Augustus gene models - Hmm evidence of RxLR effectors  
+ * D) From ORF fragments - Signal peptide & RxLR motif  
+ * E) From ORF fragments - Hmm evidence of WY domains  
+ * F) From ORF fragments - Hmm evidence of RxLR effectors  
 
 
 ### A) From Augustus gene models - Signal peptide & RxLR motif
 
 Required programs:
-SigP
-biopython
+ * SigP
+ * biopython
 
 
 Proteins that were predicted to contain signal peptides were identified using
@@ -748,6 +748,8 @@ Domain search space  (domZ):               2  [number of targets reported over t
 
 The presence of Mimp promotors in Fusarium genomes were identified. Following
 this, genes downstream of these mimps were also identified.
+
+
 
 <!--
 

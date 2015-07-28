@@ -510,11 +510,11 @@ The RxLR_EER_regex_finder.py script was used to search for this regular expressi
 		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt
 		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt | wc -l
 		printf "\n"
-	# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-	# Col2=RxLR_EER_regex_finder.py
-	# GeneNames=$OutDir/"$Strain"_Aug_RxLR_regex.txt
-	# GeneModels=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
-	# $ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_Aug_RxLR_regex.gff3
+		# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+		# Col2=RxLR_EER_regex_finder.py
+		# GeneNames=$OutDir/"$Strain"_Aug_RxLR_regex.txt
+		# GeneModels=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
+		# $ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_Aug_RxLR_regex.gff3
 	done
 ```
 
@@ -589,66 +589,115 @@ Hmm models for the WY domain contained in many RxLRs were used to search gene mo
 	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
 	HmmModel=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer/WY_motif.hmm
 	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
-	Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-	Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-	OutDir=analysis/RxLR_effectors/hmmer_WY/$Organism/$Strain
-	mkdir -p $OutDir
-	HmmResults="$Strain"_Aug_WY_hmmer.txt
-	hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
-	echo "$Organism $Strain"
-	cat $OutDir/$HmmResults | sed '1,/Scores for complete sequences/d' |  sed '/inclusion threshold/q' | tail -n +5 | head -n -1 | wc -l
-	cat $OutDir/$HmmResults | sed '1,/inclusion threshold/d' | sed '/Domain annotation for each sequence/q' | tail -n +2 | head -n -3 | wc -l
-	HmmFasta="$Strain"_Aug_WY_hmmer.fa
-	$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
+		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		OutDir=analysis/RxLR_effectors/hmmer_WY/$Organism/$Strain
+		mkdir -p $OutDir
+		HmmResults="$Strain"_Aug_WY_hmmer.txt
+		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
+		echo "$Organism $Strain"
+		cat $OutDir/$HmmResults | grep 'Initial search space'
+		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
+		HmmFasta="$Strain"_Aug_WY_hmmer.fa
+		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
 	done
 ```
 
 Results were as follows:
 
 F.oxysporum_fsp_cepae 125
-20
-0
+Initial search space (Z):              11203  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae 55
-20
-0
+Initial search space (Z):              11047  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae A23
-20
-0
+Initial search space (Z):              11108  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae A28
-20
-0
+Initial search space (Z):              11131  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae D2
-20
-0
+Initial search space (Z):              10632  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae Fus2
-20
-0
+Initial search space (Z):              11104  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae HB17
-20
-0
+Initial search space (Z):              11126  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_cepae PG
-20
-0
+Initial search space (Z):              11011  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_narcissi N139
-20
-0
+Initial search space (Z):              14757  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_pisi PG18
-20
-0
+Initial search space (Z):              14859  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.oxysporum_fsp_pisi PG3
-20
-0
+Initial search space (Z):              11517  [actual number of targets]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 F.proliferatum A8
-0
-0
-
+Initial search space (Z):              15034  [actual number of targets]
+Domain search space  (domZ):               1  [number of targets reported over threshold]
 
 
 ### C) From Augustus gene models - Hmm evidence of RxLR effectors
 ```bash
-
+	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
+	HmmModel=/home/armita/git_repos/emr_repos/SI_Whisson_et_al_2007/cropped.hmm
+	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
+		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		OutDir=analysis/RxLR_effectors/hmmer_RxLR/$Organism/$Strain
+		mkdir -p $OutDir
+		HmmResults="$Strain"_Aug_RxLR_hmmer.txt
+		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
+		echo "$Organism $Strain"
+		cat $OutDir/$HmmResults | grep 'Initial search space'
+		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
+		HmmFasta="$Strain"__Aug_RxLR_hmmer.fa
+		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
+	done
 ```
 
+F.oxysporum_fsp_cepae 125
+Initial search space (Z):              11203  [actual number of targets]
+Domain search space  (domZ):               3  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae 55
+Initial search space (Z):              11047  [actual number of targets]
+Domain search space  (domZ):               3  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae A23
+Initial search space (Z):              11108  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae A28
+Initial search space (Z):              11131  [actual number of targets]
+Domain search space  (domZ):               1  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae D2
+Initial search space (Z):              10632  [actual number of targets]
+Domain search space  (domZ):               1  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae Fus2
+Initial search space (Z):              11104  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae HB17
+Initial search space (Z):              11126  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.oxysporum_fsp_cepae PG
+Initial search space (Z):              11011  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.oxysporum_fsp_narcissi N139
+Initial search space (Z):              14757  [actual number of targets]
+Domain search space  (domZ):               1  [number of targets reported over threshold]
+F.oxysporum_fsp_pisi PG18
+Initial search space (Z):              14859  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.oxysporum_fsp_pisi PG3
+Initial search space (Z):              11517  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
+F.proliferatum A8
+Initial search space (Z):              15034  [actual number of targets]
+Domain search space  (domZ):               2  [number of targets reported over threshold]
 
 ### D) From ORF fragments - Signal peptide & RxLR motif
 ```bash

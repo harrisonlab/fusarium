@@ -403,6 +403,8 @@ also printing ORFs in .gff format.
 ```
 
 
+
+
 #Functional annotation
 
 Interproscan was used to give gene models functional annotations.
@@ -746,10 +748,70 @@ Domain search space  (domZ):               2  [number of targets reported over t
 
 ## Mimps
 
-The presence of Mimp promotors in Fusarium genomes were identified. Following
-this, genes downstream of these mimps were also identified.
+The presence of Mimp promotors in Fusarium genomes were identified. This was
+done in three steps:
+ * Position of Mimps were identified in the genome
+ * Genes within 1000bp downstream of the mimp were identified from Augustus
+predictions
+ * ORFs within 1000bp downstream of the mimp were identified from ORF
+predictions
+
+### A) Position of Mimps were identified
+Position of Mimps
+gff predictions for the position of mimps in the genome were identified
+Fus2 was performed separately to ensure mimps are predicted from the correct assembly
+
+```bash
+	ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+		Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
+		Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
+		OutDir=analysis/mimps/$Organism/"$Strain"
+		mkdir -p "$OutDir"
+		"$ProgDir"/mimp_finder.pl "$Genome" "$OutDir"/"$Strain"_mimps.fa "$OutDir"/"$Strain"_mimps.gff3 > "$OutDir"/"$Strain"_mimps.log
+	done
+```
+
+### B) Augustus genes flanking Mimps
 
 
+```bash
+ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
+for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
+Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
+Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
+MimpDir=$(dirname $Mimps)
+echo "$Mimps"
+"$ProgDir"/gffexpander.pl + 1000 "$Mimps" > "$MimpDir"/"$Strain"_mimps_expanded.gff3
+StrainModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
+bedtools intersect -s -a "$StrainModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_genes.gff
+cat "$MimpDir"/*_mimps_intersected_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq | wc -l
+done
+```
+analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3  
+18  
+analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3  
+12  
+analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3  
+17  
+analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3  
+3  
+analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3  
+0  
+analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3  
+16  
+analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3  
+23  
+analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3  
+3  
+analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3  
+9  
+analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3  
+3  
+analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3  
+3  
+analysis/mimps/F.proliferatum/A8/A8_mimps.gff3  
+0  
 
 <!--
 

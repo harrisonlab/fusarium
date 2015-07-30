@@ -727,20 +727,209 @@ Initial search space (Z):              15034  [actual number of targets]
 Domain search space  (domZ):               2  [number of targets reported over threshold]  
 
 ### D) From ORF fragments - Signal peptide & RxLR motif
-```bash
 
+Required programs:
+ * SigP
+ * biopython
+
+
+Proteins that were predicted to contain signal peptides were identified using
+the following commands:
+
+```bash
+	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+	CurPath=$PWD
+	for Proteome in $(ls gene_pred/ORF_finder/F.*/*/*.aa_cat.fa); do
+		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		SplitDir=gene_pred/ORF_finder_split/$Organism/$Strain
+		mkdir -p $SplitDir
+		BaseName="$Organism""_$Strain"_ORF_finder_preds
+		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+		for File in $(ls $SplitDir/$BaseName_*.fa); do
+			Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+			while [ $Jobs -ge 32 ]; do
+				sleep 10
+				printf "."
+				Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+			done
+			printf "\n"
+			echo $File
+			qsub $ProgDir/pred_sigP.sh $File
+		done
+	done
+```
+
+The batch files of predicted secreted proteins needed to be combined into a
+single file for each strain. This was done with the following commands:
+```bash
+	for SplitDir in $(ls -d gene_pred/ORF_finder_sigP/F.*/*/split); do
+		Strain=$(echo $SplitDir | cut -d '/' -f4)
+		Organism=$(echo $SplitDir | cut -d '/' -f3)
+		InStringAA=''
+		InStringNeg=''
+		InStringTab=''
+		InStringTxt=''
+		for GRP in $(ls -l $SplitDir/*_augustus_preds_*_sp.aa | rev | cut -d '_' -f2 | rev | sort -n); do  
+			InStringAA="$InStringAA gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
+			InStringNeg="$InStringNeg gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
+			InStringTab="$InStringTab gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
+			InStringTxt="$InStringTxt gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+		done
+		cat $InStringAA > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.aa
+		cat $InStringNeg > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+		tail -n +2 -q $InStringTab > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.tab
+		cat $InStringTxt > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.txt
+	done
+```
+The regular expression R.LR.{,40}[ED][ED][KR] has previously been used to identfy RxLR effectors. The addition of an EER motif is significant as it has been shown as required for host uptake of the protein.
+
+The RxLR_EER_regex_finder.py script was used to search for this regular expression and annotate the EER domain where present.
+
+```bash
+	for Secretome in $(ls gene_pred/sigP/F.*/*/*_aug_sp.aa); do
+		ProgDir=~/git_repos/emr_repos/tools/pathogen/RxLR_effectors;
+		Strain=$(echo $Secretome | cut -d '/' -f4);
+		Organism=$(echo $Secretome | cut -d '/' -f3) ;
+		OutDir=analysis/RxLR_effectors/RxLR_EER_regex_finder/"$Organism"/"$Strain";
+		mkdir -p $OutDir;
+		printf "\nstrain: $Strain\tspecies: $Organism\n";
+		printf "the number of SigP gene is:\t";
+		cat $Secretome | grep '>' | wc -l;
+		printf "the number of SigP-RxLR genes are:\t";
+		$ProgDir/RxLR_EER_regex_finder.py $Secretome > $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa;
+		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_regex.txt
+		cat $OutDir/"$Strain"_Aug_RxLR_regex.txt | wc -l
+		printf "the number of SigP-RxLR-EER genes are:\t";
+		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt
+		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt | wc -l
+		printf "\n"
+		# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+		# Col2=RxLR_EER_regex_finder.py
+		# GeneNames=$OutDir/"$Strain"_Aug_RxLR_regex.txt
+		# GeneModels=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
+		# $ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_Aug_RxLR_regex.gff3
+	done
 ```
 
 
 ### E) From ORF fragments - Hmm evidence of WY domains
 ```bash
-
+	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
+	HmmModel=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer/WY_motif.hmm
+	for Proteome in $(ls gene_pred/ORF_finder/F.*/*/*.aa_cat.fa); do
+		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		OutDir=analysis/RxLR_effectors/hmmer_WY/$Organism/$Strain
+		mkdir -p $OutDir
+		HmmResults="$Strain"_ORF_WY_hmmer.txt
+		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
+		echo "$Organism $Strain"
+		cat $OutDir/$HmmResults | grep 'Initial search space'
+		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
+		HmmFasta="$Strain"_ORF_WY_hmmer.fa
+		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
+	done
 ```
-
+Results were as follows:
+```
+	F.oxysporum_fsp_cepae 125
+	Initial search space (Z):             357389  [actual number of targets]
+	Domain search space  (domZ):              11  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae 55
+	Initial search space (Z):             356765  [actual number of targets]
+	Domain search space  (domZ):              11  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae A23
+	Initial search space (Z):             357686  [actual number of targets]
+	Domain search space  (domZ):              11  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae A28
+	Initial search space (Z):             365675  [actual number of targets]
+	Domain search space  (domZ):              10  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae D2
+	Initial search space (Z):             352139  [actual number of targets]
+	Domain search space  (domZ):               9  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae Fus2
+	Initial search space (Z):             353490  [actual number of targets]
+	Domain search space  (domZ):              11  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae HB17
+	Initial search space (Z):             355148  [actual number of targets]
+	Domain search space  (domZ):              11  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae PG
+	Initial search space (Z):             356817  [actual number of targets]
+	Domain search space  (domZ):              15  [number of targets reported over threshold]
+	F.oxysporum_fsp_narcissi N139
+	Initial search space (Z):             449092  [actual number of targets]
+	Domain search space  (domZ):               9  [number of targets reported over threshold]
+	F.oxysporum_fsp_pisi PG18
+	Initial search space (Z):             445079  [actual number of targets]
+	Domain search space  (domZ):              13  [number of targets reported over threshold]
+	F.oxysporum_fsp_pisi PG3
+	Initial search space (Z):             384712  [actual number of targets]
+	Domain search space  (domZ):              10  [number of targets reported over threshold]
+	F.proliferatum A8
+	Initial search space (Z):             456646  [actual number of targets]
+	Domain search space  (domZ):               6  [number of targets reported over threshold]
+```
 
 ### F) From ORF fragments - Hmm evidence of RxLR effectors
 ```bash
+	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
+	HmmModel=/home/armita/git_repos/emr_repos/SI_Whisson_et_al_2007/cropped.hmm
+	for Proteome in $(ls gene_pred/ORF_finder/F.*/*/*.aa_cat.fa); do
+		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		OutDir=analysis/RxLR_effectors/hmmer_RxLR/$Organism/$Strain
+		mkdir -p $OutDir
+		HmmResults="$Strain"_ORF_RxLR_hmmer.txt
+		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
+		echo "$Organism $Strain"
+		cat $OutDir/$HmmResults | grep 'Initial search space'
+		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
+		HmmFasta="$Strain"_ORF_RxLR_hmmer.fa
+		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
+	done
+```
 
+The results were as follows:
+
+```
+	F.oxysporum_fsp_cepae 125
+	Initial search space (Z):             357389  [actual number of targets]
+	Domain search space  (domZ):              46  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae 55
+	Initial search space (Z):             356765  [actual number of targets]
+	Domain search space  (domZ):              46  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae A23
+	Initial search space (Z):             357686  [actual number of targets]
+	Domain search space  (domZ):              46  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae A28
+	Initial search space (Z):             365675  [actual number of targets]
+	Domain search space  (domZ):              45  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae D2
+	Initial search space (Z):             352139  [actual number of targets]
+	Domain search space  (domZ):              41  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae Fus2
+	Initial search space (Z):             353490  [actual number of targets]
+	Domain search space  (domZ):              46  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae HB17
+	Initial search space (Z):             355148  [actual number of targets]
+	Domain search space  (domZ):              46  [number of targets reported over threshold]
+	F.oxysporum_fsp_cepae PG
+	Initial search space (Z):             356817  [actual number of targets]
+	Domain search space  (domZ):              51  [number of targets reported over threshold]
+	F.oxysporum_fsp_narcissi N139
+	Initial search space (Z):             449092  [actual number of targets]
+	Domain search space  (domZ):              58  [number of targets reported over threshold]
+	F.oxysporum_fsp_pisi PG18
+	Initial search space (Z):             445079  [actual number of targets]
+	Domain search space  (domZ):              48  [number of targets reported over threshold]
+	F.oxysporum_fsp_pisi PG3
+	Initial search space (Z):             384712  [actual number of targets]
+	Domain search space  (domZ):              35  [number of targets reported over threshold]
+	F.proliferatum A8
+	Initial search space (Z):             456646  [actual number of targets]
+	Domain search space  (domZ):              45  [number of targets reported over threshold]
 ```
 
 

@@ -765,22 +765,22 @@ The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
 	for SplitDir in $(ls -d gene_pred/ORF_finder_sigP/F.*/*/split); do
-		Strain=$(echo $SplitDir | cut -d '/' -f4)
-		Organism=$(echo $SplitDir | cut -d '/' -f3)
-		InStringAA=''
-		InStringNeg=''
-		InStringTab=''
-		InStringTxt=''
-		for GRP in $(ls -l $SplitDir/*_augustus_preds_*_sp.aa | rev | cut -d '_' -f2 | rev | sort -n); do  
-			InStringAA="$InStringAA gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
-			InStringNeg="$InStringNeg gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
-			InStringTab="$InStringTab gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
-			InStringTxt="$InStringTxt gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
-		done
-		cat $InStringAA > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.aa
-		cat $InStringNeg > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-		tail -n +2 -q $InStringTab > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.tab
-		cat $InStringTxt > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.txt
+	Strain=$(echo $SplitDir | cut -d '/' -f4)
+	Organism=$(echo $SplitDir | cut -d '/' -f3)
+	InStringAA=''
+	InStringNeg=''
+	InStringTab=''
+	InStringTxt=''
+	for GRP in $(ls -l $SplitDir/*_ORF_finder_preds_*_sp.aa | rev | cut -d '_' -f2 | rev | sort -n); do  
+	InStringAA="$InStringAA gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp.aa";  
+	InStringNeg="$InStringNeg gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp_neg.aa";  
+	InStringTab="$InStringTab gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp.tab";
+	InStringTxt="$InStringTxt gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp.txt";  
+	done
+	cat $InStringAA > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_sp.aa
+	cat $InStringNeg > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_neg_sp.aa
+	tail -n +2 -q $InStringTab > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_sp.tab
+	cat $InStringTxt > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_sp.txt
 	done
 ```
 The regular expression R.LR.{,40}[ED][ED][KR] has previously been used to identfy RxLR effectors. The addition of an EER motif is significant as it has been shown as required for host uptake of the protein.
@@ -788,7 +788,7 @@ The regular expression R.LR.{,40}[ED][ED][KR] has previously been used to identf
 The RxLR_EER_regex_finder.py script was used to search for this regular expression and annotate the EER domain where present.
 
 ```bash
-	for Secretome in $(ls gene_pred/sigP/F.*/*/*_aug_sp.aa); do
+	for Secretome in $(ls gene_pred/ORF_finder_sigP/F.*/*/*_ORF_finder_sp.aa); do
 		ProgDir=~/git_repos/emr_repos/tools/pathogen/RxLR_effectors;
 		Strain=$(echo $Secretome | cut -d '/' -f4);
 		Organism=$(echo $Secretome | cut -d '/' -f3) ;
@@ -798,21 +798,94 @@ The RxLR_EER_regex_finder.py script was used to search for this regular expressi
 		printf "the number of SigP gene is:\t";
 		cat $Secretome | grep '>' | wc -l;
 		printf "the number of SigP-RxLR genes are:\t";
-		$ProgDir/RxLR_EER_regex_finder.py $Secretome > $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa;
-		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_regex.txt
-		cat $OutDir/"$Strain"_Aug_RxLR_regex.txt | wc -l
+		$ProgDir/RxLR_EER_regex_finder.py $Secretome > $OutDir/"$Strain"_ORF_RxLR_EER_regex.fa;
+		cat $OutDir/"$Strain"_ORF_RxLR_EER_regex.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_ORF_RxLR_regex.txt
+		cat $OutDir/"$Strain"_ORF_RxLR_regex.txt | wc -l
 		printf "the number of SigP-RxLR-EER genes are:\t";
-		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt
-		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt | wc -l
+		cat $OutDir/"$Strain"_ORF_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_ORF_RxLR_EER_regex.txt
+		cat $OutDir/"$Strain"_ORF_RxLR_EER_regex.txt | wc -l
 		printf "\n"
-		# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-		# Col2=RxLR_EER_regex_finder.py
-		# GeneNames=$OutDir/"$Strain"_Aug_RxLR_regex.txt
-		# GeneModels=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
-		# $ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_Aug_RxLR_regex.gff3
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+		Col2=RxLR_EER_regex_finder.py
+		#GeneNames=$OutDir/"$Strain"_ORF_RxLR_regex.txt
+		#GeneModels=gene_pred/ORF_finder/"$Organism"/"$Strain"/"$Strain"*.aa_cat.fa
+		#$ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_ORF_RxLR_regex.gff3
 	done
 ```
 
+The results were as follows:
+```
+	strain: 125	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	15312
+	the number of SigP-RxLR genes are:	685
+	the number of SigP-RxLR-EER genes are:	17
+
+
+	strain: 55	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16347
+	the number of SigP-RxLR genes are:	724
+	the number of SigP-RxLR-EER genes are:	17
+
+
+	strain: A23	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16402
+	the number of SigP-RxLR genes are:	731
+	the number of SigP-RxLR-EER genes are:	17
+
+
+	strain: A28	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16617
+	the number of SigP-RxLR genes are:	716
+	the number of SigP-RxLR-EER genes are:	16
+
+
+	strain: D2	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16169
+	the number of SigP-RxLR genes are:	686
+	the number of SigP-RxLR-EER genes are:	15
+
+
+	strain: Fus2	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16262
+	the number of SigP-RxLR genes are:	722
+	the number of SigP-RxLR-EER genes are:	18
+
+
+	strain: HB17	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16326
+	the number of SigP-RxLR genes are:	720
+	the number of SigP-RxLR-EER genes are:	17
+
+
+	strain: PG	species: F.oxysporum_fsp_cepae
+	the number of SigP gene is:	16390
+	the number of SigP-RxLR genes are:	720
+	the number of SigP-RxLR-EER genes are:	15
+
+
+	strain: N139	species: F.oxysporum_fsp_narcissi
+	the number of SigP gene is:	22180
+	the number of SigP-RxLR genes are:	986
+	the number of SigP-RxLR-EER genes are:	22
+
+
+	strain: PG18	species: F.oxysporum_fsp_pisi
+	the number of SigP gene is:	22146
+	the number of SigP-RxLR genes are:	1014
+	the number of SigP-RxLR-EER genes are:	14
+
+
+	strain: PG3	species: F.oxysporum_fsp_pisi
+	the number of SigP gene is:	17424
+	the number of SigP-RxLR genes are:	740
+	the number of SigP-RxLR-EER genes are:	11
+
+
+	strain: A8	species: F.proliferatum
+	the number of SigP gene is:	24561
+	the number of SigP-RxLR genes are:	1203
+	the number of SigP-RxLR-EER genes are:	27
+```
 
 ### E) From ORF fragments - Hmm evidence of WY domains
 ```bash
@@ -932,7 +1005,42 @@ The results were as follows:
 	Domain search space  (domZ):              45  [number of targets reported over threshold]
 ```
 
+### G) Combined evidence file
 
+Evidence of RxLR effectors from different sources was combined into a single gff
+feature file.
+
+This was done using the following commands:
+<!--
+```bash
+		ProgDir=~/git_repos/emr_repos/scripts/phytophthora/pathogen/merge_gff
+    # Infiles
+    GffAug=gene_pred/augustus_unmasked/P.cactorum/414/414_augustus_preds.gtf
+    ORF_RxLRs=analysis/rxlr_atg_unmasked/P.cactorum/414/414_ORF_sp_rxlr.gff3
+    ORF_WYs=analysis/hmmer/WY/P.cactorum/414/414_ORF_WY_hmmer.gff3
+    # Outfiles
+    AugDB=414_aug.db
+    WyDB=414_WY.db
+    WyID=WY_id.txt
+    WyDB_mod=414_WY_note.db
+    RxlrDB=414_rxlr.db
+    RxlrID=rxlr_id.txt
+    RxlrDB_mod=414_rxlr_note.db
+    Rxlr_Wy_DB=414_rxlr_WY.db
+
+    OrfMerged=414_rxlr_WY_merged.db
+    MergedDB=414_Aug_ORF_merged.db
+    FinalDB=414_Aug_ORF.db
+    FinalGff=414_Aug_ORF.gff
+```
+
+Make a db of aug genes and effector ORFs
+
+```bash
+$ProgDir/make_gff_database.py --inp $GffAug --db $AugDB
+	$ProgDir/make_gff_database.py --inp $ORF_WYs --db $WyDB
+	$ProgDir/make_gff_database.py --inp $ORF_RxLRs --db $RxlrDB
+``` -->
 
 
 ## Mimps
@@ -965,43 +1073,46 @@ Fus2 was performed separately to ensure mimps are predicted from the correct ass
 
 
 ```bash
-ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
-for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
-Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
-Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
-MimpDir=$(dirname $Mimps)
-echo "$Mimps"
-"$ProgDir"/gffexpander.pl + 1000 "$Mimps" > "$MimpDir"/"$Strain"_mimps_expanded.gff3
-StrainModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
-bedtools intersect -s -a "$StrainModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_genes.gff
-cat "$MimpDir"/*_mimps_intersected_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq | wc -l
-done
+	ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
+	for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
+		Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
+		Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
+		MimpDir=$(dirname $Mimps)
+		echo "$Mimps"
+		"$ProgDir"/gffexpander.pl + 1000 "$Mimps" > "$MimpDir"/"$Strain"_mimps_expanded.gff3
+		StrainModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
+		bedtools intersect -s -a "$StrainModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_genes.gff
+		cat "$MimpDir"/*_mimps_intersected_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq | wc -l
+	done
 ```
-analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3  
-18  
-analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3  
-12  
-analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3  
-17  
-analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3  
-3  
-analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3  
-0  
-analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3  
-16  
-analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3  
-23  
-analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3  
-3  
-analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3  
-9  
-analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3  
-3  
-analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3  
-3  
-analysis/mimps/F.proliferatum/A8/A8_mimps.gff3  
-0  
 
+Results were as follows:
+```
+	analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3  
+	18  
+	analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3  
+	12  
+	analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3  
+	17  
+	analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3  
+	3  
+	analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3  
+	0  
+	analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3  
+	16  
+	analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3  
+	23  
+	analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3  
+	3  
+	analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3  
+	9  
+	analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3  
+	3  
+	analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3  
+	3  
+	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3  
+	0  
+```
 <!--
 
 #Genomic analysis

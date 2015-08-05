@@ -67,9 +67,9 @@ Extracting WY hmm domain containing ORFs
 Extracting RxLR hmm domain containing ORFs
 
 ```
-  ORF_hmm_WY_FA=analysis/RxLR_effectors/hmmer_WY/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_WY_hmmer.fa
-  ORF_hmm_WY=analysis/RxLR_effectors/hmmer_WY/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_WY_hmmer_names.txt
-  cat $ORF_hmm_WY_FA | grep '>' | sed 's/>//g' | cut -f1 | sed 's/ //g' > $ORF_hmm_WY
+  ORF_hmm_RxLR_FA=analysis/RxLR_effectors/hmmer_RxLR/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_hmmer.fa
+  ORF_hmm_RxLR=analysis/RxLR_effectors/hmmer_RxLR/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_hmmer_names.txt
+  cat $ORF_hmm_RxLR_FA | grep '>' | sed 's/>//g' | cut -f1 | sed 's/ //g' > $ORF_hmm_RxLR
 ```
 
 
@@ -86,12 +86,13 @@ Extracting RxLR hmm domain containing ORFs
   Aug_Regex_RxLR_EER=analysis/RxLR_effectors/RxLR_EER_regex_finder/F.oxysporum_fsp_cepae/Fus2/Fus2_Aug_RxLR_EER_regex_names.txt
   Aug_hmm_WY=analysis/RxLR_effectors/hmmer_WY/F.oxysporum_fsp_cepae/Fus2/Fus2_Aug_WY_hmmer_names.txt
   Aug_hmm_RxLR=analysis/RxLR_effectors/hmmer_RxLR/F.oxysporum_fsp_cepae/Fus2/Fus2__Aug_RxLR_hmmer.fa
-  Aug_Mimp_1500=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps/Fus2_mimps_intersected_Aug_genes.gff
+  Aug_Mimp_1500=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps_intersected_Aug_genes_names.txt
 
   ORF_Regex_RxLR=analysis/RxLR_effectors/RxLR_EER_regex_finder/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_regex_names.txt
-  ORF_Regex_RxLR_EER=analysis/RxLR_effectors/RxLR_EER_regex_finder/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_EER_regex_names.txt  ORF_hmm_WY=analysis/RxLR_effectors/hmmer_WY/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_WY_hmmer.fa
-  ORF_hmm_RxLR=analysis/RxLR_effectors/hmmer_RxLR/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_hmmer.fa
-  ORF_Mimp_1500=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps/Fus2_mimps_intersected_ORF_genes.gff
+  ORF_Regex_RxLR_EER=analysis/RxLR_effectors/RxLR_EER_regex_finder/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_EER_regex_names.txt
+  ORF_hmm_WY=analysis/RxLR_effectors/hmmer_WY/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_WY_hmmer_names.txt
+  ORF_hmm_RxLR=analysis/RxLR_effectors/hmmer_RxLR/F.oxysporum_fsp_cepae/Fus2/Fus2_ORF_RxLR_hmmer_names.txt
+  ORF_Mimp_1500=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps_intersected_ORF_genes_names.txt
 
   # Outfiles
   OutDir=analysis/database/F.oxysporum_fsp_cepae/Fus2
@@ -101,10 +102,14 @@ Extracting RxLR hmm domain containing ORFs
 	Aug_RxLR_DB=$OutDir/Aug_RxLR_rxlr.db
   Aug_RxLR_EER_DB=$OutDir/Aug_RxLR_EER_rxlr.db
   Aug_hmm_WY_DB=$OutDir/Aug_RxLR_EER_WY_rxlr.db
+  Aug_hmm_RxLR_DB=$OutDir/Aug_RxLR_EER_WY_RxLR_rxlr.db
+  Aug_mimp_DB=$OutDir/Aug_RxLR_EER_WY_RxLR_mimps_rxlr.db
 
   ORF_RxLR_DB=$OutDir/ORF_RxLR_rxlr.db
   ORF_RxLR_DB_EER=$OutDir/ORF_RxLR_EER_rxlr.db
   ORF_hmm_WY_DB=$OutDir/ORF_RxLR_EER_WY_rxlr.db
+  ORF_hmm_RxLR_DB=$OutDir/ORF_RxLR_EER_WY_RxLR_rxlr.db
+  ORF_mimp_DB=$OutDir/ORF_RxLR_EER_WY_RxLR_mimps_rxlr.db
 
   # WyDB=414_WY.db
 	# WyID=WY_id.txt
@@ -140,7 +145,8 @@ Add notes to Augustus genes with effector evidence
   $ProgDir/note2db.py --in_db $AugDB --out_db $Aug_RxLR_DB --id_file $Aug_Regex_RxLR --str Aug_RxLR_motif --attribute ID
   $ProgDir/note2db.py --in_db $Aug_RxLR_DB --out_db $Aug_RxLR_EER_DB --id_file $Aug_Regex_RxLR_EER --str Aug_RxLR_EER_motif --attribute ID
   $ProgDir/note2db.py --in_db $Aug_RxLR_EER_DB --out_db $Aug_hmm_WY_DB --id_file $Aug_hmm_WY --str Aug_WY_hmm --attribute ID
-  
+  $ProgDir/note2db.py --in_db $Aug_hmm_WY_DB --out_db $Aug_hmm_RxLR_DB --id_file $Aug_hmm_RxLR --str Aug_WY_hmm --attribute ID
+  $ProgDir/note2db.py --in_db $Aug_hmm_RxLR_DB --out_db $Aug_mimp_DB --id_file $Aug_Mimp_1500 --str Aug_mimp_intersect --attribute ID
 ```
 
 Add notes to ORF fragments with effector evidence
@@ -150,11 +156,13 @@ Add notes to ORF fragments with effector evidence
   $ProgDir/note2db.py --in_db $OrfDB --out_db $ORF_RxLR_DB --id_file $ORF_Regex_RxLR --str ORF_RxLR_motif --attribute Name
   $ProgDir/note2db.py --in_db $ORF_RxLR_DB --out_db $ORF_RxLR_DB_EER --id_file $ORF_Regex_RxLR_EER --str ORF_RxLR_EER_motif --attribute Name
   $ProgDir/note2db.py --in_db $ORF_RxLR_DB_EER --out_db $ORF_hmm_WY_DB --id_file $ORF_hmm_WY --str ORF_WY_hmm --attribute Name
+  $ProgDir/note2db.py --in_db $ORF_hmm_WY_DB --out_db $ORF_hmm_RxLR_DB --id_file $ORF_hmm_RxLR --str ORF_WY_hmm --attribute Name
+  $ProgDir/note2db.py --in_db $ORF_hmm_RxLR_DB --out_db $ORF_mimp_DB --id_file $ORF_Mimp_1500 --str ORF_mimp_intersect --attribute ID
 	# $ProgDir/note2db.py --in_db $WyDB --out_db $WyDB_mod --id_file $WyID --str ORF_WY_hmm --attribute ID
 	# $ProgDir/get_db_id.py --db $RxlrDB --type gene --out $RxlrID
 	# $ProgDir/note2db.py --in_db $RxlrDB --out_db $RxlrDB_mod --id_file $RxlrID --str ORF_RxLR_atg --attribute ID
 ```
-
+<!--
 ## Merge the RxLR effector and WY effector databases together
 ```bash
 	$ProgDir/merge_db.py --inp $WyDB_mod $RxlrDB_mod --db $Rxlr_Wy_DB
@@ -195,4 +203,4 @@ The final dataset contains the following number of features:	17595
 
 	$ProgDir/extract_by_note.py --db $FinalDB_mod2 --str Aug_RxLR Aug_WY_hmm ORF_WY_hmm ORF_RxLR_atg --out 414_effectors.gff --type gene transcript
 ```
- -->
+ --> 

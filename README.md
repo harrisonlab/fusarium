@@ -402,7 +402,21 @@ also printing ORFs in .gff format.
 	done
 ```
 
+The Gff files produced by ORF finder have some formatting errors. The following
+script was run to correct these:
 
+```bash
+	ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation
+	for ORF_Gff in $(ls gene_pred/ORF_finder/*/*/*_ORF.gff | grep -v '_F_atg_' | grep -v '_R_atg_'); do
+		ORF_Gff_mod=$(echo $ORF_Gff | sed 's/_ORF.gff/_ORF_mod.gff/g')
+		echo ""
+		echo "Correcting the following file:"
+		echo $ORF_Gff
+		echo "Redirecting to:"
+		echo $ORF_Gff_mod
+		$ProgDir/gff_corrector.pl $ORF_Gff > $ORF_Gff_mod
+	done
+```
 
 
 #Functional annotation
@@ -1079,39 +1093,70 @@ Fus2 was performed separately to ensure mimps are predicted from the correct ass
 		Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
 		MimpDir=$(dirname $Mimps)
 		echo "$Mimps"
-		"$ProgDir"/gffexpander.pl + 1000 "$Mimps" > "$MimpDir"/"$Strain"_mimps_expanded.gff3
-		StrainModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
-		bedtools intersect -s -a "$StrainModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_genes.gff
-		cat "$MimpDir"/*_mimps_intersected_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq | wc -l
+		"$ProgDir"/gffexpander.pl + 1500 "$Mimps" > "$MimpDir"/"$Strain"_mimps_expanded.gff3
+		StrainAugModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
+		StrainORFModels=$(ls gene_pred/ORF_finder/$Organism/"$Strain"/*_ORF_mod.gff)
+		bedtools intersect -s -a "$StrainAugModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes.gff
+		cat "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt
+		bedtools intersect -s -a "$StrainORFModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes.gff
+		cat "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt
+		printf "Augustus genes intersected:\t"
+		cat "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt | wc -l
+		printf "ORF fragments intersected:\t"
+		cat "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt | wc -l
+		echo ""
 	done
 ```
 
 Results were as follows:
 ```
-	analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3  
-	18  
-	analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3  
-	12  
-	analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3  
-	17  
-	analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3  
-	3  
-	analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3  
-	0  
-	analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3  
-	16  
-	analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3  
-	23  
-	analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3  
-	3  
-	analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3  
-	9  
-	analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3  
-	3  
-	analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3  
-	3  
-	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3  
-	0  
+	analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3
+	Augustus genes intersected:	21
+	ORF fragments intersected:	285
+
+	analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3
+	Augustus genes intersected:	15
+	ORF fragments intersected:	254
+
+	analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3
+	Augustus genes intersected:	20
+	ORF fragments intersected:	307
+
+	analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3
+	Augustus genes intersected:	5
+	ORF fragments intersected:	99
+
+	analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3
+	Augustus genes intersected:	0
+	ORF fragments intersected:	87
+
+	analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3
+	Augustus genes intersected:	20
+	ORF fragments intersected:	260
+
+	analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3
+	Augustus genes intersected:	29
+	ORF fragments intersected:	328
+
+	analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3
+	Augustus genes intersected:	5
+	ORF fragments intersected:	170
+
+	analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3
+	Augustus genes intersected:	15
+	ORF fragments intersected:	395
+
+	analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3
+	Augustus genes intersected:	5
+	ORF fragments intersected:	155
+
+	analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3
+	Augustus genes intersected:	3
+	ORF fragments intersected:	146
+
+	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3
+	Augustus genes intersected:	2
+	ORF fragments intersected:	20
 ```
 <!--
 

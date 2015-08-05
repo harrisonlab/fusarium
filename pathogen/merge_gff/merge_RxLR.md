@@ -111,6 +111,8 @@ Extracting RxLR hmm domain containing ORFs
   ORF_hmm_RxLR_DB=$OutDir/ORF_RxLR_EER_WY_RxLR_rxlr.db
   ORF_mimp_DB=$OutDir/ORF_RxLR_EER_WY_RxLR_mimps_rxlr.db
 
+  OrfMerged=$OutDir/ORF_merged.db
+
   # WyDB=414_WY.db
 	# WyID=WY_id.txt
 	# WyDB_mod=414_WY_note.db
@@ -162,16 +164,21 @@ Add notes to ORF fragments with effector evidence
 	# $ProgDir/get_db_id.py --db $RxlrDB --type gene --out $RxlrID
 	# $ProgDir/note2db.py --in_db $RxlrDB --out_db $RxlrDB_mod --id_file $RxlrID --str ORF_RxLR_atg --attribute ID
 ```
-<!--
-## Merge the RxLR effector and WY effector databases together
+
+## Merge all features in the ORF database
 ```bash
-	$ProgDir/merge_db.py --inp $WyDB_mod $RxlrDB_mod --db $Rxlr_Wy_DB
+	$ProgDir/merge_db_features.py --inp $ORF_mimp_DB --id ORF_finder --source ORF_finder --out $OrfMerged
 ```
 
 
-## Merge all features in the Rxlr and WY effector ORF database
+
+
+
+<!--
+
+## Merge the RxLR effector and WY effector databases together
 ```bash
-	$ProgDir/merge_db_features.py --inp $Rxlr_Wy_DB --id ORF_RxLR --source ORF_RxLR --out $OrfMerged
+	$ProgDir/merge_db.py --inp $WyDB_mod $RxlrDB_mod --db $Rxlr_Wy_DB
 ```
 
 ## Merge the effector ORF database and the augustus database together
@@ -203,4 +210,4 @@ The final dataset contains the following number of features:	17595
 
 	$ProgDir/extract_by_note.py --db $FinalDB_mod2 --str Aug_RxLR Aug_WY_hmm ORF_WY_hmm ORF_RxLR_atg --out 414_effectors.gff --type gene transcript
 ```
- --> 
+ -->

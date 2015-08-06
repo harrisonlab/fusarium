@@ -111,7 +111,15 @@ Extracting RxLR hmm domain containing ORFs
   ORF_hmm_RxLR_DB=$OutDir/ORF_RxLR_EER_WY_RxLR_rxlr.db
   ORF_mimp_DB=$OutDir/ORF_RxLR_EER_WY_RxLR_mimps_rxlr.db
 
-  OrfMerged=$OutDir/ORF_merged.db
+  ORF_Out_Gff=$OutDir/Fus2_ORF_effectors.gff
+
+  Orf_combined_DB=$OutDir/Fus2_ORF_combined.db
+  Orf_merged_DB=$OutDir/Fus2_ORF_merged.db
+
+  Combined_DB=$OutDir/Fus2_Aug_ORF_combined.db
+  Merged_DB=$OutDir/Fus2_Aug_ORF_merged.db
+  Merged_Gff=$OutDir/Fus2_Aug_ORF_merged.gff
+  Effectors_Gff=$OutDir/Fus2_effectors.gff
 
   # WyDB=414_WY.db
 	# WyID=WY_id.txt
@@ -147,7 +155,7 @@ Add notes to Augustus genes with effector evidence
   $ProgDir/note2db.py --in_db $AugDB --out_db $Aug_RxLR_DB --id_file $Aug_Regex_RxLR --str Aug_RxLR_motif --attribute ID
   $ProgDir/note2db.py --in_db $Aug_RxLR_DB --out_db $Aug_RxLR_EER_DB --id_file $Aug_Regex_RxLR_EER --str Aug_RxLR_EER_motif --attribute ID
   $ProgDir/note2db.py --in_db $Aug_RxLR_EER_DB --out_db $Aug_hmm_WY_DB --id_file $Aug_hmm_WY --str Aug_WY_hmm --attribute ID
-  $ProgDir/note2db.py --in_db $Aug_hmm_WY_DB --out_db $Aug_hmm_RxLR_DB --id_file $Aug_hmm_RxLR --str Aug_WY_hmm --attribute ID
+  $ProgDir/note2db.py --in_db $Aug_hmm_WY_DB --out_db $Aug_hmm_RxLR_DB --id_file $Aug_hmm_RxLR --str Aug_RxLR_hmm --attribute ID
   $ProgDir/note2db.py --in_db $Aug_hmm_RxLR_DB --out_db $Aug_mimp_DB --id_file $Aug_Mimp_1500 --str Aug_mimp_intersect --attribute ID
 ```
 
@@ -158,20 +166,55 @@ Add notes to ORF fragments with effector evidence
   $ProgDir/note2db.py --in_db $OrfDB --out_db $ORF_RxLR_DB --id_file $ORF_Regex_RxLR --str ORF_RxLR_motif --attribute Name
   $ProgDir/note2db.py --in_db $ORF_RxLR_DB --out_db $ORF_RxLR_DB_EER --id_file $ORF_Regex_RxLR_EER --str ORF_RxLR_EER_motif --attribute Name
   $ProgDir/note2db.py --in_db $ORF_RxLR_DB_EER --out_db $ORF_hmm_WY_DB --id_file $ORF_hmm_WY --str ORF_WY_hmm --attribute Name
-  $ProgDir/note2db.py --in_db $ORF_hmm_WY_DB --out_db $ORF_hmm_RxLR_DB --id_file $ORF_hmm_RxLR --str ORF_WY_hmm --attribute Name
+  $ProgDir/note2db.py --in_db $ORF_hmm_WY_DB --out_db $ORF_hmm_RxLR_DB --id_file $ORF_hmm_RxLR --str ORF_RxLR_hmm --attribute Name
   $ProgDir/note2db.py --in_db $ORF_hmm_RxLR_DB --out_db $ORF_mimp_DB --id_file $ORF_Mimp_1500 --str ORF_mimp_intersect --attribute ID
 	# $ProgDir/note2db.py --in_db $WyDB --out_db $WyDB_mod --id_file $WyID --str ORF_WY_hmm --attribute ID
 	# $ProgDir/get_db_id.py --db $RxlrDB --type gene --out $RxlrID
 	# $ProgDir/note2db.py --in_db $RxlrDB --out_db $RxlrDB_mod --id_file $RxlrID --str ORF_RxLR_atg --attribute ID
 ```
 
-## Merge all features in the ORF database
 ```bash
-	$ProgDir/merge_db_features.py --inp $ORF_mimp_DB --id ORF_finder --source ORF_finder --out $OrfMerged
+  $ProgDir/extract_by_note.py --db $ORF_mimp_DB --str ORF_RxLR_motif ORF_RxLR_EER_motif ORF_WY_hmm ORF_RxLR_hmm ORF_mimp_intersect --out $ORF_Out_Gff --type gene transcript
+  $ProgDir/make_gff_database.py --inp $ORF_Out_Gff --db $Orf_combined_DB
 ```
 
+## Merge all features in the ORF database
+```bash
+	$ProgDir/merge_db_features.py --inp $Orf_combined_DB --id ORF_finder --source ORF_finder --out $Orf_merged_DB
+```
 
+$ProgDir/extract_by_note.py --db $ORF_hmm_RxLR_DB --str ORF_RxLR_motif ORF_RxLR_EER_motif ORF_WY_hmm ORF_RxLR_hmm ORF_mimp_intersect --out $ORF_Out_Gff --type gene transcript
 
+## Merge the effector ORF database and the augustus database together
+```bash
+	$ProgDir/merge_db.py --inp $Aug_mimp_DB $Orf_merged_DB --db $Combined_DB
+```
+
+## Identify all effector ORFs contained within Augustus genes
+```bash
+	$ProgDir/contained_features.py --inp $Combined_DB --out_db $Merged_DB --A AUGUSTUS --B ORF_finder --out_gff $Merged_Gff
+```
+
+The total number of Augustus genes are: 11055
+The total number of atg genes are:      732
+Of these, this many were merged:        662
+Into this many features:        326
+And this many remain unmerged:  11125
+The final dataset contains the following number of features:    11451
+
+```bash
+  $ProgDir/extract_by_note.py --db $Merged_DB --str Aug_RxLR_motif Aug_RxLR_EER_motif Aug_WY_hmm Aug_RxLR_hmm Aug_mimp_intersect ORF_RxLR_motif ORF_RxLR_EER_motif ORF_WY_hmm ORF_RxLR_hmm ORF_mimp_intersect --out $Effectors_Gff --type gene transcript
+  cat $OutDir/Fus2_effectors.gff | grep 'Aug_RxLR_motif' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'Aug_RxLR_EER_motif' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'Aug_WY_hmm' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'Aug_RxLR_hmm' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'Aug_mimp_intersect' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'ORF_RxLR_motif' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'ORF_RxLR_EER_motif' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'ORF_WY_hmm' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'ORF_RxLR_hmm' | wc -l
+  cat $OutDir/Fus2_effectors.gff | grep 'ORF_mimp_intersect' | wc -l
+```
 
 
 <!--
@@ -181,10 +224,6 @@ Add notes to ORF fragments with effector evidence
 	$ProgDir/merge_db.py --inp $WyDB_mod $RxlrDB_mod --db $Rxlr_Wy_DB
 ```
 
-## Merge the effector ORF database and the augustus database together
-```bash
-	$ProgDir/merge_db.py --inp $AugDB $OrfMerged --db $MergedDB
-```
 
 ## Identify all effector ORFs contained within Augustus genes
 ```bash

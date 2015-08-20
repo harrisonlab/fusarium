@@ -1158,6 +1158,46 @@ Results were as follows:
 	Augustus genes intersected:	2
 	ORF fragments intersected:	20
 ```
+
+## Merging effector evidence:
+
+```bash
+	for Strain in $(ls -d gene_pred/ORF_finder/F.*/* | rev | cut -f1 -d '/' | rev); do
+		echo $Strain;
+		Orf_Gff=$(ls gene_pred/ORF_finder/*/$Strain/"$Strain"_ORF.gff);
+		Aug_Gff=$(ls gene_pred/augustus/*/"$Strain"/"$Strain"_augustus_preds.gtf | grep -v 'old');
+		echo $Orf_Gff;
+		echo $Aug_Gff; 
+		ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/merge_gff;
+		qsub $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+	done
+```
+
+# Genomic analysis
+
+## Identifcation of protospacers
+
+To facilitate CriprCas editing of the Fusarium oxysporum genome target sites
+known as protospacers were identified.
+
+This was done using a published program OPTIMuS as well as a parser script. The
+commands to do this were as follows:
+
+```bash
+	for GeneSeq in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.codingseq | grep -v 'old'); do
+	  Organism=$(echo $GeneSeq | rev | cut -f3 -d '/' | rev)
+	  Strain=$(echo $GeneSeq | rev | cut -f2 -d '/' | rev)
+		echo $Organism
+		echo $Strain
+	  ProgDir=~/git_repos/emr_repos/scripts/fusarium_venenatum/OPTIMus
+	  OutDir=analysis/protospacers/$Organism/$Strain
+	  mkdir -p $OutDir
+	  $ProgDir/OPTIMuS_EMR.pl $GeneSeq "threshold" 1 > $OutDir/"$Strain"_protospacer_sites.txt
+	  $ProgDir/Optimus2csv.py --inp $OutDir/"$Strain"_protospacer_sites.txt  --out $OutDir/"$Strain"_protospacer_by_gene.csv
+	done
+```
+
+
 <!--
 
 #Genomic analysis

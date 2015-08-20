@@ -219,28 +219,29 @@ The final dataset contains the following number of features:	11451
   $ProgDir/extract_by_note.py --db $Merged_DB --str Aug_RxLR_motif Aug_RxLR_EER_motif Aug_WY_hmm Aug_RxLR_hmm Aug_mimp_intersect ORF_RxLR_motif ORF_RxLR_EER_motif ORF_WY_hmm ORF_RxLR_hmm ORF_mimp_intersect --out $Effectors_Gff --type gene transcript
   for i in 1; do
   printf "Aug_RxLR_motif:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'Aug_RxLR_motif' | wc -l
+  cat $Effectors_Gff | grep 'Aug_RxLR_motif' | wc -l
   printf "Aug_RxLR_EER_motif:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'Aug_RxLR_EER_motif' | wc -l
+  cat $Effectors_Gff | grep 'Aug_RxLR_EER_motif' | wc -l
   printf "Aug_WY_hmm:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'Aug_WY_hmm' | wc -l
+  cat $Effectors_Gff | grep 'Aug_WY_hmm' | wc -l
   printf "Aug_RxLR_hmm:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'Aug_RxLR_hmm' | wc -l
+  cat $Effectors_Gff | grep 'Aug_RxLR_hmm' | wc -l
   printf "Aug_mimp_intersect:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'Aug_mimp_intersect' | wc -l
+  cat $Effectors_Gff | grep 'Aug_mimp_intersect' | wc -l
   printf "ORF_RxLR_motif:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'ORF_RxLR_motif' | wc -l
+  cat $Effectors_Gff | grep 'ORF_RxLR_motif' | wc -l
   printf "ORF_RxLR_EER_motif:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'ORF_RxLR_EER_motif' | wc -l
+  cat $Effectors_Gff | grep 'ORF_RxLR_EER_motif' | wc -l
   printf "ORF_WY_hmm:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'ORF_WY_hmm' | wc -l
+  cat $Effectors_Gff | grep 'ORF_WY_hmm' | wc -l
   printf "ORF_WY_hmm:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'ORF_RxLR_hmm' | wc -l
+  cat $Effectors_Gff | grep 'ORF_RxLR_hmm' | wc -l
   printf "ORF_mimp_intersect:\t"
-  cat $OutDir/Fus2_effectors.gff | grep 'ORF_mimp_intersect' | wc -l
+  cat $Effectors_Gff | grep 'ORF_mimp_intersect' | wc -l
   done
 ```
-Aug_RxLR_motif:	13
+
+Aug_RxLR_motif:	17
 Aug_RxLR_EER_motif:	1
 Aug_WY_hmm:	0
 Aug_RxLR_hmm:	2
@@ -250,3 +251,43 @@ ORF_RxLR_EER_motif:	16
 ORF_WY_hmm:	4
 ORF_WY_hmm:	30
 ORF_mimp_intersect:	124
+
+Higher confidence putative effectors were extracted using:
+```bash
+  $ProgDir/extract_by_note.py --db $Merged_DB --str Aug_RxLR_motif Aug_RxLR_EER_motif Aug_WY_hmm Aug_RxLR_hmm Aug_mimp_intersect ORF_RxLR_EER_motif ORF_WY_hmm ORF_RxLR_hmm ORF_mimp_intersect --out $Effectors_Gff --type gene transcript
+  for i in 1; do
+  printf "Aug_RxLR_motif:\t"
+  cat $Effectors_Gff | grep 'Aug_RxLR_motif' | wc -l
+  printf "Aug_RxLR_EER_motif:\t"
+  cat $Effectors_Gff | grep 'Aug_RxLR_EER_motif' | wc -l
+  printf "Aug_WY_hmm:\t"
+  cat $Effectors_Gff | grep 'Aug_WY_hmm' | wc -l
+  printf "Aug_RxLR_hmm:\t"
+  cat $Effectors_Gff | grep 'Aug_RxLR_hmm' | wc -l
+  printf "Aug_mimp_intersect:\t"
+  cat $Effectors_Gff | grep 'Aug_mimp_intersect' | wc -l
+  printf "ORF_RxLR_motif:\t"
+  cat $Effectors_Gff | grep 'ORF_RxLR_motif' | wc -l
+  printf "ORF_RxLR_EER_motif:\t"
+  cat $Effectors_Gff | grep 'ORF_RxLR_EER_motif' | wc -l
+  printf "ORF_WY_hmm:\t"
+  cat $Effectors_Gff | grep 'ORF_WY_hmm' | wc -l
+  printf "ORF_WY_hmm:\t"
+  cat $Effectors_Gff | grep 'ORF_RxLR_hmm' | wc -l
+  printf "ORF_mimp_intersect:\t"
+  cat $Effectors_Gff | grep 'ORF_mimp_intersect' | wc -l
+  printf "Total number of putative effectors:\t"
+  cat $Effectors_Gff | grep 'gene' | wc -l
+  done
+```
+
+Aug_RxLR_motif:	17
+Aug_RxLR_EER_motif:	1
+Aug_WY_hmm:	0
+Aug_RxLR_hmm:	2
+Aug_mimp_intersect:	2
+ORF_RxLR_motif:	24
+ORF_RxLR_EER_motif:	16
+ORF_WY_hmm:	4
+ORF_WY_hmm:	30
+Total number of putative effectors:	188

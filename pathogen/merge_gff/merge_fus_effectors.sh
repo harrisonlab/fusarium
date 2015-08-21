@@ -251,7 +251,7 @@ Aug_RxLR_motif  \
 Aug_RxLR_EER_motif \
 Aug_WY_hmm \
 Aug_RxLR_hmm \
-Aug_mimp_intersect
+Aug_mimp_intersect \
 ORF_RxLR_motif \
 ORF_RxLR_EER_motif \
 ORF_WY_hmm \
@@ -261,25 +261,25 @@ ORF_mimp_intersect \
 
 for i in 1; do
   printf "Aug_RxLR_motif:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'Aug_RxLR_motif' | wc -l
+  cat $Effectors_Gff| grep 'Aug_RxLR_motif' | wc -l
   printf "Aug_RxLR_EER_motif:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'Aug_RxLR_EER_motif' | wc -l
+  cat $Effectors_Gff | grep 'Aug_RxLR_EER_motif' | wc -l
   printf "Aug_WY_hmm:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'Aug_WY_hmm' | wc -l
+  cat $Effectors_Gff | grep 'Aug_WY_hmm' | wc -l
   printf "Aug_RxLR_hmm:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'Aug_RxLR_hmm' | wc -l
+  cat $Effectors_Gff | grep 'Aug_RxLR_hmm' | wc -l
   printf "Aug_mimp_intersect:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'Aug_mimp_intersect' | wc -l
+  cat $Effectors_Gff | grep 'Aug_mimp_intersect' | wc -l
   printf "ORF_RxLR_motif:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'ORF_RxLR_motif' | wc -l
+  cat $Effectors_Gff | grep 'ORF_RxLR_motif' | wc -l
   printf "ORF_RxLR_EER_motif:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'ORF_RxLR_EER_motif' | wc -l
+  cat $Effectors_Gff | grep 'ORF_RxLR_EER_motif' | wc -l
   printf "ORF_WY_hmm:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'ORF_WY_hmm' | wc -l
+  cat $Effectors_Gff | grep 'ORF_WY_hmm' | wc -l
   printf "ORF_WY_hmm:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'ORF_RxLR_hmm' | wc -l
+  cat $Effectors_Gff | grep 'ORF_RxLR_hmm' | wc -l
   printf "ORF_mimp_intersect:\t"
-  cat $WorkDir/Fus2_effectors.gff | grep 'ORF_mimp_intersect' | wc -l
+  cat $Effectors_Gff | grep 'ORF_mimp_intersect' | wc -l
 done
 
 
@@ -289,8 +289,7 @@ Aug_RxLR_motif  \
 Aug_RxLR_EER_motif \
 Aug_WY_hmm \
 Aug_RxLR_hmm \
-Aug_mimp_intersect
-# ORF_RxLR_motif \
+Aug_mimp_intersect \
 ORF_RxLR_EER_motif \
 ORF_WY_hmm \
 ORF_RxLR_hmm \

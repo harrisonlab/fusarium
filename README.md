@@ -1163,14 +1163,48 @@ Results were as follows:
 
 ```bash
 	for Strain in $(ls -d gene_pred/ORF_finder/F.*/* | rev | cut -f1 -d '/' | rev); do
+		Queue=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' |  cut -f5 -d ' ' | grep -c 'qw' | sed 's/ //g')
+		while [[ $Queue -ge 1 ]]; do
+			sleep 10
+			printf "."
+			Queue=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' |  cut -f5 -d ' ' | grep -c 'qw')
+		done
+		Node1Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
+		Node2Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
+		Node3Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
+		Node4Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
+		#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
+		while [[ $Node1Jobs -ge 1  && $Node2Jobs -ge 1 && $Node3Jobs -ge 1 && $Node4Jobs -ge 1 ]]; do
+			#while [ [ $Node1Jobs -ge 1 ] && [ $Node2Jobs -ge 1 ] && [ $Node3Jobs -ge 1 ] && [ $Node4Jobs -ge 1 ] && [ $Node5Jobs -ge 1 ] ]; do
+			sleep 10
+			printf "."
+			Node1Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
+			Node2Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
+			Node3Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
+			Node4Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
+			#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
+		done
+		ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/merge_gff;
 		echo $Strain;
 		Orf_Gff=$(ls gene_pred/ORF_finder/*/$Strain/"$Strain"_ORF.gff);
 		Aug_Gff=$(ls gene_pred/augustus/*/"$Strain"/"$Strain"_augustus_preds.gtf | grep -v 'old');
 		echo $Orf_Gff;
-		echo $Aug_Gff; 
-		ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/merge_gff;
-		qsub $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		echo $Aug_Gff;
+		if [[ $Node1Jobs -lt 1 ]]; then
+			qsub -l h=blacklace01.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		elif [[ $Node2Jobs -lt 1 ]]; then
+			qsub -l h=blacklace02.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		elif [[ $Node3Jobs -lt 1 ]]; then
+			qsub -l h=blacklace03.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		elif [[ $Node4Jobs -lt 1 ]]; then
+			qsub -l h=blacklace04.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+			# elif [[ $Node5Jobs -lt 1 ]]; then
+			# qsub -l h=blacklace05.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		else
+			echo "Error something has jumped the queue"
+		fi
 	done
+
 ```
 
 # Genomic analysis
@@ -1197,6 +1231,47 @@ commands to do this were as follows:
 	done
 ```
 
+
+## Orthology
+
+# 6) orthology
+
+Orthomcl was used to identify orthologous groups between Alternaria spp. genomes
+
+Genomes were grouped by subspecies and orthology was determined within each
+subspecies group. Orthology was also determined between subspecies groups.
+
+| Pathogenic | non-pathogenic | Intermediate |
+| ---------- | -------------- | -------------|
+| 125        | A28            | 55           |
+| A23        | D2             |              |
+| Fus2       | PG             |              |
+
+
+
+
+## 6a) Orthology between pathogenic isolates
+
+The Commands used to run this analysis are shown in
+pathogen/orthology/F.oxysporum_fsp.cepae_pathogenic_orthology.md
+
+
+## 6b) Orthology between non-pathogenic isolates
+
+The Commands used to run this analysis are shown in
+pathogen/orthology/F.oxysporum_fsp.cepae_non-pathogenic_orthology.md
+
+
+## 6c) Orthology between pathogenic and non-pathogenic isolates
+
+The Commands used to run this analysis are shown in
+pathogen/orthology/F.oxysporum_fsp.cepae_pathogen_vs_non-pathogen_orthology.md
+
+
+## 6d) Orthology between all isolates
+
+The Commands used to run this analysis are shown in
+pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md
 
 <!--
 

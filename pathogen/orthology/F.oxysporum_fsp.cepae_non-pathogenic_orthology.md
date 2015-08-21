@@ -103,7 +103,7 @@
 
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
-  $ProgDir/venn_diag_2_way.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+  $ProgDir/venn_diag_3_way.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
 ```
 
 Output was a pdf file of the venn diagram.
@@ -116,10 +116,30 @@ number of unique singleton genes
 number of unique groups of inparalogs
 
 '''
-  [1] "A28 (6904)"
-  [1] 124
-  [1] 354
-  [1] "D2 (6617)"
-  [1] 100
-  [1] 91
+[1] "A28 (6904)"
+[1] 6904
+[1] "D2 (6617)"
+[1] 6617
+[1] "PG (6907)"
+[1] 6907
+n12
+[1] 6426
+n13
+[1] 6688
+n23
+[1] 6427
+n123
+[1] 6338
+
+inparalogs:
+[1] "A28 (6904)"
+[1] 124
+[1] 4
+[1] "D2 (6617)"
+[1] 100
+[1] 2
+[1] "PG (6907)"
+[1] 125
+[1] 5
+
 '''

@@ -1,10 +1,10 @@
-# For a comparison between A. alternata, ssp. gaisen, spp. teniuissima, spp. tenuissima apple pathotype, ssp. arborescens
+# For a comparison between pathogenic isolates and non-pathogenic isolates of FoC
 
 
 ```bash
   ProjDir=/home/groups/harrisonlab/project_files/fusarium
   cd $ProjDir
-  IsolateAbrv=FoC_path_vs_non-path
+  IsolateAbrv=FoC_path_vs_nonpath
   WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
   mkdir -p $WorkDir
   mkdir -p $WorkDir/formatted

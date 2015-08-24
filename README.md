@@ -1169,19 +1169,19 @@ Results were as follows:
 			printf "."
 			Queue=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' |  cut -f5 -d ' ' | grep -c 'qw')
 		done
-		Node1Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
-		Node2Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
-		Node3Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
-		Node4Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
+		Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
+		Node2Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
+		Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
+		Node4Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
 		#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
 		while [[ $Node1Jobs -ge 1  && $Node2Jobs -ge 1 && $Node3Jobs -ge 1 && $Node4Jobs -ge 1 ]]; do
 			#while [ [ $Node1Jobs -ge 1 ] && [ $Node2Jobs -ge 1 ] && [ $Node3Jobs -ge 1 ] && [ $Node4Jobs -ge 1 ] && [ $Node5Jobs -ge 1 ] ]; do
 			sleep 10
 			printf "."
-			Node1Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
-			Node2Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
-			Node3Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
-			Node4Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
+			Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
+			Node2Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
+			Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
+			Node4Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
 			#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
 		done
 		ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/merge_gff;

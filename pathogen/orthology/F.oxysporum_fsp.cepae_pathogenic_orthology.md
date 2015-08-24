@@ -1,4 +1,4 @@
-# For a comparison between non-pathogenic FoC isolates 125, A23 & Fus2
+# For a comparison between pathogenic FoC isolates 125, A23 & Fus2
 
 
 ```bash
@@ -116,5 +116,13 @@ number of unique singleton genes
 number of unique groups of inparalogs
 
 '''
-
+  [1] "125 (7000)"
+  [1] 21
+  [1] 1
+  [1] "A23 (6978)"
+  [1] 40
+  [1] 0
+  [1] "Fus2 (7027)"
+  [1] 42
+  [1] 1
 '''

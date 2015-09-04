@@ -1207,9 +1207,9 @@ Results were as follows:
 
 ```
 
-# Genomic analysis
+# 4. Genomic analysis
 
-## Identifcation of protospacers
+## 4.1 Identifcation of protospacers
 
 To facilitate CriprCas editing of the Fusarium oxysporum genome target sites
 known as protospacers were identified.
@@ -1232,11 +1232,9 @@ commands to do this were as follows:
 ```
 
 
-## Orthology
+## 4.2 Orthology
 
-# 6) orthology
-
-Orthomcl was used to identify orthologous groups between Alternaria spp. genomes
+Orthomcl was used to identify orthologous groups between Fusarium spp. genomes
 
 Genomes were grouped by subspecies and orthology was determined within each
 subspecies group. Orthology was also determined between subspecies groups.
@@ -1250,28 +1248,33 @@ subspecies group. Orthology was also determined between subspecies groups.
 
 
 
-## 6a) Orthology between pathogenic isolates
+### 4.2.a) Orthology between pathogenic isolates
 
 The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_pathogenic_orthology.md
 
 
-## 6b) Orthology between non-pathogenic isolates
+### 4.2.b) Orthology between non-pathogenic isolates
 
 The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_non-pathogenic_orthology.md
 
 
-## 6c) Orthology between pathogenic and non-pathogenic isolates
+### 4.2.c) Orthology between pathogenic and non-pathogenic isolates
 
 The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_pathogen_vs_non-pathogen_orthology.md
 
 
-## 6d) Orthology between all isolates
+### 4.2.d) Orthology between all isolates
 
 The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md
+
+
+## 5.1 Identifying SIX genes
+
+Genes thought to be associated with pathogenicity were identified in
 
 <!--
 

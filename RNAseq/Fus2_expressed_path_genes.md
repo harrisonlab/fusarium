@@ -1,7 +1,7 @@
 These commands were used to identify highly expressed genes in the Fus2 assembly
 
 
-
+# 1) QC
 
 Perform qc of RNAseq timecourse data
 ```bash
@@ -14,18 +14,27 @@ Perform qc of RNAseq timecourse data
   done
 ```
 
+# 2) Align reads vs. Fus2 genome
+Alignments of RNAseq reads were made against the Fus2 Genome using tophat:
 
-Alignments of RNAseq reads were made against the Fus2 Genome using bowtie2:
+## 2.1) Alignment
 
 ```bash
-for FilePath in $(ls -d qc_rna/F.oxysporum_fsp_cepae/Fus2/*); do
-Genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
-FileF=$(ls $FilePath/F/*_trim.fq.gz)
-FileR=$(ls $FilePath/R/*_trim.fq.gz)
-qsub /home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq/tophat_alignment.sh $Genome $FileF $FileR
-done
+  for FilePath in $(ls -d qc_rna/F.oxysporum_fsp_cepae/Fus2/*); do
+    Genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
+    FileF=$(ls $FilePath/F/*_trim.fq.gz)
+    FileR=$(ls $FilePath/R/*_trim.fq.gz)
+    qsub /home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq/tophat_alignment.sh $Genome $FileF $FileR
+  done
+  for FilePath in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
+    Genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
+    FileF=$(ls $FilePath/F/*_trim.fq.gz)
+    FileR=$(ls $FilePath/R/*_trim.fq.gz)
+    qsub /home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq/tophat_alignment.sh $Genome $FileF $FileR
+  done
 ```
 
+## 2.2) Summarising alignments
 Results were summarised using the following commands:
 
 ```bash
@@ -38,189 +47,9 @@ Results were summarised using the following commands:
   done
 ```
 
-This produced the following text output:
+The text output of these alignments is stored in summised_output.txt
 
-```
-  bowtie_alignment.sh.e6307488
-  Settings:
-    Output files: "0_bowtie_index.*.bt2"
-  Building a SMALL index
-  3298302 reads; of these:
-    3298302 (100.00%) were paired; of these:
-      3295237 (99.91%) aligned concordantly 0 times
-      3065 (0.09%) aligned concordantly exactly 1 time
-      0 (0.00%) aligned concordantly >1 times
-      ----
-      3295237 pairs aligned concordantly 0 times; of these:
-        131 (0.00%) aligned discordantly 1 time
-      ----
-      3295106 pairs aligned 0 times concordantly or discordantly; of these:
-        6590212 mates make up the pairs; of these:
-          6589585 (99.99%) aligned 0 times
-          623 (0.01%) aligned exactly 1 time
-          4 (0.00%) aligned >1 times
-  0.11% overall alignment rate
-
-  bowtie_alignment.sh.e6307489
-  Settings:
-    Output files: "16_bowtie_index.*.bt2"
-  Building a SMALL index
-  3624880 reads; of these:
-    3624880 (100.00%) were paired; of these:
-      3615744 (99.75%) aligned concordantly 0 times
-      8901 (0.25%) aligned concordantly exactly 1 time
-      235 (0.01%) aligned concordantly >1 times
-      ----
-      3615744 pairs aligned concordantly 0 times; of these:
-        727 (0.02%) aligned discordantly 1 time
-      ----
-      3615017 pairs aligned 0 times concordantly or discordantly; of these:
-        7230034 mates make up the pairs; of these:
-          7229024 (99.99%) aligned 0 times
-          956 (0.01%) aligned exactly 1 time
-          54 (0.00%) aligned >1 times
-  0.29% overall alignment rate
-
-  bowtie_alignment.sh.e6307490
-  Settings:
-    Output files: "24.1_bowtie_index.*.bt2"
-  Building a SMALL index
-  3501899 reads; of these:
-    3501899 (100.00%) were paired; of these:
-      3489094 (99.63%) aligned concordantly 0 times
-      12247 (0.35%) aligned concordantly exactly 1 time
-      558 (0.02%) aligned concordantly >1 times
-      ----
-      3489094 pairs aligned concordantly 0 times; of these:
-        1085 (0.03%) aligned discordantly 1 time
-      ----
-      3488009 pairs aligned 0 times concordantly or discordantly; of these:
-        6976018 mates make up the pairs; of these:
-          6974831 (99.98%) aligned 0 times
-          1076 (0.02%) aligned exactly 1 time
-          111 (0.00%) aligned >1 times
-  0.41% overall alignment rate
-
-  bowtie_alignment.sh.e6307491
-  Settings:
-    Output files: "36_bowtie_index.*.bt2"
-  Building a SMALL index
-  3071374 reads; of these:
-    3071374 (100.00%) were paired; of these:
-      3015634 (98.19%) aligned concordantly 0 times
-      52087 (1.70%) aligned concordantly exactly 1 time
-      3653 (0.12%) aligned concordantly >1 times
-      ----
-      3015634 pairs aligned concordantly 0 times; of these:
-        6255 (0.21%) aligned discordantly 1 time
-      ----
-      3009379 pairs aligned 0 times concordantly or discordantly; of these:
-        6018758 mates make up the pairs; of these:
-          6013878 (99.92%) aligned 0 times
-          4059 (0.07%) aligned exactly 1 time
-          821 (0.01%) aligned >1 times
-  2.10% overall alignment rate
-
-  bowtie_alignment.sh.e6307492
-  Settings:
-    Output files: "4_bowtie_index.*.bt2"
-  Building a SMALL index
-  3859028 reads; of these:
-    3859028 (100.00%) were paired; of these:
-      3855123 (99.90%) aligned concordantly 0 times
-      3894 (0.10%) aligned concordantly exactly 1 time
-      11 (0.00%) aligned concordantly >1 times
-      ----
-      3855123 pairs aligned concordantly 0 times; of these:
-        156 (0.00%) aligned discordantly 1 time
-      ----
-      3854967 pairs aligned 0 times concordantly or discordantly; of these:
-        7709934 mates make up the pairs; of these:
-          7709157 (99.99%) aligned 0 times
-          773 (0.01%) aligned exactly 1 time
-          4 (0.00%) aligned >1 times
-  0.12% overall alignment rate
-
-  bowtie_alignment.sh.e6307493
-  Settings:
-    Output files: "48_bowtie_index.*.bt2"
-  Building a SMALL index
-  4229461 reads; of these:
-    4229461 (100.00%) were paired; of these:
-      4139423 (97.87%) aligned concordantly 0 times
-      86278 (2.04%) aligned concordantly exactly 1 time
-      3760 (0.09%) aligned concordantly >1 times
-      ----
-      4139423 pairs aligned concordantly 0 times; of these:
-        9133 (0.22%) aligned discordantly 1 time
-      ----
-      4130290 pairs aligned 0 times concordantly or discordantly; of these:
-        8260580 mates make up the pairs; of these:
-          8254586 (99.93%) aligned 0 times
-          5242 (0.06%) aligned exactly 1 time
-          752 (0.01%) aligned >1 times
-  2.42% overall alignment rate
-
-  bowtie_alignment.sh.e6307494
-  Settings:
-    Output files: "72_bowtie_index.*.bt2"
-  Building a SMALL index
-  3949141 reads; of these:
-    3949141 (100.00%) were paired; of these:
-      3648243 (92.38%) aligned concordantly 0 times
-      286697 (7.26%) aligned concordantly exactly 1 time
-      14201 (0.36%) aligned concordantly >1 times
-      ----
-      3648243 pairs aligned concordantly 0 times; of these:
-        31622 (0.87%) aligned discordantly 1 time
-      ----
-      3616621 pairs aligned 0 times concordantly or discordantly; of these:
-        7233242 mates make up the pairs; of these:
-          7215859 (99.76%) aligned 0 times
-          14559 (0.20%) aligned exactly 1 time
-          2824 (0.04%) aligned >1 times
-  8.64% overall alignment rate
-
-  bowtie_alignment.sh.e6307495
-  Settings:
-    Output files: "8_bowtie_index.*.bt2"
-  Building a SMALL index
-  2666930 reads; of these:
-    2666930 (100.00%) were paired; of these:
-      2662031 (99.82%) aligned concordantly 0 times
-      4811 (0.18%) aligned concordantly exactly 1 time
-      88 (0.00%) aligned concordantly >1 times
-      ----
-      2662031 pairs aligned concordantly 0 times; of these:
-        289 (0.01%) aligned discordantly 1 time
-      ----
-      2661742 pairs aligned 0 times concordantly or discordantly; of these:
-        5323484 mates make up the pairs; of these:
-          5322765 (99.99%) aligned 0 times
-          697 (0.01%) aligned exactly 1 time
-          22 (0.00%) aligned >1 times
-  0.21% overall alignment rate
-
-  bowtie_alignment.sh.e6307496
-  Settings:
-    Output files: "96_bowtie_index.*.bt2"
-  Building a SMALL index
-  3695419 reads; of these:
-    3695419 (100.00%) were paired; of these:
-      3257981 (88.16%) aligned concordantly 0 times
-      416336 (11.27%) aligned concordantly exactly 1 time
-      21102 (0.57%) aligned concordantly >1 times
-      ----
-      3257981 pairs aligned concordantly 0 times; of these:
-        42456 (1.30%) aligned discordantly 1 time
-      ----
-      3215525 pairs aligned 0 times concordantly or discordantly; of these:
-        6431050 mates make up the pairs; of these:
-          6407950 (99.64%) aligned 0 times
-          19273 (0.30%) aligned exactly 1 time
-          3827 (0.06%) aligned >1 times
-  13.30% overall alignment rate
-```
+# 3) Move to timecourse directory
 
 Data was copied from the alignment directory to a working directory for this
 timecourse experiment.
@@ -231,6 +60,117 @@ timecourse experiment.
   cp -r alignment/Fus2 $WorkDir/.
   # cd $WorkDir
 ```
+
+# 4) Assemble transcripts
+
+Cufflinks was used to assemble transcripts from reads aligned to the genome.
+
+```bash
+  for TimePoint in $(ls timecourse/v2_genes/* | grep -v 'merged' | grep -v 'quantified'); do
+  echo $TimePoint;
+  Alignment=$(ls timecourse/v2_genes/*/$TimePoint/accepted_hits.bam)
+  echo $Alignment
+  cufflinks -o timecourse/v2_genes/Fus2/$TimePoint/cufflinks -p 16 --max-intron-length 4000 $Alignment
+  done
+  # for Media in $(ls timecourse/v2_genes/F.oxysporum_fsp_cepae | grep -v 'merged' | grep -v 'quantified'); do
+  # echo $Media;
+  # Alignment=$(ls "timecourse/v2_genes/F.oxysporum_fsp_cepae/$Media/accepted_hits.bam")
+  # cufflinks -o timecourse/v2_genes/Fus2/$Media/cufflinks -p 16 --max-intron-length 4000 $Alignment
+  # done
+```
+
+# 5) Merge assembled transcripts
+
+```bash
+  ls timecourse/v2_genes/Fus2/*/cufflinks/transcripts.gtf | sort -g -k4 -t '/' > transcript_list.txt
+  cuffmerge -o timecourse/v2_genes/Fus2/merged --num-threads 16 transcript_list.txt
+  rm transcript_list.txt
+```
+
+# 6) quantify expression
+
+```bash
+  for TimePoint in $(ls timecourse/v2_genes/Fus2 | grep -v 'merged' | grep -v 'quantified' | sort -g -k4 -t '/'); do
+    echo $TimePoint;
+    Alignment=$(ls timecourse/v2_genes/*/$TimePoint/accepted_hits.bam)
+    echo $Alignment
+    cuffquant timecourse/v2_genes/Fus2/merged/merged.gtf -o timecourse/v2_genes/Fus2/quantified/$TimePoint -p 16 $Alignment
+  done
+```
+
+```bash
+  Alignments=$(ls timecourse/v2_genes/Fus2/quantified/*/abundances.cxb | sort -g -k5 -t '/')
+  Labels=$(ls -d timecourse/v2_genes/Fus2/quantified/*/ | cut -f5 -d '/' | sort -g | tr '\n' ',')
+  cuffdiff --time-series -o timecourse/v2_genes/Fus2/quantified -p 16 -L $Labels timecourse/v2_genes/Fus2/merged/merged.gtf $Alignments
+```
+
+```R
+  source("http://bioconductor.org/biocLite.R")
+  biocLite()
+  biocLite("cummeRbund")
+
+```
+
+# 7) Use merged transcripts to train Augustus gene models
+Instuctions were followed from:
+http://transdecoder.github.io
+http://jamg.sourceforge.net/tutorial.html (Step2c)
+
+Note - this require the transdecoder utils scripts to be installed.
+
+```bash
+cufflinks_gtf_genome_to_cdna_fasta.pl $GffMerged $Assembly > tmp.fa
+cufflinks_gtf_to_alignment_gff3.pl $GffMerged > tmp.gff
+TransDecoder.LongOrfs -t tmp.fa
+cdna_alignment_orf_to_genome_orf.pl tmp.fa.transdecoder_dir/longest_orfs.gff3 tmp.gff tmp.fa > tmp2.gff
+gff2gbSmallDNA.pl tmp2.gff $Assembly 4000 tmp.gb
+
+
+OutDir=gene_pred/training_augustus/Fusarium_oxysporum_fsp_cepae/Fus2
+mkdir -p $OutDir
+AUG_DIR=
+PASA_DIR=$(which pasa | sed s%/pasa%%)
+GffMerged=timecourse/v2_genes/Fus2/merged/merged.gtf
+Assembly=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
+Organism=F.oxysporum_fsp_cepae
+Strain=Fus2
+#------------------------------------------------------
+# 		Step A		Convert .gff output to .gb format
+#------------------------------------------------------
+/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus/gff3_2_auggff.pl $GffMerged > $OutDir/merged_mod.gff
+MAX_FLANK_DNA=4000
+
+gff2gbSmallDNA.pl $OutDir/merged_mod.gff $Assembly $MAX_FLANK_DNA $OutDir/"$ORGANISM"_"$STRAIN"_evidence.gb
+# --good=$OutDir/complete_genes.txt
+
+#------------------------------------------------------
+# 		Step 5.		Extract a subset of the aligned reads to use as a test set
+#------------------------------------------------------
+# The genes.gb must be in the directory this command is being run from
+randomSplit.pl $OutDir/"$ORGANISM"_"$STRAIN"_evidence.gb 100
+
+
+#------------------------------------------------------
+# 		Step 6.		Create a metafile for the new species
+#------------------------------------------------------
+
+new_species.pl --species="$ORGANISM"_"$STRAIN"
+
+perl -pi -e "s%codingseq           off%codingseq           on%g" ~/prog/augustus-3.1/config/species/"$ORGANISM"_"$STRAIN"/"$ORGANISM"_"$STRAIN"_parameters.cfg
+perl -pi -e "s%stopCodonExcludedFromCDS false%stopCodonExcludedFromCDS true%g" ~/prog/augustus-3.1/config/species/"$ORGANISM"_"$STRAIN"/"$ORGANISM"_"$STRAIN"_parameters.cfg
+perl -pi -e "s%alternatives-from-evidence  false%alternatives-from-evidence  true%g" ~/prog/augustus-3.1/config/species/"$ORGANISM"_"$STRAIN"/"$ORGANISM"_"$STRAIN"_parameters.cfg
+
+
+#------------------------------------------------------
+# 		Step 7.		Train Augustus using aligned reads
+#------------------------------------------------------
+
+etraining --species="$ORGANISM"_"$STRAIN" "$ORGANISM"_"$STRAIN"_evidence.gb.train
+
+augustus --species="$ORGANISM"_"$STRAIN" "$ORGANISM"_"$STRAIN"_evidence.gb.train | tee "$ORGANISM"_"$STRAIN"_sum.txt
+
+```
+
 <!--
 ```bash
   samtools view -bS ../4fus.sam > 24_hr_alignment.bam
@@ -317,84 +257,87 @@ cp timecourse/expreiment1/8fus.sam timecourse/expreiment1/F.oxysporum_fsp_cepae/
 # qsub /home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq/gene_expression.sh timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/4/4hfus.sam repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_hardmasked.fa gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_aug_out.gff -->
 
 ```bash
-for SamFile in $(ls $WorkDir/Fus2/*/accepted_hits.bam); do
-ScriptDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-Genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_hardmasked.fa
-GeneGff=gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.gtf
-echo $SamFile
-qsub $ScriptDir/gene_expression.sh $SamFile $Genome $GeneGff
-done
+  for SamFile in $(ls $WorkDir/Fus2/*/accepted_hits.bam); do
+    ScriptDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+    Genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_hardmasked.fa
+    GeneGff=gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.gtf
+    echo $SamFile
+    qsub $ScriptDir/gene_expression.sh $SamFile $Genome $GeneGff
+  done
 ```
 
 ```bash
-for ExpressedGenes in $(ls timecourse/v2_genes/Fus2/*/*_expressed_genes.bed); do
-OutFile=$(echo $ExpressedGenes | sed 's/_expressed_genes.bed/_expressed_genes_sorted_by_genelength2.bed/g')
-cat $ExpressedGenes | while read Line; do
-Start=$(echo $Line | cut -f4 -d ' ');
-Stop=$(echo $Line | cut -f5 -d ' ');
-Diff=$(( $Stop - $Start ));  
-Reads=$(echo $Line | cut -f10 -d ' ');
-Cov=$(( $Reads / $Diff ))
-echo -e "$Line\t$Diff\t$Cov";
-done | sort -n -r -k12 > $OutFile
-done
+  for ExpressedGenes in $(ls timecourse/v2_genes/Fus2/*/*_expressed_genes.bed); do
+    OutFile=$(echo $ExpressedGenes | sed 's/_expressed_genes.bed/_expressed_genes_sorted_by_genelength2.bed/g')
+    cat $ExpressedGenes | while read Line; do
+    Start=$(echo $Line | cut -f4 -d ' ');
+    Stop=$(echo $Line | cut -f5 -d ' ');
+    Diff=$(( $Stop - $Start ));  
+    Reads=$(echo $Line | cut -f10 -d ' ');
+    Cov=$((( $Reads * 1000 ) / $Diff ))
+    echo -e "$Line\t$Diff\t$Cov";
+    done | sort -n -r -k12 > $OutFile
+  done
 ```
 
+```bash
+  for FILE in $(ls timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/*/*expressed_genes.bed); do
+  	printf "$FILE\n" >> tmp3/top_50_genes.csv
+  	cat $FILE | head -n50 >> tmp3/top_50_genes.csv
+  done
+```
 
-for FILE in $(ls timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/*/*expressed_genes.bed); do
-	printf "$FILE\n" >> tmp3/top_50_genes.csv
-	cat $FILE | head -n50 >> tmp3/top_50_genes.csv
-done
+  ```bash
+  # identify is any of the top 100 expressed genes in Fus2 come from the same contig.
+  cat timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_expressed_genes.bed | head -n 100 | cut -f1 | sort | uniq -c | sort -r | less
+  # 	  4 NODE_9643_length_1511754_cov_84.114418
+  #       4 NODE_4583_length_445765_cov_84.597122
+  #       4 NODE_1105_length_605632_cov_83.266510
+  #       3 NODE_566_length_732593_cov_83.236145
+  #       3 NODE_2374_length_16459_cov_83.673859
+  #       3 NODE_1097_length_595114_cov_83.826759
+  #       2 NODE_956_length_295543_cov_83.945419
+  #       2 NODE_731_length_218737_cov_86.751648
+  #       2 NODE_7096_length_311910_cov_84.936836
+  #       2 NODE_6283_length_399598_cov_84.774551
+  #       2 NODE_608_length_519399_cov_83.445702
+  #       2 NODE_4974_length_475916_cov_84.779022
+  #       2 NODE_4873_length_67562_cov_92.001808
+  #       2 NODE_4575_length_487109_cov_84.320221
+  #       2 NODE_256_length_160675_cov_85.558762
+  #       2 NODE_2122_length_266153_cov_81.544640
+  #       2 NODE_1420_length_454186_cov_84.973450
+  #       2 NODE_10255_length_363655_cov_83.498451
+  #       1 NODE_979_length_171603_cov_83.119377
 
-# identify is any of the top 100 expressed genes in Fus2 come from the same contig.
-cat timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_expressed_genes.bed | head -n 100 | cut -f1 | sort | uniq -c | sort -r | less
-# 	  4 NODE_9643_length_1511754_cov_84.114418
-#       4 NODE_4583_length_445765_cov_84.597122
-#       4 NODE_1105_length_605632_cov_83.266510
-#       3 NODE_566_length_732593_cov_83.236145
-#       3 NODE_2374_length_16459_cov_83.673859
-#       3 NODE_1097_length_595114_cov_83.826759
-#       2 NODE_956_length_295543_cov_83.945419
-#       2 NODE_731_length_218737_cov_86.751648
-#       2 NODE_7096_length_311910_cov_84.936836
-#       2 NODE_6283_length_399598_cov_84.774551
-#       2 NODE_608_length_519399_cov_83.445702
-#       2 NODE_4974_length_475916_cov_84.779022
-#       2 NODE_4873_length_67562_cov_92.001808
-#       2 NODE_4575_length_487109_cov_84.320221
-#       2 NODE_256_length_160675_cov_85.558762
-#       2 NODE_2122_length_266153_cov_81.544640
-#       2 NODE_1420_length_454186_cov_84.973450
-#       2 NODE_10255_length_363655_cov_83.498451
-#       1 NODE_979_length_171603_cov_83.119377
+  cat analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.csv | cut -f 1,9,14,15 | sort -k2 | grep 'NODE' | cat
+  # Fusarium_oxysporum_f._sp._lycopersici_SIX3_gene_for_Secreted_in_xylem_3_protein	NODE_1364_length_4671_cov_108.113892	1100	1657
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_IPO3_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds	NODE_2080_length_2535_cov_50.341618	310	836
+  # Fusarium_oxysporum_f._sp._lycopersici_Six5_mRNA,_complete_cds	NODE_2080_length_2535_cov_50.341618	706	843
+  # Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds	NODE_2938_length_1682_cov_52.927467	601	1266
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_7_(SIX7)_gene,_complete_cds	NODE_2938_length_1682_cov_52.927467	601	1266
+  # Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds	NODE_2938_length_1682_cov_52.927467	601	1266
+  # Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds	NODE_788_length_4929_cov_54.397850	4328	4697
+  # Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	NODE_788_length_4929_cov_54.397850	750	1091
+  #
+  #In Summary:
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds
+  # NODE_1364_length_4671_cov_108.113892	1136	1624
+  # Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds
+  # NODE_2080_length_2535_cov_50.341618	310	836
+  # Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds
+  # NODE_2938_length_1682_cov_52.927467	601	1266
+  # Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds
+  # NODE_788_length_4929_cov_54.397850	4328	4697
+  # Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	NODE_788_length_4929_cov_54.397850	750	1091
 
-cat analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.csv | cut -f 1,9,14,15 | sort -k2 | grep 'NODE' | cat
-# Fusarium_oxysporum_f._sp._lycopersici_SIX3_gene_for_Secreted_in_xylem_3_protein	NODE_1364_length_4671_cov_108.113892	1100	1657
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_IPO3_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	NODE_1364_length_4671_cov_108.113892	1136	1624
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds	NODE_2080_length_2535_cov_50.341618	310	836
-# Fusarium_oxysporum_f._sp._lycopersici_Six5_mRNA,_complete_cds	NODE_2080_length_2535_cov_50.341618	706	843
-# Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds	NODE_2938_length_1682_cov_52.927467	601	1266
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_7_(SIX7)_gene,_complete_cds	NODE_2938_length_1682_cov_52.927467	601	1266
-# Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds	NODE_2938_length_1682_cov_52.927467	601	1266
-# Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds	NODE_788_length_4929_cov_54.397850	4328	4697
-# Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	NODE_788_length_4929_cov_54.397850	750	1091
-#
-#In Summary:
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds
-# NODE_1364_length_4671_cov_108.113892	1136	1624
-# Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds
-# NODE_2080_length_2535_cov_50.341618	310	836
-# Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds
-# NODE_2938_length_1682_cov_52.927467	601	1266
-# Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds
-# NODE_788_length_4929_cov_54.397850	4328	4697
-# Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	NODE_788_length_4929_cov_54.397850	750	1091
-
-#Identify expression of Fusarium SIX genes.
-qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
-/home/armita/git_repos/emr_repos/tools/pathogen/blast/blast2gff.pl six_gene analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.csv > analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.gff
-cat timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_expressed_genes.bed | grep 'NODE_4546' | less
-bedtools intersect -c -a analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.gff -b timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_sorted.bam > timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_expressed_six.bed
+  #Identify expression of Fusarium SIX genes.
+  qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
+  /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast2gff.pl six_gene analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.csv > analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.gff
+  cat timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_expressed_genes.bed | grep 'NODE_4546' | less
+  bedtools intersect -c -a analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_six-appended_parsed.fa_homologs.gff -b timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_sorted.bam > timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/96/Fus2_96_expressed_six.bed
+```

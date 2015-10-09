@@ -386,6 +386,26 @@ A gene model trained for F.oxysporum fsp. cepae was used to describe the structu
 	done
 ```
 
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
+	mkdir -p qc_rna/concatenated
+	RnaFiles=$(ls qc_rna/paired/._*/*/*/*.fastq.gz | paste -s -d ' ')
+	RnaF=qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq
+	RnaR=qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq
+	mkdir -p qc_rna/concatenated/F.oxysporum/Fus2
+	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_appended.fa.gz
+	cat $RnaF $RnaR | gzip -fc > $ConcatRna
+	GeneModel=fusarium
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+		Organism=$(echo $Genome | rev | cut -f4 -d'/' | rev)
+		Strain=$(echo $Genome | rev | cut -f3 -d'/' | rev)
+		OutDir=gene_pred/augustus/Model-fusarium_sp./$Organism/$Strain
+		qsub $ProgDir/submit_augustus.sh $GeneModel $Genome false $OutDir
+		OutDir=gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/$Organism/$Strain
+		qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel $OutDir
+	done
+```
+
 ## ORF finder
 
 The genome was searched in six reading frames for any start codon and following
@@ -1083,10 +1103,22 @@ Fus2 was performed separately to ensure mimps are predicted from the correct ass
 	done
 ```
 
+```bash
+ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
+# for Genome in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_AssemblyScaffolds.fasta); do
+for Genome in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Ma_et_al_2010/fusarium_oxysporum_f._sp._lycopersici_mitochondrion_2_contigs.fasta); do
+Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
+Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
+OutDir=analysis/mimps/$Organism/"$Strain"
+mkdir -p "$OutDir"
+"$ProgDir"/mimp_finder.pl "$Genome" "$OutDir"/"$Strain"_mimps.fa "$OutDir"/"$Strain"_mimps.gff3 > "$OutDir"/"$Strain"_mimps.log
+done
+```
+
 ### B) Augustus genes flanking Mimps
 
 
-```bash
+<!-- ```bash
 	ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
 	for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
 		Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
@@ -1157,6 +1189,102 @@ Results were as follows:
 	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3
 	Augustus genes intersected:	2
 	ORF fragments intersected:	20
+``` -->
+
+```bash
+	ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
+	for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
+		Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
+		Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
+		OutDir=analysis/mimps_+-2000bp/$Organism/$Strain
+		mkdir -p $OutDir
+		MimpDir=$(dirname $Mimps)
+		echo "$Mimps"
+		"$ProgDir"/gffexpander.pl +- 2000 "$Mimps" > "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3
+		StrainAugModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
+		StrainORFModels=$(ls gene_pred/ORF_finder/$Organism/"$Strain"/*_ORF_mod.gff)
+		bedtools intersect -a "$StrainAugModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff
+		#bedtools intersect -s -a "$StrainAugModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff
+		cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt
+		bedtools intersect -s -a "$StrainORFModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_ORF_genes.gff
+		cat "$OutDir"/"$Strain"_mimps_intersected_ORF_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$OutDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt
+		printf "Augustus genes intersected:\t"
+		cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt | wc -l
+		printf "ORF fragments intersected:\t"
+		cat "$OutDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt | wc -l
+		echo ""
+	done
+```
+
+```
+	analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3
+	Augustus genes intersected:	62
+	ORF fragments intersected:	767
+
+	analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3
+	Augustus genes intersected:	47
+	ORF fragments intersected:	757
+
+	analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3
+	Augustus genes intersected:	64
+	ORF fragments intersected:	755
+
+	analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3
+	Augustus genes intersected:	17
+	ORF fragments intersected:	393
+
+	analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3
+	Augustus genes intersected:	11
+	ORF fragments intersected:	326
+
+	analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3
+	Augustus genes intersected:	60
+	ORF fragments intersected:	654
+
+	analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3
+	Augustus genes intersected:	68
+	ORF fragments intersected:	830
+
+	analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3
+	Augustus genes intersected:	16
+	ORF fragments intersected:	415
+
+	analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3
+	Augustus genes intersected:	39
+	ORF fragments intersected:	951
+
+	analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3
+	Augustus genes intersected:	20
+	ORF fragments intersected:	470
+
+	analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3
+	Augustus genes intersected:	19
+	ORF fragments intersected:	425
+
+	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3
+	Augustus genes intersected:	5
+	ORF fragments intersected:	58
+```
+
+### for FoL reference genome
+
+```bash
+ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
+for Mimps in $(ls -d analysis/mimps/F.oxysporum_fsp_lycopersici/4287/*_mimps.gff3); do
+Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
+Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
+OutDir=analysis/mimps_+-2000bp/$Organism/$Strain
+mkdir -p $OutDir
+MimpDir=$(dirname $Mimps)
+echo "$Mimps"
+"$ProgDir"/gffexpander.pl +- 2000 "$Mimps" > "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3
+StrainAugModels=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1.filtered_proteins.ExternalModels.gff3
+bedtools intersect -a "$StrainAugModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff
+cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt
+bedtools intersect -s -a "$StrainORFModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > 		printf "Augustus genes intersected:\t"
+cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt | wc -l
+echo ""
+done
 ```
 
 ## Merging effector evidence:
@@ -1169,20 +1297,25 @@ Results were as follows:
 			printf "."
 			Queue=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' |  cut -f5 -d ' ' | grep -c 'qw')
 		done
-		Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
+		# Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
 		Node2Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
-		Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
+		# Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
 		Node4Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
 		#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
-		while [[ $Node1Jobs -ge 1  && $Node2Jobs -ge 1 && $Node3Jobs -ge 1 && $Node4Jobs -ge 1 ]]; do
+		Node6Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace06' | sed 's/ //g')
+		Node11Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace11' | sed 's/ //g')
+		# while [[ $Node1Jobs -ge 1  && $Node2Jobs -ge 1 && $Node3Jobs -ge 1 && $Node4Jobs -ge 1 ]]; do
+		while [[ $Node2Jobs -ge 1 && $Node4Jobs -ge 1 && $Node6Jobs -ge 1 && $Node11Jobs -ge 1 ]]; do
 			#while [ [ $Node1Jobs -ge 1 ] && [ $Node2Jobs -ge 1 ] && [ $Node3Jobs -ge 1 ] && [ $Node4Jobs -ge 1 ] && [ $Node5Jobs -ge 1 ] ]; do
 			sleep 10
 			printf "."
-			Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
+			# Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
 			Node2Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
-			Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
+			# Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
 			Node4Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
 			#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
+			Node6Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace06' | sed 's/ //g')
+			Node11Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace11' | sed 's/ //g')
 		done
 		ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/merge_gff;
 		echo $Strain;
@@ -1190,21 +1323,25 @@ Results were as follows:
 		Aug_Gff=$(ls gene_pred/augustus/*/"$Strain"/"$Strain"_augustus_preds.gtf | grep -v 'old');
 		echo $Orf_Gff;
 		echo $Aug_Gff;
-		if [[ $Node1Jobs -lt 1 ]]; then
-			qsub -l h=blacklace01.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		elif [[ $Node2Jobs -lt 1 ]]; then
+		# if [[ $Node1Jobs -lt 1 ]]; then
+		# 	qsub -l h=blacklace01.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		# elif [[ $Node2Jobs -lt 1 ]]; then
+		if [[ $Node2Jobs -lt 1 ]]; then
 			qsub -l h=blacklace02.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		elif [[ $Node3Jobs -lt 1 ]]; then
-			qsub -l h=blacklace03.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		# elif [[ $Node3Jobs -lt 1 ]]; then
+		# 	qsub -l h=blacklace03.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
 		elif [[ $Node4Jobs -lt 1 ]]; then
 			qsub -l h=blacklace04.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
 			# elif [[ $Node5Jobs -lt 1 ]]; then
 			# qsub -l h=blacklace05.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		elif [[ $Node6Jobs -lt 1 ]]; then
+			qsub -l h=blacklace06.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
+		elif [[ $Node11Jobs -lt 1 ]]; then
+			qsub -l h=blacklace11.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
 		else
 			echo "Error something has jumped the queue"
 		fi
 	done
-
 ```
 
 # 4. Genomic analysis
@@ -1272,138 +1409,200 @@ The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md
 
 
+## 5. BLAST Searches
+
 ## 5.1 Identifying SIX genes
 
-Genes thought to be associated with pathogenicity were identified in
+Protein sequence of previously characterised SIX genes used to BLAST against
+assemlies.
 
-<!--
-
-#Genomic analysis
-
-
-The first analysis was based upon BLAST searches for genes known to be involved in toxin production
-
-#BLAST Searches
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast/
-	Query=analysis/blast_homology/CDC_genes/A.alternata_CDC_genes.fa
-	BestAss675=assembly/velvet/A.alternata_ssp._arborescens/675/A.alternata_ssp._arborescens_675_69/sorted_contigs.fa
-	BestAss970013=assembly/velvet/A.alternata_ssp._arborescens/97.0013/A.alternata_ssp._arborescens_97.0013_59/sorted_contigs.fa
-	BestAss970016=assembly/velvet/A.alternata_ssp._arborescens/97.0016/A.alternata_ssp._arborescens_97.0016_77/sorted_contigs.fa
-	BestAss650=assembly/velvet/A.alternata_ssp._gaisen/650/A.alternata_ssp._gaisen_650_67/sorted_contigs.fa
-	BestAss1082=assembly/velvet/A.alternata_ssp._tenuissima/1082/A.alternata_ssp._tenuissima_1082_49/sorted_contigs.fa
-	BestAss1164=assembly/velvet/A.alternata_ssp._tenuissima/1164/A.alternata_ssp._tenuissima_1164_67/sorted_contigs.fa
-	BestAss1166=assembly/velvet/A.alternata_ssp._tenuissima/1166/A.alternata_ssp._tenuissima_1166_43/sorted_contigs.fa
-	BestAss1177=assembly/velvet/A.alternata_ssp._tenuissima/1177/A.alternata_ssp._tenuissima_1177_63/sorted_contigs.fa
-	BestAss24350=assembly/velvet/A.alternata_ssp._tenuissima/24350/A.alternata_ssp._tenuissima_24350_63/sorted_contigs.fa
-	BestAss635=assembly/velvet/A.alternata_ssp._tenuissima/635/A.alternata_ssp._tenuissima_635_59/sorted_contigs.fa
-	BestAss648=assembly/velvet/A.alternata_ssp._tenuissima/648/A.alternata_ssp._tenuissima_648_45/sorted_contigs.fa
-	BestAss743=assembly/velvet/A.alternata_ssp._tenuissima/743/A.alternata_ssp._tenuissima_743_69/sorted_contigs.fa
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss675
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss970013
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss970016
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss650
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss1082
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss1164
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss1166
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss1177
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss24350
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss635
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss648
-	qsub $ProgDir/blast_pipe.sh $Query dna $BestAss743
-```
-BLAST search results were summarised into a presence/absence table
+	‘grep -A1 '>' analysis/blast_homology/six_genes/six-appended.fa | cut -d '|' -f5 > analysis/blast_homology/six_genes/six-appended_parsed.fa
+	vi analysis/blast_homology/six_genes/six-appended_parsed_tmp.fa # Removed initial ' ' from line and added '>'
+	sed 's/\s/_/g' analysis/blast_homology/six_genes/six-appended_parsed_tmp.fa > analysis/blast_homology/six_genes/six-appended_parsed.fa
 
-The presence /absence table determines presence if a hit is present and the alignment represents >50% of the query sequence.
-This thresholding means that some hits have not been summarised including AMT11, AMT15 and ALT1.
-```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast/
-	InFiles=$(ls analysis/blast_homology/A.alternata_ssp._*/*/*_A.alternata_CDC_genes.fa_homologs.csv | paste -s -d ' ')
-	echo $InFiles
-	$ProgDir/blast_differentials.pl $InFiles
-	mv *.csv analysis/blast_homology/CDC_genes/.
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/125/125_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/55/55_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/A23/A23_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/A28/A28_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/D2/D2_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/Fus2/Fus2_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/HB17/HB17_assembly.41/sorted_contigs.fa
+	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/PG/PG_assembly.41/sorted_contigs.fa
+
 ```
 
+## 5.2 Identifying PHIbase homologs
 
+The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 
-
-
-
-#CDC Assembly
-
-Raw reads were aligned against assembled genomes to identify contigs that were unique to a isolate or clade
 ```bash
-	for Pathz in $(ls -d qc_dna/paired/A.alternata_ssp._*/*); do  
-		Strain=$(echo $Pathz | cut -d '/' -f4)
-		echo "using reads for $Strain"
-		ProgPath=/home/armita/git_repos/emr_repos/tools/pathogen/lineage_specific_regions
-		F_IN=$(ls $Pathz/F/*.fastq.gz)
-		R_IN=$(ls $Pathz/R/*.fastq.gz)
-		for Assemblyz in $(ls repeat_masked/A.alternata_ssp._*/*/*/*_contigs_unmasked.fa); do
-			basename $Assemblyz
-			qsub "$ProgPath"/bowtie2_alignment_pipe.sh $F_IN $R_IN $Assemblyz
-		done
+	for Assembly in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+		qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/PHIbase/PHI_36_accessions.fa protein $Assembly
 	done
 ```
-A summary file was made from the alignment logs.
-The percentage of reads aligning to each set of assembled contigs was determined.
+
+following blasting PHIbase to the genome, the hits were filtered by effect on
+virulence.
+
+First the a tab seperated file was made in the clusters core directory containing
+PHIbase. These commands were run as part of previous projects but have been
+included here for completeness.
 
 ```bash
-	SummaryFile=analysis/ls_contigs/alignment_summaries.txt
-	printf "" > "$SummaryFile"
-	for OUTPUT in $(ls bowtie2_alignment_pipe.sh.e*); do
-		ID=$(echo $OUTPUT | rev | cut -d 'e' -f1 | rev | less);
-		cat bowtie2_alignment_pipe.sh.o"$ID" | grep -E "Trimmed .* reads .*/F/|Output files: " | sed -e 's/.*\/F\///g' | cut -f1 -d ')' | cut -f2 -d '"' >> "$SummaryFile";
-		cat $OUTPUT >> "$SummaryFile";
-		printf "\n" >> "$SummaryFile";
-	done
-	cat $SummaryFile | grep ' overall alignment rate' | cut -f1 -d ' ' | less
-```
-These are the reads percentages reported by bowtie but do not actually reflect the percentage unaligned reads where neither pair matched.
-
-These were identified using SAM FLAGS to extract unaligned pairs.
-```bash
-	for Pathz in $(ls assembly/ls_contigs/A.alternata_ssp._*/*/vs_*/*_sorted.bam); do  
-		OutFileF=$(echo $Pathz | sed 's/.bam/_unaligned_F.txt/g')
-		OutFileR=$(echo $Pathz | sed 's/.bam/_unaligned_R.txt/g')
-		OutFileSum=$(echo $Pathz | sed 's/.bam/_sum.txt/g')
-		samtools view -f 77 "$Pathz" | cut -f1 > $OutFileF
-		samtools view -f 141 "$Pathz" | cut -f1 > $OutFileR
-		NoReads=$(samtools view -f 1 "$Pathz" | wc -l)
-		NoReadsF=$(cat "$OutFileF" | wc -l)
-		NoReadsR=$(cat "$OutFileR" | wc -l)
-		printf "File\tNo. paired reads\tF reads unaligned\tR reads unaligned\n" > "$OutFileSum"
-		printf "$Pathz\t$NoReads\t$NoReadsF\t$NoReadsR\n" >> "$OutFileSum"
-	done
-
-	for File in $(ls assembly/ls_contigs/A.alternata_ssp._*/*/vs_*/*_sum.txt); do
-		cat $File | tail -n+2;
-	done > analysis/ls_contigs/assembly_summaries2.txt
+	PhibaseDir=/home/groups/harrisonlab/phibase/v3.8
+	printf "header\n" > $PhibaseDir/PHI_headers.csv
+	cat $PhibaseDir/PHI_accessions.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/\r//g' >> $PhibaseDir/PHI_headers.csv
+	printf "effect\n" > .$PhibaseDir/PHI_virulence.csv
+	cat $PhibaseDir/PHI_accessions.fa | grep '>' | cut -f1 | sed 's/>//g' | rev | cut -f1 -d '|' | rev  >> $PhibaseDir/PHI_virulence.csv
 ```
 
-The number of reads aligning per bp of assembly was determined. Typical alignment values were 0.20 reads per bp. Contigs were detemined as unique to that alignment if they contained an average of 0 reads per bp.
-The number of bp unique to each assembly were identified.
 
 ```bash
-	mkdir -p analysis/ls_contigs
-	Outfile=analysis/ls_contigs/ls_contig_size.csv
-	printf "Reads" > $Outfile
-	for Genome in $(ls -d assembly/ls_contigs/A.alternata_ssp._arborescens/675/vs_A.alternata_ssp._*); do
-		NameG=$(basename "$Genome" | sed 's/vs_//g' | sed 's/_repmask_contigs//g')
-		printf "\t$NameG" >> $Outfile
-	done
-	printf "\n" >> $Outfile
-	for Reads in $(ls -d assembly/ls_contigs/A.alternata_ssp._*/*); do
-		NameR=$(basename "$Reads")
-		printf "$NameR" >> $Outfile
-		for Genome in $(ls -d $Reads/*); do
-			printf "\t" >> $Outfile
-			cat $Genome/*_sorted_indexstats_coverage.csv | head -n-1 | grep -E -w "0.00$" | cut -f2 | awk '{s+=$1} END {printf s}' >> $Outfile
-		done
-		printf "\n" >> $Outfile
+	PhibaseDir=/home/groups/harrisonlab/phibase/v3.8
+	PhibaseHeaders=$PhibaseDir/PHI_headers.csv
+	PhibaseVirulence=$PhibaseDir/PHI_virulence.csv
+	for BlastCSV in $(ls analysis/blast_homology/F*/*/*_PHI_36_accessions.fa_homologs.csv); do
+		Strain=$(echo $BlastCSV | rev | cut -f2 -d'/' | rev)
+		echo "$Strain"
+		OutDir=$(dirname $BlastCSV)
+		paste -d '\t' $PhibaseHeaders $PhibaseVirulence $BlastCSV | cut -f-3,1185- > $OutDir/"$Strain"_PHIbase_virulence.csv
+		cat $OutDir/"$Strain"_PHIbase_virulence.csv | grep 'NODE_' | cut -f2 | sort | uniq -c | tee $OutDir/"$Strain"_PHIbase_virulence.txt
 	done
 ```
-This did not give clear results.
+results were:
 
-Contigs that had no reads align to them were identified.
- -->
+```
+	125
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      1 Increased virulence (Hypervirulence)
+	     15 Lethal
+	     66 Loss of pathogenicity
+	     14 Mixed outcome
+	      2 reduced virulence
+	    131 Reduced virulence
+	     87 Unaffected pathogenicity
+	55
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      1 Increased virulence (Hypervirulence)
+	     14 Lethal
+	     58 Loss of pathogenicity
+	     12 Mixed outcome
+	      2 reduced virulence
+	    121 Reduced virulence
+	     83 Unaffected pathogenicity
+	A23
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      1 Increased virulence (Hypervirulence)
+	     14 Lethal
+	     60 Loss of pathogenicity
+	     12 Mixed outcome
+	      2 reduced virulence
+	    123 Reduced virulence
+	     79 Unaffected pathogenicity
+	A28
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      2 Increased virulence (Hypervirulence)
+	     15 Lethal
+	     58 Loss of pathogenicity
+	     13 Mixed outcome
+	      2 reduced virulence
+	    125 Reduced virulence
+	     79 Unaffected pathogenicity
+	D2
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      2 Increased virulence (Hypervirulence)
+	     16 Lethal
+	     62 Loss of pathogenicity
+	     12 Mixed outcome
+	      2 reduced virulence
+	    123 Reduced virulence
+	     81 Unaffected pathogenicity
+	Fus2
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      1 Increased virulence (Hypervirulence)
+	     15 Lethal
+	     59 Loss of pathogenicity
+	     12 Mixed outcome
+	      2 reduced virulence
+	    120 Reduced virulence
+	     79 Unaffected pathogenicity
+	HB17
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      1 Increased virulence (Hypervirulence)
+	     14 Lethal
+	     60 Loss of pathogenicity
+	     13 Mixed outcome
+	      2 reduced virulence
+	    123 Reduced virulence
+	     84 Unaffected pathogenicity
+	PG
+	      3 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      2 Increased virulence (Hypervirulence)
+	     15 Lethal
+	     61 Loss of pathogenicity
+	     13 Mixed outcome
+	      2 reduced virulence
+	    126 Reduced virulence
+	     78 Unaffected pathogenicity
+	N139
+	      4 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      2 Increased virulence (Hypervirulence)
+	     16 Lethal
+	     72 Loss of pathogenicity
+	     13 Mixed outcome
+	      2 reduced virulence
+	    149 Reduced virulence
+	     93 Unaffected pathogenicity
+	PG18
+	      4 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      2 Increased virulence (Hypervirulence)
+	     17 Lethal
+	     72 Loss of pathogenicity
+	     14 Mixed outcome
+	      2 reduced virulence
+	    153 Reduced virulence
+	     97 Unaffected pathogenicity
+	PG3
+	      4 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      2 Increased virulence (Hypervirulence)
+	     17 Lethal
+	     65 Loss of pathogenicity
+	     13 Mixed outcome
+	      2 reduced virulence
+	    139 Reduced virulence
+	     93 Unaffected pathogenicity
+	A8
+	      4 Chemistry target
+	      1 Effector (plant avirulence determinant)
+	      4 Increased virulence (Hypervirulence)
+	     15 Lethal
+	     71 Loss of pathogenicity
+	     14 Mixed outcome
+	      2 reduced virulence
+	    152 Reduced virulence
+	     82 Unaffected pathogenicity
+
+```
+
+The analysis was also performed by blasting the predicted proteins against the
+PHIbase database:
+
+The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
+
+```bash
+	for Proteins in $(ls gene_pred/augustus/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa); do
+		qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh $Proteins protein ../../phibase/v3.8/PHI_accessions.fa
+	done
+```

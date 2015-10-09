@@ -159,3 +159,49 @@ number of unique groups of inparalogs
 ```
 
 ``` -->
+
+# Downstream analysis
+
+Particular orthogroups were analysed for expansion in isolates.
+
+This section details the commands used and the results observed.
+
+### SIX9
+
+FoL 4287 gene FOXG_14223 was identified as SIX9. This gene was observed to be a
+member of orthogroup 240:
+
+```bash
+  Orthogroups=analysis/orthology/orthomcl/FoC_125_55_A23_A28_D2_Fus2_PG_FoL_4287/FoC_125_55_A23_A28_D2_Fus2_PG_FoL_4287_orthogroups.txt
+  cat $Orthogroups | grep 'FOXG_14223'
+```  
+orthogroup 240 was noted to be a large gene family. The following number of
+genes were associated with the following organisms:
+
+```bash
+  cat $Orthogroups | grep -w 'orthogroup240' | cut -f2 -d':' | sed 's/ /\n/g' | sort | less
+  cat $Orthogroups | grep -w 'orthogroup240' | cut -f2 -d':' | sed 's/ /\n/g' | cut -f1 -d '|' | sort | uniq -c
+```
+output -
+```
+  8 125
+  12 4287
+  5 55
+  6 A23
+  2 A28
+  2 D2
+  5 Fus2
+  3 PG
+```
+Pathogens
+  8 125
+  6 A23
+  5 Fus2
+non-pathogenic
+  2 A28
+  2 D2
+  3 PG
+Intermediate
+  5 55
+Fol
+  12 4287 # two of these represent alternatively spliced transcripts (10)

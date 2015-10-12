@@ -205,3 +205,51 @@ Intermediate
   5 55
 Fol
   12 4287 # two of these represent alternatively spliced transcripts (10)
+
+
+### SIX7
+
+Fus2 gene FUS2_g10785 was identified as SIX7. This gene was observed to be a
+member of orthogroup 6993:
+
+```bash
+  Orthogroups=analysis/orthology/orthomcl/FoC_125_55_A23_A28_D2_Fus2_PG_FoL_4287/FoC_125_55_A23_A28_D2_Fus2_PG_FoL_4287_orthogroups.txt
+  cat $Orthogroups | grep 'Fus2|g10785'
+```  
+orthogroup 6993 was noted to be expanded in Fus2, containing two genes.
+The following number of genes were associated with the following organisms:
+
+```bash
+  cat $Orthogroups | grep -w 'orthogroup6993' | cut -f2 -d':' | sed 's/ /\n/g' | sort | less
+  cat $Orthogroups | grep -w 'orthogroup6993' | cut -f2 -d':' | sed 's/ /\n/g' | cut -f1 -d '|' | sort | uniq -c
+```
+
+### RxLR_463
+
+Fus2 gene FUS2_g10608 was identified as RxLR_463. This gene was observed to be a
+member of orthogroup 453:
+
+```bash
+  Orthogroups=analysis/orthology/orthomcl/FoC_125_55_A23_A28_D2_Fus2_PG_FoL_4287/FoC_125_55_A23_A28_D2_Fus2_PG_FoL_4287_orthogroups.txt
+  cat $Orthogroups | grep 'Fus2|g10608'
+```  
+orthogroup 453 was noted to be a large gene family. The following number of
+genes were associated with the following organisms:
+
+```bash
+  cat $Orthogroups | grep -w 'orthogroup453' | cut -f2 -d':' | sed 's/ /\n/g' | sort | less
+  cat $Orthogroups | grep -w 'orthogroup453' | cut -f2 -d':' | sed 's/ /\n/g' | cut -f1 -d '|' | sort | uniq -c
+```
+
+Pathogens
+  4 125
+  4 A23
+  4 Fus2
+non-pathogenic
+  4 A28
+  2 D2
+  2 PG
+Intermediate
+  4 55
+Fol
+  3 4287

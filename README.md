@@ -389,12 +389,12 @@ A gene model trained for F.oxysporum fsp. cepae was used to describe the structu
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
 	mkdir -p qc_rna/concatenated
-	RnaFiles=$(ls qc_rna/paired/._*/*/*/*.fastq.gz | paste -s -d ' ')
-	RnaF=qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq
-	RnaR=qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq
+	RnaFiles=$(ls qc_rna/paired/F.oxysporum_fsp_cepae/*/*/*_trim.fq.gz | paste -s -d ' ')
+	RnaF=qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq.gz
+	RnaR=qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq.gz
 	mkdir -p qc_rna/concatenated/F.oxysporum/Fus2
-	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_appended.fa.gz
-	cat $RnaF $RnaR | gzip -fc > $ConcatRna
+	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_CzapekDox_GlucosePeptone_PDA_PDB_appended.fa.gz
+	cat $RnaF $RnaR $RnaFiles > $ConcatRna
 	GeneModel=fusarium
 	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
 		Organism=$(echo $Genome | rev | cut -f4 -d'/' | rev)
@@ -404,6 +404,64 @@ A gene model trained for F.oxysporum fsp. cepae was used to describe the structu
 		OutDir=gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/$Organism/$Strain
 		qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel $OutDir
 	done
+```
+
+```bash
+for File in $(ls gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.*/*/*_augustus_preds.aa); do
+	echo $File; cat $File | grep '>' | wc -l;
+done
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/125/125_augustus_preds.aa
+# 17261
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/55/55_augustus_preds.aa
+# 17013
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/A23/A23_augustus_preds.aa
+# 17101
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/A28/A28_augustus_preds.aa
+# 17292
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/D2/D2_augustus_preds.aa
+# 16727
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.aa
+# 16988
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/HB17/HB17_augustus_preds.aa
+# 17077
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/PG/PG_augustus_preds.aa
+# 16961
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_narcissi/N139/N139_augustus_preds.aa
+# 21539
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_pisi/PG18/PG18_augustus_preds.aa
+# 21618
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_pisi/PG3/PG3_augustus_preds.aa
+# 18077
+# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.proliferatum/A8/A8_augustus_preds.aa
+# 20681
+for File in $(ls gene_pred/augustus/Model-fusarium_sp./*/*/*_EMR_singlestrand_aug_out.aa); do
+	echo $File;
+	cat $File | grep '>' | wc -l;
+done
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/125/125_EMR_singlestrand_aug_out.aa
+# 18650
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/55/55_EMR_singlestrand_aug_out.aa
+# 18293
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/A23/A23_EMR_singlestrand_aug_out.aa
+# 18363
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/A28/A28_EMR_singlestrand_aug_out.aa
+# 18730
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/D2/D2_EMR_singlestrand_aug_out.aa
+# 18432
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/Fus2/Fus2_EMR_singlestrand_aug_out.aa
+# 18108
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/HB17/HB17_EMR_singlestrand_aug_out.aa
+# 18282
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/PG/PG_EMR_singlestrand_aug_out.aa
+# 18431
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_narcissi/N139/N139_EMR_singlestrand_aug_out.aa
+# 23374
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_pisi/PG18/PG18_EMR_singlestrand_aug_out.aa
+# 23346
+# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_pisi/PG3/PG3_EMR_singlestrand_aug_out.aa
+# 19906
+# gene_pred/augustus/Model-fusarium_sp./F.proliferatum/A8/A8_EMR_singlestrand_aug_out.aa
+# 22116
 ```
 
 ## ORF finder

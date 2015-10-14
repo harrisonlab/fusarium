@@ -140,6 +140,27 @@ Particular orthogroups were analysed for expansion in isolates.
 
 This section details the commands used and the results observed.
 
+```bash
+  less gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interpro.gff3
+  less gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
+  less -S $PathOrthogroupsFus2Anno
+  PathgeneDir=analysis/orthology/orthomcl/FoC_path_vs_non_path/path_unique
+  Orthogroups=analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt
+  mkdir -p $PathgeneDir
+  PathOrthogroupsFus2=$PathgeneDir/Fus2_pathgene_orthogroups.txt
+  cat $Orthogroups | grep -v 'NonP' | grep 'Fus2' | grep 'A23' | grep '125' | wc -l
+  cat $Orthogroups | grep -v 'NonP' | grep 'Fus2' | grep 'A23' | grep '125' | grep -P -o 'Fus2_g.*?\.t.' | sed 's/Fus2_//g' | sed 's/\.t.//g' > $PathOrthogroupsFus2
+  PathOrthogroupsFus2Gff=$PathgeneDir/Fus2_pathgene_orthogroups.gff
+  Fus2Genes=gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.gtf
+  Fus2Annotations=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
+  PathOrthogroupsFus2Gff=$PathgeneDir/Fus2_pathgene_orthogroups.gff
+  PathOrthogroupsFus2Anno=$PathgeneDir/Fus2_pathgene_orthogroup_annotation.tsv
+  cat $Fus2Genes | grep -w -f $PathOrthogroupsFus2 > $PathOrthogroupsFus2Gff
+  cat $Fus2Annotations | grep -w -f $PathOrthogroupsFus2 > $PathOrthogroupsFus2Anno
+```
+
+
+
 ### Pathogenic Fusarium unique gene families
 
 F. oxysporum Fus2 secreted proteins were parsed to the same format as the gene

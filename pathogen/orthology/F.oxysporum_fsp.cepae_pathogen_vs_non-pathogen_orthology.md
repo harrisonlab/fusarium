@@ -133,3 +133,51 @@ number of unique groups of inparalogs
   [1] 185
   [1] 36
 ```
+
+# Downstream analysis
+
+Particular orthogroups were analysed for expansion in isolates.
+
+This section details the commands used and the results observed.
+
+### Pathogenic Fusarium unique gene families
+
+F. oxysporum Fus2 secreted proteins were parsed to the same format as the gene
+names used in the analysis:
+
+```bash
+  SigP_Fus2=analysis/sigP_rxlr/F.oxysporum_fsp_cepae/Fus2/Fus2_sigP_RxLR.fa
+  SigPDir=analysis/orthology/orthomcl/FoC_path_vs_non_path/SigP
+  Orthogroups=analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt
+  SigP_ID_Fus2=$SigPDir/Fus2_aug_SigP_IDs.txt
+  mkdir -p $SigPDir
+  cat $SigP_Fus2 | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' | sed 's/g/Path|Fus2_g/g' > $SigP_ID_Fus2
+```
+
+Ortholog groups containing RxLR proteins were identified using the following
+commands:
+```bash
+  SigP_Orthogroup_Path=$SigPDir/Path_SigP_Orthogroups.txt
+  cat $Orthogroups | grep -w -f $SigP_ID_Fus2 > $SigP_Orthogroup_Path
+  RxLR_Orthogroup_hits_10300=$RxLR_Dir/Pcac_RxLR_Orthogroups_hits.txt
+  cat $Orthogroups | grep -o -w -f $SigP_ID_Fus2 > $RxLR_Orthogroup_hits_10300
+```
+
+All 61 predicted RxLRs were found to have orthologs in other taxa. The 61 RxLRs
+were distributed through 41 orthogroups.
+
+Orthogroup 8 was a large gene family of 298 genes. This included 46 P. cactorum
+gene including 11 P. cactorum RxLRs.
+```bash
+  cat $Orthogroups | grep -w 'orthogroup8' | sed 's/ /\n/g' | sort | wc -l
+  Orthogroup8_Pcac_ID=$RxLR_Dir/Pcac_RxLR_Orthogroups8_IDs.txt
+  cat $Orthogroups | grep -w 'orthogroup8' | sed 's/ /\n/g' | sort | grep 'Pcac' > $Orthogroup8_Pcac_ID.txt
+  cat $Orthogroups | grep -w 'orthogroup8' | sed 's/ /\n/g' | sort | cut -f1 -d'|' | uniq -c
+```
+```
+  1 orthogroup8:
+  46 Pcac
+  100 Pinf
+  73 Pram
+  74 Psoj
+```

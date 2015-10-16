@@ -190,6 +190,10 @@ The interproscan annotations were studied.
 ```bash
   cat $PathOrthogroupsFus2Anno | grep -i 'heterokaryon' | cut -f1 | sort | uniq | wc -l
   cat $Fus2Annotations | grep -i 'heterokaryon' | cut -f1 | sort | uniq | wc -l
+  CommonOrthogroupsFus2=$PathgeneDir/Fus2_common_orthogroups.gff
+  cat $Orthogroups | grep 'Fus2' | grep 'A23' | grep '125' | grep 'A28' | grep 'D2' | grep 'PG' | grep -P -o 'Fus2_g.*?\.t.' | sed 's/Fus2_//g' | sed 's/\.t.//g' > $CommonOrthogroupsFus2
+  CommonOrthogroupsFus2Anno=$PathgeneDir/Fus2_common_orthogroup_annotation.tsv
+  cat $Fus2Annotations | grep -w -f $CommonOrthogroupsFus2 > $CommonOrthogroupsFus2Anno
 ```
 
 

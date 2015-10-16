@@ -183,16 +183,38 @@ were extracted for these genes.
   cat $Fus2Annotations | grep -w -f $PathOrthogroupsFus2 > $PathOrthogroupsFus2Anno
 ```
 
+The non-pathogen A28 was used to investigate non-pathogen unique genes.
+Non-pathogens contain 28 orthogroups, within which the non-pathogen A28 has 34
+genes.
+
+```bash
+  NonPathgeneDir=analysis/orthology/orthomcl/FoC_path_vs_non_path/common_genes
+  NonPathOrthogroupsA28=$NonPathgeneDir/A28_common_orthogroup.txt
+  NonPathOrthogroupsA28Anno=$NonPathgeneDir/A28_common_orthogroup_annotation.tsv
+  mkdir -p $NonPathgeneDir
+  cat $Orthogroups | grep -v 'Path' | grep 'A28' | grep 'D2' | grep 'PG' | grep -P -o 'A28_g.*?\.t.' | sed 's/A28_//g' | sed 's/\.t.//g' > $NonPathOrthogroupsA28
+  NonPathOrthogroupsA28Gff=$PathgeneDir/A28_nonpathgene_orthogroups.gff
+  A28Genes=gene_pred/augustus/F.oxysporum_fsp_cepae/A28/A28_augustus_preds.gtf
+  A28Annotations=gene_pred/interproscan/F.oxysporum_fsp_cepae/A28/A28_interproscan.tsv
+  NonPathOrthogroupsA28Gff=$NonPathgeneDir/A28_nonpathgene_orthogroups.gff
+  NonPathOrthogroupsA28Anno=$NonPathgeneDir/A28_nonpathgene_orthogroup_annotation.tsv
+  cat $A28Genes | grep -w -f $NonPathOrthogroupsA28 > $NonPathOrthogroupsA28Gff
+  cat $A28Annotations | grep -w -f $NonPathOrthogroupsA28 > $NonPathOrthogroupsA28Anno
+```
+
+
 The interproscan annotations were studied.
- * Two heterokaryon incompatibility loci were observed in these pathogen unique genes.
+ * Two heterokaryon incompatibility loci were observed in pathogen unique genes.
  * 130 genes were identified in Fus2 with a Heterokaron annotation
+ * Two heterokaryon incompatibility loci were found in non-pathogen specific genes.
 
 ```bash
   cat $PathOrthogroupsFus2Anno | grep -i 'heterokaryon' | cut -f1 | sort | uniq | wc -l
   cat $Fus2Annotations | grep -i 'heterokaryon' | cut -f1 | sort | uniq | wc -l
   CommonOrthogroupsFus2=$PathgeneDir/Fus2_common_orthogroups.gff
   cat $Orthogroups | grep 'Fus2' | grep 'A23' | grep '125' | grep 'A28' | grep 'D2' | grep 'PG' | grep -P -o 'Fus2_g.*?\.t.' | sed 's/Fus2_//g' | sed 's/\.t.//g' > $CommonOrthogroupsFus2
-  CommonOrthogroupsFus2Anno=$PathgeneDir/Fus2_common_orthogroup_annotation.tsv
+  CommongeneDir=analysis/orthology/orthomcl/FoC_path_vs_non_path/common_genes
+  CommonOrthogroupsFus2Anno=$CommongeneDir/Fus2_common_orthogroup_annotation.tsv
   cat $Fus2Annotations | grep -w -f $CommonOrthogroupsFus2 > $CommonOrthogroupsFus2Anno
 ```
 

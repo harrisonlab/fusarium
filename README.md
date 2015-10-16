@@ -434,6 +434,8 @@ done
 # 18077
 # gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.proliferatum/A8/A8_augustus_preds.aa
 # 20681
+
+
 for File in $(ls gene_pred/augustus/Model-fusarium_sp./*/*/*_EMR_singlestrand_aug_out.aa); do
 	echo $File;
 	cat $File | grep '>' | wc -l;
@@ -1475,19 +1477,12 @@ Protein sequence of previously characterised SIX genes used to BLAST against
 assemlies.
 
 ```bash
-	‘grep -A1 '>' analysis/blast_homology/six_genes/six-appended.fa | cut -d '|' -f5 > analysis/blast_homology/six_genes/six-appended_parsed.fa
-	vi analysis/blast_homology/six_genes/six-appended_parsed_tmp.fa # Removed initial ' ' from line and added '>'
-	sed 's/\s/_/g' analysis/blast_homology/six_genes/six-appended_parsed_tmp.fa > analysis/blast_homology/six_genes/six-appended_parsed.fa
-
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/125/125_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/55/55_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/A23/A23_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/A28/A28_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/D2/D2_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/Fus2/Fus2_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/HB17/HB17_assembly.41/sorted_contigs.fa
-	qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/six_genes/six-appended_parsed.fa dna assembly/velvet/F.oxysporum_fsp_cepae/PG/PG_assembly.41/sorted_contigs.fa
-
+	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+	Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+		echo $Assembly
+		qsub $ProgDir/blast_pipe.sh $Query dna $Query
+	done
 ```
 
 ## 5.2 Identifying PHIbase homologs

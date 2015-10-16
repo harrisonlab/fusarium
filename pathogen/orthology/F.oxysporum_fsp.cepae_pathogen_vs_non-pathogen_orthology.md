@@ -140,6 +140,17 @@ Particular orthogroups were analysed for expansion in isolates.
 
 This section details the commands used and the results observed.
 
+
+
+### Pathogenic Fusarium unique gene families
+
+Of the 7107 orthogroups identified in the analysis (not including singleton
+genes - found in a single pathogen without paralogs) 88 orthogroups were only
+found in pathogic isolates. Within these 88 orthogroups, 70 were represented by
+genes from each of the three pathogens. This compares to 86 orthogroups only
+found in non-pathogenic isolates, within which only 28 orthogroups were common
+to each of the non-pathogens.
+
 ```bash
   less gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interpro.gff3
   less gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
@@ -148,7 +159,20 @@ This section details the commands used and the results observed.
   Orthogroups=analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt
   mkdir -p $PathgeneDir
   PathOrthogroupsFus2=$PathgeneDir/Fus2_pathgene_orthogroups.txt
+  cat $Orthogroups | grep -v 'NonP' | wc -l
+  cat $Orthogroups | grep -v 'Path' | wc -l
   cat $Orthogroups | grep -v 'NonP' | grep 'Fus2' | grep 'A23' | grep '125' | wc -l
+  cat $Orthogroups | grep -v 'Path' | grep 'A28' | grep 'D2' | grep 'PG' | wc -l
+```
+
+Fus2 predicted genes were used to investigate the 70 pathogen-uniqu orthogroups.
+77 Fus2 genes were contained within these 70 orthogroups (orthogroups may
+contain paralogs).
+
+Gff tracks were extracted for the 77 genes. Furthermore interproscan annotations
+were extracted for these genes.
+
+```bash  
   cat $Orthogroups | grep -v 'NonP' | grep 'Fus2' | grep 'A23' | grep '125' | grep -P -o 'Fus2_g.*?\.t.' | sed 's/Fus2_//g' | sed 's/\.t.//g' > $PathOrthogroupsFus2
   PathOrthogroupsFus2Gff=$PathgeneDir/Fus2_pathgene_orthogroups.gff
   Fus2Genes=gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.gtf
@@ -159,9 +183,18 @@ This section details the commands used and the results observed.
   cat $Fus2Annotations | grep -w -f $PathOrthogroupsFus2 > $PathOrthogroupsFus2Anno
 ```
 
+The interproscan annotations were studied.
+ * Two heterokaryon incompatibility loci were observed in these pathogen unique genes.
+ * 130 genes were identified in Fus2 with a Heterokaron annotation
+
+```bash
+  cat $PathOrthogroupsFus2Anno | grep -i 'heterokaryon' | cut -f1 | sort | uniq | wc -l
+  cat $Fus2Annotations | grep -i 'heterokaryon' | cut -f1 | sort | uniq | wc -l
+```
 
 
-### Pathogenic Fusarium unique gene families
+
+### Secreted RxLR like proteins
 
 F. oxysporum Fus2 secreted proteins were parsed to the same format as the gene
 names used in the analysis:

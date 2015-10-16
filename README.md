@@ -98,7 +98,7 @@ sequences and remove poor quality data. This was done with fastq-mcf
 ```bash
 	for StrainPath in $(ls -d raw_dna/paired/*/* | grep -v 'cepae'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
-		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/illumina_full_adapters.fa
+		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
 		ReadsF=$(ls $StrainPath/F/*.fastq*)
 		ReadsR=$(ls $StrainPath/R/*.fastq*)
 		echo $ReadsF
@@ -1481,8 +1481,20 @@ assemlies.
 	Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
 		echo $Assembly
-		qsub $ProgDir/blast_pipe.sh $Query dna $Query
+		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
 	done
+```
+
+Once blast searches had completed, the BLAST hits were converted to GFF
+annotations:
+
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+	BlastHits=analysis/blast_homology/FeChina/dip_spades/dip_spades_six-appended_parsed.fa_homologs.csv
+	HitsGff=analysis/blast_homology/FeChina/dip_spades/dip_spades_six-appended_parsed.fa_homologs.gff
+	Column2=SIX_homolog
+	NumHits=5
+	$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 ```
 
 ## 5.2 Identifying PHIbase homologs

@@ -218,7 +218,30 @@ The interproscan annotations were studied.
   cat $Fus2Annotations | grep -w -f $CommonOrthogroupsFus2 > $CommonOrthogroupsFus2Anno
 ```
 
+```bash
+  cat $CommonOrthogroupsFus2Anno | grep -i "heterokaryon" | wc -l
+  HetDir=analysis/orthology/orthomcl/FoC_path_vs_non_path/het_loci
+  mkdir -p $HetDir
+  # Fus2HetGenes=$HetDir/Fus2HetGenes.txt
+  cat $Fus2Annotations | grep -i 'heterokaryon' | cut -f1 | sort | uniq | sed 's/\.t.//g' | sed 's/ //g' > $HetDir/Fus2HetGenes.txt
+  cat $HetDir/Fus2HetGenes.txt | sed 's/g/Fus2_g/g' > $HetDir/Fus2HetGenes_Ortho.txt
+  cat $Orthogroups | grep -w -f $HetDir/Fus2HetGenes_Ortho.txt > $HetDir/Fus2HetOrthogroups.txt
+  # cat $Fus2Annotations | grep -i 'heterokaryon' | cut -f1 | sort | uniq | sed 's/g/Fus2_g/g' > $Fus2HetGenes
+  cat $Fus2Genes | grep -w -f $Fus2HetGenes > $HetDir/Fus2HetGenes.gff
+```
 
+The following was noted from studying ortholog groups:
+ * Within the Fus2 genome, Het loci are dispesed on long and short contigs ($HetDir/Fus2HetGenes.gff viewed in geneious)
+ * One of these Het loci is part of the lineage specific regions of the 2nd largest contig.
+ * Within the Fus2 core genes, 63 have a heterokaryon incompatbility function.
+
+
+```bash
+  cat $Fus2Annotations | grep -i 'HMG' | cut -f1 | sort | uniq | wc -l
+```
+
+The annotations of HMG box domains were studied in the genome:
+ * 20 Fus2 proteins were identified containing HMG domains.
 
 ### Secreted RxLR like proteins
 

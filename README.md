@@ -514,7 +514,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 ```bash
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
 	for Genes in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v 'cepae'); do
 		echo $Genes
 		$ProgDir/sub_interproscan.sh $Genes
@@ -527,6 +527,30 @@ commands:
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
 	for StrainPath in $(ls -d gene_pred/interproscan/F.*/*); do
+		Strain=$(basename $StrainPath)
+		Organism=$(echo $StrainPath | rev | cut -d "/" -f2 | rev)
+		echo $Strain
+		PredGenes=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
+		InterProRaw=gene_pred/interproscan/"$Organism"/"$Strain"/raw
+		$ProgDir/append_interpro.sh $PredGenes $InterProRaw
+	done
+```
+19/10/15 interproscan results were moved temporarily. This was to allow
+interproscan to be run for the Fus2 gene predictions containing 11k genes.
+
+```bash
+	mv gene_pred/interproscan/F.oxysporum_fsp_cepae gene_pred/interproscan/F.oxysporum_fsp_cepae_old
+	screen -a
+	cd /home/groups/harrisonlab/project_files/fusarium
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+	for Genes in $(ls gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.aa); do
+		echo $Genes
+		$ProgDir/sub_interproscan.sh $Genes
+	done 2>&1 |  tee -a interproscan_submisison.log
+	# Following interproscan annotation split files were combined
+	# using the following commands:
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+	for StrainPath in $(ls -d gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2); do
 		Strain=$(basename $StrainPath)
 		Organism=$(echo $StrainPath | rev | cut -d "/" -f2 | rev)
 		echo $Strain

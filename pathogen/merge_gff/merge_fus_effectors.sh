@@ -126,13 +126,15 @@ Aug_Regex_RxLR=$WorkDir/"$Strain"_Aug_RxLR_regex_names.txt
 Aug_Regex_RxLR_EER=$WorkDir/"$Strain"_Aug_RxLR_EER_regex_names.txt
 Aug_hmm_WY=$WorkDir/"$Strain"_Aug_WY_hmmer_names.txt
 Aug_hmm_RxLR=$WorkDir/"$Strain"_Aug_RxLR_hmmer_names.txt
-Aug_Mimp_1500=analysis/mimps/$Organism/$Strain/"$Strain"_mimps_intersected_Aug_genes_names.txt
+# Aug_Mimp_1500=analysis/mimps/$Organism/$Strain/"$Strain"_mimps_intersected_Aug_genes_names.txt
+Aug_Mimp=analysis/mimps_+-2000bp/$Organism/$Strain/"$Strain"_mimps_intersected_Aug_genes_names.txt
 
 ORF_Regex_RxLR=$WorkDir/"$Strain"_ORF_RxLR_regex_names.txt
 ORF_Regex_RxLR_EER=$WorkDir/"$Strain"_ORF_RxLR_EER_regex_names.txt
 ORF_hmm_WY=$WorkDir/"$Strain"_ORF_WY_hmmer_names.txt
 ORF_hmm_RxLR=$WorkDir/"$Strain"_ORF_RxLR_hmmer_names.txt
-ORF_Mimp_1500=analysis/mimps/$Organism/$Strain/"$Strain"_mimps_intersected_ORF_genes_names.txt
+# ORF_Mimp=analysis/mimps/$Organism/$Strain/"$Strain"_mimps_intersected_ORF_genes_names.txt
+ORF_Mimp=analysis/mimps_+-2000bp/$Organism/$Strain/"$Strain"_mimps_intersected_ORF_genes_names.txt
 
 # Outfiles
 
@@ -187,7 +189,7 @@ $ProgDir/note2db.py --in_db $AugDB --out_db $Aug_RxLR_DB --id_file $Aug_Regex_Rx
 $ProgDir/note2db.py --in_db $Aug_RxLR_DB --out_db $Aug_RxLR_EER_DB --id_file $Aug_Regex_RxLR_EER --str Aug_RxLR_EER_motif --attribute ID
 $ProgDir/note2db.py --in_db $Aug_RxLR_EER_DB --out_db $Aug_hmm_WY_DB --id_file $Aug_hmm_WY --str Aug_WY_hmm --attribute ID
 $ProgDir/note2db.py --in_db $Aug_hmm_WY_DB --out_db $Aug_hmm_RxLR_DB --id_file $Aug_hmm_RxLR --str Aug_RxLR_hmm --attribute ID
-$ProgDir/note2db.py --in_db $Aug_hmm_RxLR_DB --out_db $Aug_mimp_DB --id_file $Aug_Mimp_1500 --str Aug_mimp_intersect --attribute ID
+$ProgDir/note2db.py --in_db $Aug_hmm_RxLR_DB --out_db $Aug_mimp_DB --id_file $Aug_Mimp --str Aug_mimp_intersect --attribute ID
 $ProgDir/notes2parents.py --in_db $Aug_mimp_DB --out_db $Aug_named_parents_DB
 
 
@@ -200,7 +202,7 @@ $ProgDir/note2db.py --in_db $OrfDB --out_db $ORF_RxLR_DB --id_file $ORF_Regex_Rx
 $ProgDir/note2db.py --in_db $ORF_RxLR_DB --out_db $ORF_RxLR_DB_EER --id_file $ORF_Regex_RxLR_EER --str ORF_RxLR_EER_motif --attribute Name
 $ProgDir/note2db.py --in_db $ORF_RxLR_DB_EER --out_db $ORF_hmm_WY_DB --id_file $ORF_hmm_WY --str ORF_WY_hmm --attribute Name
 $ProgDir/note2db.py --in_db $ORF_hmm_WY_DB --out_db $ORF_hmm_RxLR_DB --id_file $ORF_hmm_RxLR --str ORF_RxLR_hmm --attribute Name
-$ProgDir/note2db.py --in_db $ORF_hmm_RxLR_DB --out_db $ORF_mimp_DB --id_file $ORF_Mimp_1500 --str ORF_mimp_intersect --attribute ID
+$ProgDir/note2db.py --in_db $ORF_hmm_RxLR_DB --out_db $ORF_mimp_DB --id_file $ORF_Mimp --str ORF_mimp_intersect --attribute ID
 $ProgDir/notes2parents.py --in_db $ORF_mimp_DB --out_db $ORF_named_parents_DB
 
 
@@ -324,7 +326,7 @@ done
 echo "Final step"
 echo "Copying files"
 
-cp $WorkDir/. $OutDir/.
+cp -r $WorkDir/. $OutDir/.
 
 
 #

@@ -102,12 +102,10 @@ InFile=assembly/ls_contigs/F.oxysporum_fsp_cepae/PG/vs_PG_assembly.81_repmask_co
 #   58930 77 -  read1 unmap + read2 unmap +
 # FLAGS 141 and 77 will extract the desired unmapped reads.
 
-# for Pathz in $(ls assembly/ls_contigs/F.oxysporum_fsp_cepae/D2/vs_*/*_sorted.bam); do  
-# OutFileF=$(echo $Pathz | sed 's/.bam/_unaligned_F.fastq/g')
-# OutFileR=$(echo $Pathz | sed 's/.bam/_unaligned_R.fastq/g')
-# samtools view -f 77 "$Pathz" > $OutFileF
-# samtools view -f 141 "$Pathz" > $OutFileR
-# done
+for Pathz in $(ls assembly/ls_contigs/F.oxysporum_fsp_cepae/D2/vs_125/*_sorted.fastq); do  
+	cat "$Pathz" | wc -l
+	
+done
 
 # -------------------------
 #	Extract unaligned reads
@@ -117,9 +115,19 @@ InFile=assembly/ls_contigs/F.oxysporum_fsp_cepae/PG/vs_PG_assembly.81_repmask_co
 for Pathz in $(ls assembly/ls_contigs/F.oxysporum_fsp_cepae/*/vs_*/*_sorted.bam); do  
 OutFileF=$(echo $Pathz | sed 's/.bam/_unaligned_F.txt/g')
 OutFileR=$(echo $Pathz | sed 's/.bam/_unaligned_R.txt/g')
+OutFileSum=$(echo $Pathz | sed 's/.bam/_sum.txt/g')
 samtools view -f 77 "$Pathz" | cut -f1 > $OutFileF
 samtools view -f 141 "$Pathz" | cut -f1 > $OutFileR
+NoReads=$(samtools view -f 1 "$Pathz" | wc -l)
+NoReadsF=$(cat "$OutFileF" | wc -l)
+NoReadsR=$(cat "$OutFileR" | wc -l)
+printf "File\tNo. paired reads\tF reads unaligned\tR reads unaligned\n" > "$OutFileSum"
+printf "$Pathz\t$NoReads\t$NoReadsF\t$NoReadsR\n" >> "$OutFileSum"
 done
+
+for File in $(ls assembly/ls_contigs/F.oxysporum_fsp_cepae/*/vs_*/*_sum.txt); do 
+	cat $File | tail -n+2; 
+done > assembly/ls_contigs/assembly_summaries2.txt 
 
 for Pathz in $(ls -d assembly/ls_contigs/F.oxysporum_fsp_cepae/*/vs_Ma*); do
 FileF=$(ls $Pathz/*_F.txt)
@@ -149,7 +157,7 @@ ProgPath=/home/armita/git_repos/emr_repos/tools/pathogen/lineage_specific_region
 InsLgth=600
 
 # Assemble 125 regions
-for Pathz in $(ls -d assembly/ls_contigs/F.oxysporum_fsp_cepae/125/*); do
+for Pathz in $(ls -d assembly/ls_contigs/F.oxysporum_fsp_cepae/125/vs_PG*); do
 FileF=$(ls $Pathz/*_F.fastq)
 FileR=$(ls $Pathz/*_R.fastq)
 HashLgth=71
@@ -248,7 +256,7 @@ cat assembly/ls_contigs/assembly_summaries.txt | grep -e "Number of bases in con
 #cat assembly/ls_contigs/F.oxysporum_fsp_cepae/125/vs_PG_assembly.81_repmask_contigs/125_vs_PG_assembly.81_repmask_sorted_unaligned_F.fastq | cut -f1 > tmp_unalF.fq 
 
 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/lineage_specific_regions
-for Assemblyz in $(ls assembly/ls_contigs/F.oxysporum_fsp_cepae/*/*/*_contigs_ls_*.fa); do
+for Assemblyz in $(ls assembly/ls_contigs/F.oxysporum_fsp_cepae/125/vs_D2*/*_contigs_ls_*.fa); do
 	echo "$Assemblyz"
 	qsub "$ProgDir"/augustus_ls_contig.sh fusarium_graminearum $Assemblyz
 done

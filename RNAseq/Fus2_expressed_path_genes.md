@@ -119,21 +119,24 @@ http://jamg.sourceforge.net/tutorial.html (Step2c)
 Note - this require the transdecoder utils scripts to be installed.
 
 ```bash
-cufflinks_gtf_genome_to_cdna_fasta.pl $GffMerged $Assembly > tmp.fa
-cufflinks_gtf_to_alignment_gff3.pl $GffMerged > tmp.gff
-TransDecoder.LongOrfs -t tmp.fa
-cdna_alignment_orf_to_genome_orf.pl tmp.fa.transdecoder_dir/longest_orfs.gff3 tmp.gff tmp.fa > tmp2.gff
-gff2gbSmallDNA.pl tmp2.gff $Assembly 4000 tmp.gb
-
-
 OutDir=gene_pred/training_augustus/Fusarium_oxysporum_fsp_cepae/Fus2
 mkdir -p $OutDir
-AUG_DIR=
+# AUG_DIR=
 PASA_DIR=$(which pasa | sed s%/pasa%%)
 GffMerged=timecourse/v2_genes/Fus2/merged/merged.gtf
 Assembly=repeat_masked/F.oxysporum_fsp_cepae/Fus2/Fus2_combined_49/Fus2_combined_49_contigs_unmasked.fa
 Organism=F.oxysporum_fsp_cepae
 Strain=Fus2
+
+cufflinks_gtf_genome_to_cdna_fasta.pl $GffMerged $Assembly > $OutDir/cufflinks_transcripts.fa
+cufflinks_gtf_to_alignment_gff3.pl $GffMerged > $OutDir/cufflinks_transcripts.gff
+TransDecoder.LongOrfs -t $OutDir/cufflinks_transcripts.fa
+mv cufflinks_transcripts.fa.transdecoder_dir $OutDir/.
+cdna_alignment_orf_to_genome_orf.pl $OutDir/cufflinks_transcripts.fa.transdecoder_dir/longest_orfs.gff3 $OutDir/cufflinks_transcripts.gff $OutDir/cufflinks_transcripts.fa > $OutDir/transdecoder_ORFs.gff
+gff2gbSmallDNA.pl $OutDir/transdecoder_ORFs.gff $Assembly 4000 $OutDir/tmp.gb
+
+
+
 #------------------------------------------------------
 # 		Step A		Convert .gff output to .gb format
 #------------------------------------------------------
@@ -282,8 +285,8 @@ cp timecourse/expreiment1/8fus.sam timecourse/expreiment1/F.oxysporum_fsp_cepae/
 
 ```bash
   for FILE in $(ls timecourse/expreiment1/F.oxysporum_fsp_cepae/Fus2/*/*expressed_genes.bed); do
-  	printf "$FILE\n" >> tmp3/top_50_genes.csv
-  	cat $FILE | head -n50 >> tmp3/top_50_genes.csv
+  	printf "$FILE\n" >> $OutDir/top_50_genes.csv
+  	cat $FILE | head -n50 >> $OutDir/top_50_genes.csv
   done
 ```
 

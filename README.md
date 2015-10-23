@@ -396,13 +396,16 @@ A gene model trained for F.oxysporum fsp. cepae was used to describe the structu
 	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_CzapekDox_GlucosePeptone_PDA_PDB_appended.fa.gz
 	cat $RnaF $RnaR $RnaFiles > $ConcatRna
 	GeneModel=fusarium
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+	for Genome in $(ls repeat_masked/F.*/Fus2/*/*_contigs_unmasked.fa); do
 		Organism=$(echo $Genome | rev | cut -f4 -d'/' | rev)
 		Strain=$(echo $Genome | rev | cut -f3 -d'/' | rev)
-		OutDir=gene_pred/augustus/Model-fusarium_sp./$Organism/$Strain
-		qsub $ProgDir/submit_augustus.sh $GeneModel $Genome false $OutDir
-		OutDir=gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/$Organism/$Strain
-		qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel $OutDir
+			OutDir=gene_pred/augustus/Model-fusarium_sp./$Organism/$Strain
+			qsub $ProgDir/submit_augustus.sh $GeneModel $Genome false $OutDir
+			OutDir=gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/$Organism/$Strain
+			qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel $OutDir
+		# OutDir=gene_pred/augustus/Model-fusarium_sp._CuffHints-Fus2/$Organism/$Strain
+		# HintsGff=gene_pred/training_augustus/Fusarium_oxysporum_fsp_cepae/Fus2/cufflinks_transcripts.gff
+		# qsub $ProgDir/submit_aug_hint.sh $GeneModel $Genome $HintsGff $OutDir
 	done
 ```
 

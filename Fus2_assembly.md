@@ -18,7 +18,7 @@ Functional annotation
 
 #Building of directory structure
 ```shell
-	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/HAPI_seq_3/ 
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/HAPI_seq_3/
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/Fus2/F/
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/Fus2/R/
@@ -52,10 +52,9 @@ programs:
 
 Data quality was visualised using fastqc:
 ```shell
-	for RawData in $(ls raw_dna/paired/*/*/Fus2/*.fastq.gz); do 
+	for RawData in $(ls raw_dna/paired/*/*/Fus2/*.fastq.gz); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
-		echo $RawData; 
+		echo $RawData;
 		qsub $ProgDir/run_fastqc.sh $RawData
 	done
 ```
-

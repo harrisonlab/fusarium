@@ -64,3 +64,14 @@ braker.pl \
 
   rm -r $WorkDir
 ```
+
+# Extract gff and amino acid sequences
+
+```bash
+  for File in $(ls gene_pred/braker/F.*/*/*/augustus.gff); do
+    getAnnoFasta.pl $File
+    OutDir=$(dirname $File)
+    echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+    cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+  done
+```

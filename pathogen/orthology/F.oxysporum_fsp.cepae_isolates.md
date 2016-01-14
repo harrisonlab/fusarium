@@ -140,7 +140,17 @@
   qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts
 ```
 
-<!-- ## Plot venn diagrams:
+## Plot venn diagrams:
+
+
+The normal method for venn diagram plotting could not be used due to the number
+of isolates used. The following commands were used instead:
+
+```bash
+cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep -v -e 'A28_' -e 'D2_' -e 'PG_'| grep 'Fus2_' | grep '125_' | grep 'A23_' |  wc -l
+cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep -v -e 'Fus2_' -e '125_' -e 'A23_' | grep 'A28_' | grep 'D2_' | grep 'PG_' |  wc -l
+cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep 'Fus2_' | grep '125_' | grep 'A23_' | grep 'A28_' | grep 'D2_' | grep 'PG_' | wc -l
+```
 
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
@@ -158,7 +168,7 @@ number of unique groups of inparalogs
 
 ```
 
-``` -->
+```
 
 # Downstream analysis
 
@@ -253,3 +263,7 @@ Intermediate
   4 55
 Fol
   3 4287
+
+
+
+```

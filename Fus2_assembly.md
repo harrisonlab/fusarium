@@ -129,7 +129,7 @@ commands:
 		FastaStart=$(cat $File | grep -E "^##FASTA" -n | cut -d ':' -f1)
 		cat $File | head -n "$FastaStart" | grep -v -E "^#" >> $OutDir/interpro_features.gff
 	done
-	cat $OutDir/interpro_features.gff $PredGenes >> $OutDir/"$Strain"_interpro.gff3
+	cat $OutDir/interpro_features.gff $PredGenes >> $OutDir/"$Strain"_interpro.gff
 	rm $OutDir/interpro_features.gff
 ```
 

@@ -151,11 +151,11 @@ cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthog
 cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep -v -e 'Fus2_' -e '125_' -e 'A23_' | grep 'A28_' | grep 'D2_' | grep 'PG_' |  wc -l
 cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep 'Fus2_' | grep '125_' | grep 'A23_' | grep 'A28_' | grep 'D2_' | grep 'PG_' | wc -l
 ```
-
+<!--
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
   $ProgDir/venn_diag_4_way.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
-```
+``` -->
 
 Output was a pdf file of the venn diagram.
 

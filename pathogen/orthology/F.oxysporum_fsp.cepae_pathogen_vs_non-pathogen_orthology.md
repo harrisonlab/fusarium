@@ -420,3 +420,69 @@ gene including 11 P. cactorum RxLRs.
   GoodProts=$WorkDir/goodProteins/goodProteins.fasta
   qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts
 ```
+
+## Manual identification of numbers of orthologous and unique genes
+
+
+```bash
+  echo "The number of ortholog groups unique to pathogens are:"
+  cat $WorkDir/FoC_path_vs_non_path_2_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|'| grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
+  echo "The number of ortholog groups unique to non-pathogens are:"
+  cat $WorkDir/FoC_path_vs_non_path_2_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' |  wc -l
+  echo "The number of ortholog groups common to all F. oxysporum isolates are:"
+  cat $WorkDir/FoC_path_vs_non_path_2_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | wc -l
+```
+
+```
+  The number of ortholog groups unique to pathogens are:
+  70
+  The number of ortholog groups unique to non-pathogens are:
+  28
+  The number of ortholog groups common to all F. oxysporum isolates are:
+  6261
+```
+
+
+## Plot venn diagrams:
+
+```bash
+  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
+  $ProgDir/FoC_path_vs_non_path_venn_diag.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+```
+
+Output was a pdf file of the venn diagram.
+
+The following additional information was also provided. The format of the
+following lines is as follows:
+
+Isolate name (total number of orthogroups)
+number of unique singleton genes
+number of unique groups of inparalogs
+
+
+```
+[1] "A28"
+[1] "The total number of orthogroups and singleton genes in this isolate:  6911"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  570"
+[1] "The total number of singleton genes not in the venn diagram:  14"
+[1] "D2"
+[1] "The total number of orthogroups and singleton genes in this isolate:  6622"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  281"
+[1] "The total number of singleton genes not in the venn diagram:  23"
+[1] "PG"
+[1] "The total number of orthogroups and singleton genes in this isolate:  6916"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  575"
+[1] "The total number of singleton genes not in the venn diagram:  77"
+[1] "Fus2"
+[1] "The total number of orthogroups and singleton genes in this isolate:  7002"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  138"
+[1] "The total number of singleton genes not in the venn diagram:  63"
+[1] "125"
+[1] "The total number of orthogroups and singleton genes in this isolate:  6974"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  110"
+[1] "The total number of singleton genes not in the venn diagram:  24"
+[1] "A23"
+[1] "The total number of orthogroups and singleton genes in this isolate:  6954"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  90"
+[1] "The total number of singleton genes not in the venn diagram:  79"
+```

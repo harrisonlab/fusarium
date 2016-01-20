@@ -34,6 +34,16 @@ Assembly of remaining reads
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG3/R
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/F
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/R
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160115_M01678_0041_000000000-AEMMK
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP1/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP1/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP5/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP5/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/R
 ```
 Sequence data was moved into the appropriate directories
 
@@ -48,6 +58,17 @@ Sequence data was moved into the appropriate directories
 	cp $RawDatDir/FoxysporumPG3_S3_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG3/R/.
 	cp $RawDatDir/FoxysporumPG18_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/F/.
 	cp $RawDatDir/FoxysporumPG18_S4_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/R/.
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160115_M01678_0041_000000000-AEMMK
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	cp $RawDatDir/FOP1_S1_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP1/F/.
+	cp $RawDatDir/FOP1_S1_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP1/R/.
+	cp $RawDatDir/FOP5_S2_L001_R1_001.fastq.gz  $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP5/F/.
+	cp $RawDatDir/FOP5_S2_L001_R2_001.fastq.gz  $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP5/R/.
+	cp $RawDatDir/L5_S3_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/F/.
+	cp $RawDatDir/L5_S3_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/R/.
+	cp $RawDatDir/HB6_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/F/.
+	cp $RawDatDir/HB6_S4_L001_R2_001.fastq.gz  $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/R/.
+
 ```
 
 This process was repeated for RNAseq data:

@@ -42,8 +42,20 @@ Assembly of remaining reads
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP5/R
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/F
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/R
-	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/F
-	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/R
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160119_M016878_0042-AGDN7
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A1-2/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A1-2/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A13/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A13/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CB3/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CB3/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.avenaceum/PG8/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.avenaceum/PG8/R
 ```
 Sequence data was moved into the appropriate directories
 
@@ -66,9 +78,20 @@ Sequence data was moved into the appropriate directories
 	cp $RawDatDir/FOP5_S2_L001_R2_001.fastq.gz  $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP5/R/.
 	cp $RawDatDir/L5_S3_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/F/.
 	cp $RawDatDir/L5_S3_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/L5/R/.
-	cp $RawDatDir/HB6_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/F/.
-	cp $RawDatDir/HB6_S4_L001_R2_001.fastq.gz  $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/HB6/R/.
-
+	cp $RawDatDir/HB6_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/F/.
+	cp $RawDatDir/HB6_S4_L001_R2_001.fastq.gz  $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/R/.
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160119_M016878_0042-AGDN7
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	cp $RawDatDir/A12_S1_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A1-2/F/.
+	cp $RawDatDir/A12_S1_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A1-2/R/.
+	cp $RawDatDir/A13_S2_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A13/F/.
+	cp $RawDatDir/A13_S2_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/A13/R/.
+	cp $RawDatDir/CB3_S3_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CB3/F/.
+	cp $RawDatDir/CB3_S3_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CB3/R/.
+	cp $RawDatDir/HB6_S5_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/F/.
+	cp $RawDatDir/HB6_S5_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/R/.
+	cp $RawDatDir/PG8_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.avenaceum/PG8/F/.
+	cp $RawDatDir/PG8_S4_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.avenaceum/PG8/R/.
 ```
 
 This process was repeated for RNAseq data:
@@ -106,7 +129,7 @@ programs:
 
 Data quality was visualised using fastqc:
 ```bash
-	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz | grep -v 'cepae'); do
+	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
 		qsub $ProgDir/run_fastqc.sh $RawData
@@ -116,8 +139,29 @@ Data quality was visualised using fastqc:
 Trimming was performed on data to trim adapters from
 sequences and remove poor quality data. This was done with fastq-mcf
 
+Firstly, those strains with more than one run were identified:
+
 ```bash
-	for StrainPath in $(ls -d raw_dna/paired/*/* | grep -v 'cepae'); do
+	for Strain in $(ls -d raw_dna/paired/*/*); do
+	NumReads=$(ls $Strain/F/*.gz | wc -l);
+		if [ $NumReads -gt 1 ]; then
+			echo "$Strain";
+			echo "$NumReads";
+		fi;
+	done
+```
+
+```
+	raw_dna/paired/F.oxysporum_fsp_cepae/Fus2
+	2
+	raw_dna/paired/F.oxysporum_fsp_cepae/HB6
+	2
+```
+
+Trimming was first performed on all strains that had a single run of data:
+
+```bash
+	for StrainPath in $(ls -d raw_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
 		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
 		ReadsF=$(ls $StrainPath/F/*.fastq*)
@@ -128,11 +172,35 @@ sequences and remove poor quality data. This was done with fastq-mcf
 	done
 ```
 
+Trimming was then performed for strains with multiple runs of data
+
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
+	IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+	echo "Fus2"
+	StrainPath=raw_dna/paired/F.oxysporum_fsp_cepae/Fus2
+	ReadsF=$(ls $StrainPath/F/s_6_1_sequence.fastq.gz)
+	ReadsR=$(ls $StrainPath/R/s_6_2_sequence.fastq.gz)
+	qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+	StrainPath=raw_dna/paired/F.oxysporum_fsp_cepae/Fus2
+	ReadsF=$(ls $StrainPath/F/FUS2_S2_L001_R1_001.fastq.gz)
+	ReadsR=$(ls $StrainPath/R/FUS2_S2_L001_R2_001.fastq.gz)
+	qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+	echo "HB6"
+	StrainPath=raw_dna/paired/F.oxysporum_fsp_cepae/HB6
+	ReadsF=$(ls $StrainPath/F/HB6_S4_L001_R1_001.fastq.gz)
+	ReadsR=$(ls $StrainPath/R/HB6_S4_L001_R2_001.fastq.gz)
+	qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+	StrainPath=raw_dna/paired/F.oxysporum_fsp_cepae/HB6
+	ReadsF=$(ls $StrainPath/F/HB6_S5_L001_R1_001.fastq.gz)
+	ReadsR=$(ls $StrainPath/R/HB6_S5_L001_R2_001.fastq.gz)
+	qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+```
 
 
 Data quality was visualised once again following trimming:
 ```bash
-	for RawData in qc_dna/paired/*/*/*/*.fastq*; do
+	for RawData in $(ls qc_dna/paired/*/*/*/*.fq.gz); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
 		qsub $ProgDir/run_fastqc.sh $RawData
@@ -142,8 +210,10 @@ Data quality was visualised once again following trimming:
 kmer counting was performed using kmc
 This allowed estimation of sequencing depth and total genome size
 
+This was performed for strains with single runs of data
+
 ```bash
-	for TrimPath in qc_dna/paired/*/*; do
+	for TrimPath in $(ls -d raw_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		TrimF=$(ls $TrimPath/F/*.fastq*)
 		TrimR=$(ls $TrimPath/R/*.fastq*)
@@ -153,71 +223,169 @@ This allowed estimation of sequencing depth and total genome size
 	done
 ```
 
+and for strains with muiltiple runs of data:
+
+```bash
+	for TrimPath in $(ls -d raw_dna/paired/*/Fus2); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+		TrimF1=$(ls $TrimPath/F/s_6_1_sequence.fastq.gz)
+		TrimR1=$(ls $TrimPath/R/s_6_2_sequence.fastq.gz)
+		echo $TrimF1
+		echo $TrimR1
+		TrimF2=$(ls $TrimPath/F/FUS2_S2_L001_R1_001.fastq.gz)
+		TrimR2=$(ls $TrimPath/R/FUS2_S2_L001_R2_001.fastq.gz)
+		echo $TrimF2
+		echo $TrimR2
+		qsub $ProgDir/kmc_kmer_counting.sh $TrimF1 $TrimR1 $TrimF2 $TrimR2
+	done
+	for TrimPath in $(ls -d raw_dna/paired/*/HB6); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+		TrimF1=$(ls $TrimPath/F/HB6_S4_L001_R1_001.fastq.gz)
+		TrimR1=$(ls $TrimPath/R/HB6_S4_L001_R2_001.fastq.gz)
+		echo $TrimF1
+		echo $TrimR1
+		TrimF2=$(ls $TrimPath/F/HB6_S5_L001_R1_001.fastq.gz)
+		TrimR2=$(ls $TrimPath/R/HB6_S5_L001_R2_001.fastq.gz)
+		echo $TrimF2
+		echo $TrimR2
+		qsub $ProgDir/kmc_kmer_counting.sh $TrimF1 $TrimR1 $TrimF2 $TrimR2
+	done
+```
+
+mode kmer abundance prior to error correction was reported using the following
+commands:
+
+```bash
+for File in $(ls qc_dna/kmc/*/*/*_true_kmer_summary.txt); do
+basename $File;
+tail -n3 $File | head -n1 ;
+done
+```
+
+```
+PG8_true_kmer_summary.txt
+The mode kmer abundance is:  53
+125_true_kmer_summary.txt
+The mode kmer abundance is:  46
+55_true_kmer_summary.txt
+The mode kmer abundance is:  29
+A1-2_true_kmer_summary.txt
+The mode kmer abundance is:  16
+A13_true_kmer_summary.txt
+The mode kmer abundance is:  22
+A23_true_kmer_summary.txt
+The mode kmer abundance is:  33
+A28_true_kmer_summary.txt
+The mode kmer abundance is:  36
+CB3_true_kmer_summary.txt
+The mode kmer abundance is:  21
+D2_true_kmer_summary.txt
+The mode kmer abundance is:  11
+Fus2_true_kmer_summary.txt
+The mode kmer abundance is:  109
+HB17_true_kmer_summary.txt
+The mode kmer abundance is:  27
+HB6_true_kmer_summary.txt
+The mode kmer abundance is:  91
+PG_true_kmer_summary.txt
+The mode kmer abundance is:  58
+N139_true_kmer_summary.txt
+The mode kmer abundance is:  26
+FOP1_true_kmer_summary.txt
+The mode kmer abundance is:  32
+FOP5_true_kmer_summary.txt
+The mode kmer abundance is:  62
+L5_true_kmer_summary.txt
+The mode kmer abundance is:  35
+PG18_true_kmer_summary.txt
+The mode kmer abundance is:  24
+PG3_true_kmer_summary.txt
+The mode kmer abundance is:  28
+A8_true_kmer_summary.txt
+The mode kmer abundance is:  21
+
+```
+
 #Assembly
 
-Assembly was performed using Velvet
+Assembly was perfromed with:
+* Spades
 
-A range of hash lengths were used and the best assembly selected for subsequent analysis
+## Spades Assembly
+
+
 
 ```bash
-	for TrimPath in $(ls -d qc_dna/paired/*/* | grep -v 'cepae'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/velvet
-		Strain=$(printf $TrimPath | rev | cut -f1 -d '/' | rev)
-
-		MinHash=41
-		MaxHash=81
-		HashStep=2
-		TrimF=$(ls $TrimPath/F/*.fastq*)
-		TrimR=$(ls $TrimPath/R/*.fastq*)
-		GenomeSz=65
-
-		echo $Strain
-		if [ "$Strain" == 'PG18' ]; then
-			ExpCov=24
-			MinCov=8
-			InsLgth=600
-			echo "$Strain set"
-		elif [ "$Strain" == 'PG3' ]; then
-			ExpCov=27
-			MinCov=9
-			InsLgth=600
-			echo "$Strain set"
-		elif [ "$Strain" == 'N139' ]; then
-			ExpCov=26
-			MinCov=9
-			InsLgth=600
-			echo "$Strain set"
-		elif [ "$Strain" == 'A8' ]; then
-			ExpCov=20
-			MinCov=7
-			InsLgth=600
-			echo "$Strain set"
-		fi
-
-		qsub $ProgDir/submit_velvet_range.sh $MinHash $MaxHash $HashStep \
-		$TrimF $TrimR $GenomeSz $ExpCov $MinCov $InsLgth
+	for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
+		Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+		Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+		F_Read=$(ls $StrainPath/F/*.fq.gz)
+		R_Read=$(ls $StrainPath/R/*.fq.gz)
+		OutDir=assembly/spades/$Organism/$Strain
+		Jobs=$(qstat | grep 'submit_SPA' | grep 'qw' | wc -l)
+		while [ $Jobs -gt 1 ]; do
+			sleep 5m
+			printf "."
+			Jobs=$(qstat | grep 'submit_SPA' | grep 'qw' | wc -l)
+		done		
+		printf "\n"
+		echo $F_Read
+		echo $R_Read
+		qsub $ProgDir/submit_SPAdes.sh $F_Read $R_Read $OutDir correct 10
 	done
-
 ```
 
 
-Assemblies were summarised to allow the best assembly to be determined by eye.
-Although flashed reads and additional datasets were not used in this set of analyses, there were
-some results from previous assemblies in the destination folders that needed to be excluded.
-In the for loop that cycled through the stats file from each assembly correctly the following
-commands was added: | grep -v 'flash' | grep -v 'combined' . This prevented assemblies
-using flashed reads or additional datasets from being included in this summary. These
-two grep expressions can be excluded if copying and pasting these commands for a different project.
+Assemblies were submitted for genomes with data from multiple sequencing runs:
 
 ```bash
-	for StrainPath in $(ls -d assembly/velvet/F*/* ); do
-		printf "N50\tMax_contig_size\tNumber of bases in contigs\tNumber of contigs\tNumber of contigs >=1kb\tNumber of contigs in N50\tNumber of bases in contigs >=1kb\tGC Content of contigs\n" > $StrainPath/assembly_stats.csv
-		for StatsFile in $(ls $StrainPath/*/stats.txt | grep -v 'flash' | grep -v 'combined'); do
-		cat $StatsFile | rev | cut -f1 -d ' ' | rev | paste -d '\t' -s >> $StrainPath/assembly_stats.csv
-		done
-	done
-	tail -n+1 assembly/velvet/F*/*/assembly_stats.csv > assembly/velvet/Fusarium_assembly_stats.csv
+
 ```
+
+Quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+    for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+The results of quast were shown using the following commands:
+
+```bash
+  for Assembly in $(ls assembly/spades/*/1177/filtered_contigs/report.txt); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev);
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev);
+    echo;
+    echo $Organism;
+    echo $Strain;
+    cat $Assembly;
+  done
+```
+
+The output of this analysis is in the assembly/quast_results.txt file of this
+git repository.
+
+
+Contigs were renamed in accordance with ncbi recomendations.
+
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
+
 
 
 

@@ -264,9 +264,9 @@ done
 
 ```
 PG8_true_kmer_summary.txt
-The mode kmer abundance is:  53
+The mode kmer abundance is:  53 < fail
 125_true_kmer_summary.txt
-The mode kmer abundance is:  46
+The mode kmer abundance is:  46 < pass
 55_true_kmer_summary.txt
 The mode kmer abundance is:  29
 A1-2_true_kmer_summary.txt

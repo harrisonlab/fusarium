@@ -263,52 +263,51 @@ done
 ```
 
 ```
-PG8_true_kmer_summary.txt
-The mode kmer abundance is:  53 < fail
-125_true_kmer_summary.txt
-The mode kmer abundance is:  46 < pass
-55_true_kmer_summary.txt
-The mode kmer abundance is:  29
-A1-2_true_kmer_summary.txt
-The mode kmer abundance is:  16
-A13_true_kmer_summary.txt
-The mode kmer abundance is:  22
-A23_true_kmer_summary.txt
-The mode kmer abundance is:  33
-A28_true_kmer_summary.txt
-The mode kmer abundance is:  36
-CB3_true_kmer_summary.txt
-The mode kmer abundance is:  21
-D2_true_kmer_summary.txt
-The mode kmer abundance is:  11
-Fus2_true_kmer_summary.txt
-The mode kmer abundance is:  109
-HB17_true_kmer_summary.txt
-The mode kmer abundance is:  27
-HB6_true_kmer_summary.txt
-The mode kmer abundance is:  91
-PG_true_kmer_summary.txt
-The mode kmer abundance is:  58
-N139_true_kmer_summary.txt
-The mode kmer abundance is:  26
-FOP1_true_kmer_summary.txt
-The mode kmer abundance is:  32
-FOP5_true_kmer_summary.txt
-The mode kmer abundance is:  62
-L5_true_kmer_summary.txt
-The mode kmer abundance is:  35
-PG18_true_kmer_summary.txt
-The mode kmer abundance is:  24
-PG3_true_kmer_summary.txt
-The mode kmer abundance is:  28
-A8_true_kmer_summary.txt
-The mode kmer abundance is:  21
-
+	PG8_true_kmer_summary.txt
+	The mode kmer abundance is:  53 < fail
+	125_true_kmer_summary.txt
+	The mode kmer abundance is:  46 < pass
+	55_true_kmer_summary.txt
+	The mode kmer abundance is:  29 < pass
+	A1-2_true_kmer_summary.txt
+	The mode kmer abundance is:  16 < pass
+	A13_true_kmer_summary.txt
+	The mode kmer abundance is:  22 < pass
+	A23_true_kmer_summary.txt
+	The mode kmer abundance is:  33 < pass
+	A28_true_kmer_summary.txt
+	The mode kmer abundance is:  36 < pass
+	CB3_true_kmer_summary.txt
+	The mode kmer abundance is:  21 < pass
+	D2_true_kmer_summary.txt
+	The mode kmer abundance is:  11 < pass
+	Fus2_true_kmer_summary.txt
+	The mode kmer abundance is:  109 < 2lib
+	HB17_true_kmer_summary.txt
+	The mode kmer abundance is:  27 < pass
+	HB6_true_kmer_summary.txt
+	The mode kmer abundance is:  91 < 2 lib
+	PG_true_kmer_summary.txt
+	The mode kmer abundance is:  58 < pass
+	N139_true_kmer_summary.txt
+	The mode kmer abundance is:  26 < pass
+	FOP1_true_kmer_summary.txt
+	The mode kmer abundance is:  32 <- fail
+	FOP5_true_kmer_summary.txt
+	The mode kmer abundance is:  62 <- fail
+	L5_true_kmer_summary.txt
+	The mode kmer abundance is:  35 <- pass
+	PG18_true_kmer_summary.txt
+	The mode kmer abundance is:  24 <- pass
+	PG3_true_kmer_summary.txt
+	The mode kmer abundance is:  28 <- pass
+	A8_true_kmer_summary.txt
+	The mode kmer abundance is:  21 <- pass
 ```
 
 #Assembly
 
-Assembly was perfromed with:
+Assembly was performed with:
 * Spades
 
 ## Spades Assembly
@@ -336,18 +335,70 @@ Assembly was perfromed with:
 	done
 ```
 
+Assembly for PG8, FOP1 and FOP5 failed due to a lack of memory, as such the assembly was
+resubmitted with more RAM.
+
+```bash
+	for StrainPath in $(ls -d qc_dna/paired/*/* | grep -e 'FOP5' -e 'PG8' -e 'FOP1'); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
+		Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+		Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+		F_Read=$(ls $StrainPath/F/*.fq.gz)
+		R_Read=$(ls $StrainPath/R/*.fq.gz)
+		OutDir=assembly/spades/$Organism/$Strain
+		echo $F_Read
+		echo $R_Read
+		qsub $ProgDir/submit_SPAdes_HiMem.sh $F_Read $R_Read $OutDir correct 10
+	done
+```
 
 Assemblies were submitted for genomes with data from multiple sequencing runs:
 
 ```bash
-
+for StrainPath in $(ls -d qc_dna/paired/F.*/HB6); do
+  echo $StrainPath
+    ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
+    Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+    Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+    echo $Strain
+    echo $Organism
+    TrimF1_Read=$(ls $StrainPath/F/HB6_S4_L001_R1_001_trim.fq.gz);
+    TrimR1_Read=$(ls $StrainPath/R/HB6_S4_L001_R2_001_trim.fq.gz);
+    TrimF2_Read=$(ls $StrainPath/F/HB6_S5_L001_R1_001_trim.fq.gz);
+    TrimR2_Read=$(ls $StrainPath/R/HB6_S5_L001_R2_001_trim.fq.gz);
+    echo $TrimF1_Read
+    echo $TrimR1_Read
+    echo $TrimF2_Read
+    echo $TrimR2_Read
+    OutDir=assembly/spades/$Organism/$Strain
+    qsub $ProgDir/subSpades_2lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $OutDir correct 10
+  done
+	for StrainPath in $(ls -d qc_dna/paired/F.*/Fus2); do
+	  echo $StrainPath
+	    ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
+	    Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+	    Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+	    echo $Strain
+	    echo $Organism
+	    TrimF1_Read=$(ls $StrainPath/F/s_6_1_sequence_trim.fq.gz);
+	    TrimR1_Read=$(ls $StrainPath/R/s_6_2_sequence_trim.fq.gz);
+	    TrimF2_Read=$(ls $StrainPath/F/FUS2_S2_L001_R1_001_trim.fq.gz);
+	    TrimR2_Read=$(ls $StrainPath/R/FUS2_S2_L001_R2_001_trim.fq.gz);
+	    echo $TrimF1_Read
+	    echo $TrimR1_Read
+	    echo $TrimF2_Read
+	    echo $TrimR2_Read
+	    OutDir=assembly/spades/$Organism/$Strain
+	    qsub $ProgDir/subSpades_2lib_HiMem.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $OutDir correct 10
+	  done
 ```
 
 Quast
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-    for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+  # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2' -e 'HB6' -e 'PG8' -e 'FOP1'); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -355,10 +406,10 @@ Quast
   done
 ```
 
-The results of quast were shown using the following commands:
+<!-- The results of quast were shown using the following commands:
 
 ```bash
-  for Assembly in $(ls assembly/spades/*/1177/filtered_contigs/report.txt); do
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/report.txt); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev);
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev);
     echo;
@@ -369,7 +420,7 @@ The results of quast were shown using the following commands:
 ```
 
 The output of this analysis is in the assembly/quast_results.txt file of this
-git repository.
+git repository. -->
 
 
 Contigs were renamed in accordance with ncbi recomendations.
@@ -377,7 +428,8 @@ Contigs were renamed in accordance with ncbi recomendations.
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2'); do
+  # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2'); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -389,7 +441,7 @@ Contigs were renamed in accordance with ncbi recomendations.
 
 
 
-#Repeatmasking
+# Repeatmasking
 
 Repeat masking was performed and used the following programs:
 	Repeatmasker
@@ -399,42 +451,152 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	BestAssPG18=assembly/velvet/F.*/PG18/F.*_PG18_53/sorted_contigs.fa
-	BestAssPG3=assembly/velvet/F.*/PG3/F.*_PG3_79/sorted_contigs.fa
-	BestAssN139=assembly/velvet/F.*/N139/F.*_N139_59/sorted_contigs.fa
-	BestAssA8=assembly/velvet/F.*/A8/F.*_A8_51/sorted_contigs.fa
-
-	qsub $ProgDir/rep_modeling.sh $BestAssPG18
-	qsub $ProgDir/rep_modeling.sh $BestAssPG3
-	qsub $ProgDir/rep_modeling.sh $BestAssN139
-	qsub $ProgDir/rep_modeling.sh $BestAssA8
-
-	qsub $ProgDir/transposonPSI.sh $BestAssPG18
-	qsub $ProgDir/transposonPSI.sh $BestAssPG3
-	qsub $ProgDir/transposonPSI.sh $BestAssN139
-	qsub $ProgDir/transposonPSI.sh $BestAssA8
-
+	for BestAss in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -e 'Fus2'); do
+		qsub $ProgDir/rep_modeling.sh $BestAss
+		qsub $ProgDir/transposonPSI.sh $BestAss
+	done
 ```
 
+The number of bases masked by transposonPSI and Repeatmasker were summarised
+using the following commands:
 
-#Gene Prediction
+```bash
+	for RepDir in $(ls -d repeat_masked/F.*/*/*); do
+		Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
+		RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+		TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+		printf "$Organism\t$Strain\n"
+		printf "The number of bases masked by RepeatMasker:\t"
+		sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+		printf "The number of bases masked by TransposonPSI:\t"
+		sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+		printf "The total number of masked bases are:\t"
+		cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+		echo
+	done
+```
+
+```
+	F.avenaceum	PG8
+	The number of bases masked by RepeatMasker:	0
+	The number of bases masked by TransposonPSI:	0
+	The total number of masked bases are:	0
+
+	F.oxysporum_fsp_cepae	125
+	The number of bases masked by RepeatMasker:	3707484
+	The number of bases masked by TransposonPSI:	1210934
+	The total number of masked bases are:	3952973
+
+	F.oxysporum_fsp_cepae	55
+	The number of bases masked by RepeatMasker:	3206161
+	The number of bases masked by TransposonPSI:	1031019
+	The total number of masked bases are:	3466359
+
+	F.oxysporum_fsp_cepae	A1-2
+	The number of bases masked by RepeatMasker:	1937168
+	The number of bases masked by TransposonPSI:	816426
+	The total number of masked bases are:	2177343
+
+	F.oxysporum_fsp_cepae	A13
+	The number of bases masked by RepeatMasker:	4414509
+	The number of bases masked by TransposonPSI:	1555142
+	The total number of masked bases are:	4712084
+
+	F.oxysporum_fsp_cepae	A23
+	The number of bases masked by RepeatMasker:	3156362
+	The number of bases masked by TransposonPSI:	1061656
+	The total number of masked bases are:	3446078
+
+	F.oxysporum_fsp_cepae	A28
+	The number of bases masked by RepeatMasker:	4001386
+	The number of bases masked by TransposonPSI:	1189369
+	The total number of masked bases are:	4304881
+
+	F.oxysporum_fsp_cepae	CB3
+	The number of bases masked by RepeatMasker:	2382071
+	The number of bases masked by TransposonPSI:	842157
+	The total number of masked bases are:	2630520
+
+	F.oxysporum_fsp_cepae	D2
+	The number of bases masked by RepeatMasker:	1363000
+	The number of bases masked by TransposonPSI:	594012
+	The total number of masked bases are:	1632798
+
+	F.oxysporum_fsp_cepae	Fus2
+	The number of bases masked by RepeatMasker:	3619961
+	The number of bases masked by TransposonPSI:	1280301
+	The total number of masked bases are:	3857605
+
+	F.oxysporum_fsp_cepae	HB17
+	The number of bases masked by RepeatMasker:	3385838
+	The number of bases masked by TransposonPSI:	1077091
+	The total number of masked bases are:	3649652
+
+	F.oxysporum_fsp_cepae	HB6
+	The number of bases masked by RepeatMasker:	3216000
+	The number of bases masked by TransposonPSI:	995170
+	The total number of masked bases are:	3455823
+
+	F.oxysporum_fsp_cepae	PG
+	The number of bases masked by RepeatMasker:	2769568
+	The number of bases masked by TransposonPSI:	865813
+	The total number of masked bases are:	3005423
+
+	F.oxysporum_fsp_narcissi	N139
+	The number of bases masked by RepeatMasker:	5404179
+	The number of bases masked by TransposonPSI:	1655249
+	The total number of masked bases are:	5709023
+
+	F.oxysporum_fsp_pisi	FOP1
+	The number of bases masked by RepeatMasker:	0
+	The number of bases masked by TransposonPSI:	0
+	The total number of masked bases are:	0
+
+	F.oxysporum_fsp_pisi	FOP5
+	The number of bases masked by RepeatMasker:	3880611
+	The number of bases masked by TransposonPSI:	1313995
+	The total number of masked bases are:	4193700
+
+	F.oxysporum_fsp_pisi	L5
+	The number of bases masked by RepeatMasker:	1287737
+	The number of bases masked by TransposonPSI:	417513
+	The total number of masked bases are:	1456488
+
+	F.oxysporum_fsp_pisi	PG18
+	The number of bases masked by RepeatMasker:	5349661
+	The number of bases masked by TransposonPSI:	1627436
+	The total number of masked bases are:	5673770
+
+	F.oxysporum_fsp_pisi	PG3
+	The number of bases masked by RepeatMasker:	4686428
+	The number of bases masked by TransposonPSI:	1663269
+	The total number of masked bases are:	5011872
+
+	F.proliferatum	A8
+	The number of bases masked by RepeatMasker:	1065627
+	The number of bases masked by TransposonPSI:	278366
+	The total number of masked bases are:	1266227
+```
+
+# Gene Prediction
 
 
 Gene prediction followed three steps:
 	Pre-gene prediction
 		- Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified.
 	Gene model training
-		- Gene models were trained for isolates 1166 and 650 using assembled RNAseq data
+		- Gene models were trained using assembled RNAseq data as part of the Braker1 pipeline
 	Gene prediction
-		- Gene models were used to predict genes in A. alternata genomes. This used RNAseq data as hints for gene models.
+		- Gene models were used to predict genes in genomes as part of the the Braker1 pipeline. This used RNAseq data as hints for gene models.
 
-#Pre-gene prediction
+# Pre-gene prediction
 
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 	cd /home/groups/harrisonlab/project_files/fusarium
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'cepae'); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
 		echo $Genome;
 		qsub $ProgDir/sub_cegma.sh $Genome dna;
 	done
@@ -452,211 +614,152 @@ Outputs were summarised using the commands:
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
 
-<!--
-#Gene model training
-
-Data quality was visualised using fastqc:
-```bash
-	for RawData in raw_rna/paired/*/*/*/*.fastq.gz; do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
-		echo $RawData;
-		qsub $ProgDir/run_fastqc.sh $RawData
-	done
-```
-
-Trimming was performed on data to trim adapters from
-sequences and remove poor quality data. This was done with fastq-mcf
-
-```bash
-	for StrainPath in raw_rna/paired/*/*; do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
-		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/illumina_full_adapters.fa
-		ReadsF=$(ls $StrainPath/F/*.fastq.gz)
-		ReadsR=$(ls $StrainPath/R/*.fastq.gz)
-		echo $ReadsF
-		echo $ReadsR
-		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters RNA
-	done
-```
-
-Data quality was visualised once again following trimming:
-```bash
-	for TrimData in qc_rna/paired/*/*/*/*.fastq.gz; do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
-		echo $RawData;
-		qsub $ProgDir/run_fastqc.sh $TrimData
-	done
-```
-
-RNAseq data was assembled into transcriptomes using Trinity
-```bash
-	for StrainPath in qc_rna/paired/*/*; do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/transcriptome_assembly
-		ReadsF=$(ls $StrainPath/F/*.fastq.gz)
-		ReadsR=$(ls $StrainPath/R/*.fastq.gz)
-		echo $ReadsF
-		echo $ReadsR
-		qsub $ProgDir/transcriptome_assembly_trinity.sh $ReadsF $ReadsR
-	done
-```
-Gene training was performed using RNAseq data. The cluster can not run this script using qlogin. As such it was run on the head node (-naughty) using screen.
-Training for 650 and 1166 was performed in two instances of screen and occassionally viewed to check progress over time.
-(screen is detached after opening using ctrl+a then ctrl+d. - if just ctrl+d is pressed the instance of screen is deleted. - be careful)
-```bash
-	screen -a
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
-	Assembly650=assembly/trinity/A.alternata_ssp._gaisen/650/650_rna_contigs/Trinity.fasta
-	Genome650=repeat_masked/A.alternata_ssp._gaisen/650/A.alternata_ssp._gaisen_650_67_repmask/650_contigs_unmasked.fa
-	$ProgDir/training_by_transcriptome.sh $Assembly650 $Genome650
-
-	screen -a
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
-	Assembly1166=assembly/trinity/A.alternata_ssp._tenuissima/1166/1166_rna_contigs/Trinity.fasta
-	Genome1166=repeat_masked/A.alternata_ssp._tenuissima/1166/A.alternata_ssp._tenuissima_1166_43_repmask/1166_contigs_unmasked.fa
-	$ProgDir/training_by_transcriptome.sh $Assembly1166 $Genome1166
-```
-
-Quality of Trinity assemblies were assessed using Cegma to assess gene-space within the transcriptome
-```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
-	for Transcriptome in $(ls assembly/trinity/A.*/*/*_rna_contigs/Trinity.fasta); do  
-		echo $Transcriptome;  
-		qsub $ProgDir/sub_cegma.sh $Transcriptome rna;
-	done
-```
-Outputs were summarised using the commands:
-```bash
-	for File in $(ls gene_pred/cegma/A.alternata_ssp._*/*/*_rna_cegma.completeness_report); do
-		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
-		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
-		printf "$Species\t$Strain\n";
-		cat $File | head -n18 | tail -n+4;printf "\n";
-	done > gene_pred/cegma/cegma_results_rna_summary.txt
-
-	less gene_pred/cegma/cegma_results_rna_summary.txt
-```
- -->
-
-
-
-
-
 
 #Gene prediction
 
 Gene prediction was performed for Fusarium genomes. Two gene prediction
 approaches were used:
 
-Gene prediction using Augustus
+Gene prediction using Braker1
 Prediction of all putative ORFs in the genome using the ORF finder (atg.pl)
 approach.
 
-## Augustus
 
+## Gene prediction 1 - Braker1 gene model training and prediction
 
-RNAseq reads were used as Hints for the location of CDS.
+Gene prediction was performed using Braker1.
 
-A concatenated dataset of RNAseq reads from F. oxysporum fsp. cepae isolate Fus2
-were used as hints for these predictions.
-A gene model trained for F.oxysporum fsp. cepae was used to describe the structure of a gene.
+First, RNAseq data was aligned to Fusarium genomes.
+* qc of RNA seq data is detailed below:
 
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
-	mkdir -p qc_rna/concatenated
-	RnaFiles=$(ls qc_rna/paired/._*/*/*/*.fastq.gz | paste -s -d ' ')
-	RnaF=qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq
-	RnaR=qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq
-	mkdir -p qc_rna/concatenated/F.oxysporum/Fus2
-	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_appended.fa.gz
-	cat $RnaF $RnaR | gzip -fc > $ConcatRna
-	GeneModel=F.oxysporum_fsp_cepae_Fus2
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'cepae'); do
-		qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel
+ for Folder in $(ls -d raw_rna/paired/F.oxysporum_fsp_cepae/*); do
+	 FolderName=$(echo $Folder | rev | cut -f1 -d '/' | rev);
+	 echo $FolderName;
+	 ls $Folder/F;
+	 ls $Folder/R;
+	done
+```
+This contained the following data:
+```
+	55_72hrs_rep1
+	sample013_1.combined.fastq.gz
+	sample013_2.combined.fastq.gz
+	55_72hrs_rep2
+	sample014_1.combined.fastq.gz
+	sample014_2.combined.fastq.gz
+	55_72hrs_rep3
+	sample015_1.combined.fastq.gz
+	sample015_2.combined.fastq.gz
+	control_72hrs_rep1
+	sample002_1.combined.fastq.gz
+	sample002_2.combined.fastq.gz
+	control_72hrs_rep2
+	sample004_1.combined.fastq.gz
+	sample004_2.combined.fastq.gz
+	control_72hrs_rep3
+	sample005_1.combined.fastq.gz
+	sample005_2.combined.fastq.gz
+	FO47_72hrs_rep1
+	sample006_1.combined.fastq.gz
+	sample006_2.combined.fastq.gz
+	FO47_72hrs_rep2
+	sample007_1.combined.fastq.gz
+	sample007_2.combined.fastq.gz
+	FO47_72hrs_rep3
+	sample012_1.combined.fastq.gz
+	sample012_2.combined.fastq.gz
+	Fus2_0hrs_prelim
+	1_S1_L001_R1_001.fastq.gz
+	1_S1_L001_R2_001.fastq.gz
+	Fus2_16hrs_prelim
+	3_S2_L001_R1_001.fastq.gz
+	3_S2_L001_R2_001.fastq.gz
+	Fus2_24hrs_prelim_rep1
+	4_S3_L001_R1_001.fastq.gz
+	4_S3_L001_R2_001.fastq.gz
+	Fus2_24hrs_prelim_rep2
+	Fus2_36hrs_prelim
+	36hr-root_S10_L001_R1_001.fastq.gz
+	36hr-root_S10_L001_R2_001.fastq.gz
+	Fus2_48hrs_prelim
+	6_S4_L001_R1_001.fastq.gz
+	6_S4_L001_R2_001.fastq.gz
+	Fus2_4hrs_prelim
+	4hr-root_S7_L001_R1_001.fastq.gz
+	4hr-root_S7_L001_R2_001.fastq.gz
+	Fus2_72hrs_prelim
+	7_S5_L001_R1_001.fastq.gz
+	7_S5_L001_R2_001.fastq.gz
+	Fus2_72hrs_rep1
+	sample016_1.combined.fastq.gz
+	sample016_2.combined.fastq.gz
+	Fus2_72hrs_rep2
+	sample018_1.combined.fastq.gz
+	sample018_2.combined.fastq.gz
+	Fus2_72hrs_rep3
+	sample019_1.combined.fastq.gz
+	sample019_2.combined.fastq.gz
+	Fus2_8hrs_prelim
+	8hr-root_S8_L001_R1_001.fastq.gz
+	8hr-root_S8_L001_R2_001.fastq.gz
+	Fus2_96hrs_prelim
+	8_S6_L001_R1_001.fastq.gz
+	8_S6_L001_R2_001.fastq.gz
+	Fus2_CzapekDox
+	6_S2_L001_R1_001_fastqc  6_S2_L001_R1_001.fastq.gz
+	6_S2_L001_R2_001_fastqc  6_S2_L001_R2_001.fastq.gz
+	Fus2_GlucosePeptone
+	7_S3_L001_R1_001_fastqc  7_S3_L001_R1_001.fastq.gz
+	7_S3_L001_R2_001_fastqc  7_S3_L001_R2_001.fastq.gz
+	Fus2_PDA
+	9_S4_L001_R1_001_fastqc  9_S4_L001_R1_001.fastq.gz
+	9_S4_L001_R2_001_fastqc  9_S4_L001_R2_001.fastq.gz
+	Fus2_PDB
+	4_S1_L001_R1_001_fastqc  4_S1_L001_R1_001.fastq.gz
+	4_S1_L001_R2_001_fastqc  4_S1_L001_R2_001.fastq.gz
+```
+
+Perform qc of RNAseq timecourse data
+```bash
+	for FilePath in $(ls -d raw_rna/paired/F.oxysporum_fsp_cepae/*); do
+		echo $FilePath
+		FileF=$(ls $FilePath/F/*.gz)
+		FileR=$(ls $FilePath/R/*.gz)
+		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+		qsub /home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
 	done
 ```
 
+
+
+#### Aligning
+
+Then Rnaseq data was aligned to each genome assembly:
+
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/augustus
-	mkdir -p qc_rna/concatenated
-	RnaFiles=$(ls qc_rna/paired/F.oxysporum_fsp_cepae/*/*/*_trim.fq.gz | paste -s -d ' ')
-	RnaF=qc_rna/paired/Fus2/aligned_appended/appended_paired.1.fastq.gz
-	RnaR=qc_rna/paired/Fus2/aligned_appended/appended_paired.2.fastq.gz
-	mkdir -p qc_rna/concatenated/F.oxysporum/Fus2
-	ConcatRna=qc_rna/concatenated/F.oxysporum/Fus2/Fus2_RNA_timecourse_CzapekDox_GlucosePeptone_PDA_PDB_appended.fa.gz
-	cat $RnaF $RnaR $RnaFiles > $ConcatRna
-	GeneModel=fusarium
-	for Genome in $(ls repeat_masked/F.*/Fus2/*/*_contigs_unmasked.fa); do
-		Organism=$(echo $Genome | rev | cut -f4 -d'/' | rev)
-		Strain=$(echo $Genome | rev | cut -f3 -d'/' | rev)
-			OutDir=gene_pred/augustus/Model-fusarium_sp./$Organism/$Strain
-			qsub $ProgDir/submit_augustus.sh $GeneModel $Genome false $OutDir
-			OutDir=gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/$Organism/$Strain
-			qsub $ProgDir/augustus_pipe.sh $Genome $ConcatRna $GeneModel $OutDir
-		# OutDir=gene_pred/augustus/Model-fusarium_sp._CuffHints-Fus2/$Organism/$Strain
-		# HintsGff=gene_pred/training_augustus/Fusarium_oxysporum_fsp_cepae/Fus2/cufflinks_transcripts.gff
-		# qsub $ProgDir/submit_aug_hint.sh $GeneModel $Genome $HintsGff $OutDir
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+	FileF=qc_rna/raw_rna/genbank/P.cactorum/F/SRR1206032_trim.fq.gz
+	FileR=qc_rna/raw_rna/genbank/P.cactorum/R/SRR1206033_trim.fq.gz
+	OutDir=alignment/$Organism/$Strain"_masked"
+	qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+	Jobs=$(qstat | grep 'tophat_ali' | wc -l)
+	while [ $Jobs -gt 0 ]; do
+	  sleep 10
+	  printf "."
+	  Jobs=$(qstat | grep 'tophat_ali' | wc -l)
 	done
+done
+	OutDir=gene_pred/braker/$Organism/$Strain"_masked"
+	AcceptedHits=alignment/$Organism/$Strain"_masked"/accepted_hits.bam
+	GeneModelName="$Organism"_"$Strain"_masked_braker
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+	qsub $ProgDir/sub_braker.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 ```
 
-```bash
-for File in $(ls gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.*/*/*_augustus_preds.aa); do
-	echo $File; cat $File | grep '>' | wc -l;
-done
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/125/125_augustus_preds.aa
-# 17261
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/55/55_augustus_preds.aa
-# 17013
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/A23/A23_augustus_preds.aa
-# 17101
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/A28/A28_augustus_preds.aa
-# 17292
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/D2/D2_augustus_preds.aa
-# 16727
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.aa
-# 16988
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/HB17/HB17_augustus_preds.aa
-# 17077
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_cepae/PG/PG_augustus_preds.aa
-# 16961
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_narcissi/N139/N139_augustus_preds.aa
-# 21539
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_pisi/PG18/PG18_augustus_preds.aa
-# 21618
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.oxysporum_fsp_pisi/PG3/PG3_augustus_preds.aa
-# 18077
-# gene_pred/augustus/Model-fusarium_sp._Hints-Fus2/F.proliferatum/A8/A8_augustus_preds.aa
-# 20681
-
-
-for File in $(ls gene_pred/augustus/Model-fusarium_sp./*/*/*_EMR_singlestrand_aug_out.aa); do
-	echo $File;
-	cat $File | grep '>' | wc -l;
-done
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/125/125_EMR_singlestrand_aug_out.aa
-# 18650
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/55/55_EMR_singlestrand_aug_out.aa
-# 18293
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/A23/A23_EMR_singlestrand_aug_out.aa
-# 18363
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/A28/A28_EMR_singlestrand_aug_out.aa
-# 18730
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/D2/D2_EMR_singlestrand_aug_out.aa
-# 18432
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/Fus2/Fus2_EMR_singlestrand_aug_out.aa
-# 18108
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/HB17/HB17_EMR_singlestrand_aug_out.aa
-# 18282
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_cepae/PG/PG_EMR_singlestrand_aug_out.aa
-# 18431
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_narcissi/N139/N139_EMR_singlestrand_aug_out.aa
-# 23374
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_pisi/PG18/PG18_EMR_singlestrand_aug_out.aa
-# 23346
-# gene_pred/augustus/Model-fusarium_sp./F.oxysporum_fsp_pisi/PG3/PG3_EMR_singlestrand_aug_out.aa
-# 19906
-# gene_pred/augustus/Model-fusarium_sp./F.proliferatum/A8/A8_EMR_singlestrand_aug_out.aa
-# 22116
-```
 
 ## ORF finder
 

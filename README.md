@@ -604,12 +604,12 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 
 Outputs were summarised using the commands:
 ```bash
-	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report | grep -v 'cepae'); do
+	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
 		printf "$Species\t$Strain\n";
 		cat $File | head -n18 | tail -n+4;printf "\n";
-	done >> gene_pred/cegma/cegma_results_dna_summary.txt
+	done > gene_pred/cegma/cegma_results_dna_summary.txt
 
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
@@ -722,15 +722,36 @@ This contained the following data:
 
 Perform qc of RNAseq timecourse data
 ```bash
-	for FilePath in $(ls -d raw_rna/paired/F.oxysporum_fsp_cepae/*); do
-		echo $FilePath
-		FileF=$(ls $FilePath/F/*.gz)
-		FileR=$(ls $FilePath/R/*.gz)
-		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
-		qsub /home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
-	done
+for num in $(qstat | grep 'rna_qc' | cut -f1 -d ' '); do
+Treatment=$(head -n1 rna_qc_fastq-mcf.sh.o$num | cut -f10 -d '/')
+for FilePath in $(raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep1); do
+echo $FilePath
+FileF=$(ls $FilePath/F/*.gz)
+FileR=$(ls $FilePath/R/*.gz)
+IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+qsub /home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+sleep 10
+done
+done
 ```
-
+```
+raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep1
+Your job 6436212 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep2
+Your job 6436213 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep3
+Your job 6436214 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/control_72hrs_rep2
+Your job 6436215 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/control_72hrs_rep3
+Your job 6436216 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep1
+Your job 6436217 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep2
+Your job 6436218 ("rna_qc_fastq-mcf.sh") has been submitted
+raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep3
+Your job 6436219 ("rna_qc_fastq-mcf.sh") has been submitted
+```
 
 
 #### Aligning
@@ -738,26 +759,67 @@ Perform qc of RNAseq timecourse data
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
-	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-	FileF=qc_rna/raw_rna/genbank/P.cactorum/F/SRR1206032_trim.fq.gz
-	FileR=qc_rna/raw_rna/genbank/P.cactorum/R/SRR1206033_trim.fq.gz
-	OutDir=alignment/$Organism/$Strain"_masked"
-	qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
-	Jobs=$(qstat | grep 'tophat_ali' | wc -l)
-	while [ $Jobs -gt 0 ]; do
-	  sleep 10
-	  printf "."
-	  Jobs=$(qstat | grep 'tophat_ali' | wc -l)
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v 'Fus2'); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v -e '55_72hrs' -e 'FO47_72hrs' -e 'control_72hrs_rep2' -e 'control_72hrs_rep3' | grep 'Fus2_72hrs_rep1'); do
+			Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+			echo "$Timepoint"
+			FileF=$(ls $RNADir/F/*_trim.fq.gz)
+			FileR=$(ls $RNADir/R/*_trim.fq.gz)
+			OutDir=alignment/$Organism/$Strain/$Timepoint
+			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+			qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+		done
 	done
+```
+```bash
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		mkdir -p merge alignment/$Organism/$Strain/concatenated
+		samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+			alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+			alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+			alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+			alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+		OutDir=gene_pred/braker/$Organism/$Strain
+		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+		GeneModelName="$Organism"_"$Strain"_braker
+		rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+		qsub $ProgDir/sub_braker.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+	done
+```
+Fasta and gff files were extracted from Braker1 output.
+
+```bash
+for File in $(ls gene_pred/braker/F.*/*/*_braker/augustus.gff ); do
+getAnnoFasta.pl $File
+OutDir=$(dirname $File)
+echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
 done
-	OutDir=gene_pred/braker/$Organism/$Strain"_masked"
-	AcceptedHits=alignment/$Organism/$Strain"_masked"/accepted_hits.bam
-	GeneModelName="$Organism"_"$Strain"_masked_braker
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-	qsub $ProgDir/sub_braker.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 ```
 
 
@@ -771,10 +833,10 @@ also printing ORFs in .gff format.
 
 
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
-		qsub $ProgDir/run_ORF_finder.sh $Genome
-	done
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+qsub $ProgDir/run_ORF_finder.sh $Genome
+done
 ```
 
 The Gff files produced by ORF finder have some formatting errors. The following
@@ -810,10 +872,10 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v 'cepae'); do
+	for Genes in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v 'Fus2'| grep -v '125'); do
 		echo $Genes
 		$ProgDir/sub_interproscan.sh $Genes
-	done 2>&1 |  tee -a interproscan_submisison.log
+	done 2>&1 | tee -a interproscan_submisison.log
 ```
 
 Following interproscan annotation split files were combined using the following
@@ -822,30 +884,6 @@ commands:
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
 	for StrainPath in $(ls -d gene_pred/interproscan/F.*/*); do
-		Strain=$(basename $StrainPath)
-		Organism=$(echo $StrainPath | rev | cut -d "/" -f2 | rev)
-		echo $Strain
-		PredGenes=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
-		InterProRaw=gene_pred/interproscan/"$Organism"/"$Strain"/raw
-		$ProgDir/append_interpro.sh $PredGenes $InterProRaw
-	done
-```
-19/10/15 interproscan results were moved temporarily. This was to allow
-interproscan to be run for the Fus2 gene predictions containing 11k genes.
-
-```bash
-	mv gene_pred/interproscan/F.oxysporum_fsp_cepae gene_pred/interproscan/F.oxysporum_fsp_cepae_old
-	screen -a
-	cd /home/groups/harrisonlab/project_files/fusarium
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/augustus/F.oxysporum_fsp_cepae/Fus2/Fus2_augustus_preds.aa); do
-		echo $Genes
-		$ProgDir/sub_interproscan.sh $Genes
-	done 2>&1 |  tee -a interproscan_submisison.log
-	# Following interproscan annotation split files were combined
-	# using the following commands:
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for StrainPath in $(ls -d gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2); do
 		Strain=$(basename $StrainPath)
 		Organism=$(echo $StrainPath | rev | cut -d "/" -f2 | rev)
 		echo $Strain
@@ -884,23 +922,23 @@ the following commands:
 	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	CurPath=$PWD
-	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
-		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v -w 'Fus2'); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		SplitDir=gene_pred/augustus_split/$Organism/$Strain
 		mkdir -p $SplitDir
 		BaseName="$Organism""_$Strain"_augustus_preds
 		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
 		for File in $(ls $SplitDir/*_augustus_preds_*); do
-			Jobs=$(qstat | grep 'pred_sigP' | wc -l)
-			while [ $Jobs -ge 32 ]; do
+			Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+			while [ $Jobs -gt 1 ]; do
 				sleep 10
 				printf "."
-				Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+				Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
 			done
 			printf "\n"
 			echo $File
-			qsub $ProgDir/pred_sigP.sh $File
+			qsub $ProgDir/pred_sigP.sh $File signalp-4.1
 		done
 	done
 ```

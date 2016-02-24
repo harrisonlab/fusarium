@@ -483,100 +483,100 @@ using the following commands:
 	The number of bases masked by TransposonPSI:	0
 	The total number of masked bases are:	0
 
-	F.oxysporum_fsp_cepae	125
-	The number of bases masked by RepeatMasker:	3707484
-	The number of bases masked by TransposonPSI:	1210934
-	The total number of masked bases are:	3952973
+	F.oxysporum_fsp_cepae		125
+	The number of bases masked by RepeatMasker:		3707484
+	The number of bases masked by TransposonPSI:		1210934
+	The total number of masked bases are:		3952973
 
-	F.oxysporum_fsp_cepae	55
-	The number of bases masked by RepeatMasker:	3206161
-	The number of bases masked by TransposonPSI:	1031019
-	The total number of masked bases are:	3466359
+	F.oxysporum_fsp_cepae		55
+	The number of bases masked by RepeatMasker:		3206161
+	The number of bases masked by TransposonPSI:		1031019
+	The total number of masked bases are:		3466359
 
-	F.oxysporum_fsp_cepae	A1-2
-	The number of bases masked by RepeatMasker:	1937168
-	The number of bases masked by TransposonPSI:	816426
-	The total number of masked bases are:	2177343
+	F.oxysporum_fsp_cepae		A1-2
+	The number of bases masked by RepeatMasker:		1937168
+	The number of bases masked by TransposonPSI:		816426
+	The total number of masked bases are:		2177343
 
-	F.oxysporum_fsp_cepae	A13
-	The number of bases masked by RepeatMasker:	4414509
-	The number of bases masked by TransposonPSI:	1555142
-	The total number of masked bases are:	4712084
+	F.oxysporum_fsp_cepae		A13
+	The number of bases masked by RepeatMasker:		4414509
+	The number of bases masked by TransposonPSI:		1555142
+	The total number of masked bases are:		4712084
 
-	F.oxysporum_fsp_cepae	A23
-	The number of bases masked by RepeatMasker:	3156362
-	The number of bases masked by TransposonPSI:	1061656
-	The total number of masked bases are:	3446078
+	F.oxysporum_fsp_cepae		A23
+	The number of bases masked by RepeatMasker:		3156362
+	The number of bases masked by TransposonPSI:		1061656
+	The total number of masked bases are:		3446078
 
-	F.oxysporum_fsp_cepae	A28
-	The number of bases masked by RepeatMasker:	4001386
-	The number of bases masked by TransposonPSI:	1189369
-	The total number of masked bases are:	4304881
+	F.oxysporum_fsp_cepae		A28
+	The number of bases masked by RepeatMasker:		4001386
+	The number of bases masked by TransposonPSI:		1189369
+	The total number of masked bases are:		4304881
 
-	F.oxysporum_fsp_cepae	CB3
-	The number of bases masked by RepeatMasker:	2382071
-	The number of bases masked by TransposonPSI:	842157
-	The total number of masked bases are:	2630520
+	F.oxysporum_fsp_cepae		CB3
+	The number of bases masked by RepeatMasker:		2382071
+	The number of bases masked by TransposonPSI:		842157
+	The total number of masked bases are:		2630520
 
-	F.oxysporum_fsp_cepae	D2
-	The number of bases masked by RepeatMasker:	1363000
-	The number of bases masked by TransposonPSI:	594012
-	The total number of masked bases are:	1632798
+	F.oxysporum_fsp_cepae		D2
+	The number of bases masked by RepeatMasker:		1363000
+	The number of bases masked by TransposonPSI:		594012
+	The total number of masked bases are:		1632798
 
-	F.oxysporum_fsp_cepae	Fus2
-	The number of bases masked by RepeatMasker:	3619961
-	The number of bases masked by TransposonPSI:	1280301
-	The total number of masked bases are:	3857605
+	F.oxysporum_fsp_cepae		Fus2
+	The number of bases masked by RepeatMasker:		3619961
+	The number of bases masked by TransposonPSI:		1280301
+	The total number of masked bases are:		3857605
 
-	F.oxysporum_fsp_cepae	HB17
-	The number of bases masked by RepeatMasker:	3385838
-	The number of bases masked by TransposonPSI:	1077091
-	The total number of masked bases are:	3649652
+	F.oxysporum_fsp_cepae		HB17
+	The number of bases masked by RepeatMasker:		3385838
+	The number of bases masked by TransposonPSI:		1077091
+	The total number of masked bases are:		3649652
 
-	F.oxysporum_fsp_cepae	HB6
-	The number of bases masked by RepeatMasker:	3216000
-	The number of bases masked by TransposonPSI:	995170
-	The total number of masked bases are:	3455823
+	F.oxysporum_fsp_cepae		HB6
+	The number of bases masked by RepeatMasker:		3216000
+	The number of bases masked by TransposonPSI:		995170
+	The total number of masked bases are:		3455823
 
-	F.oxysporum_fsp_cepae	PG
-	The number of bases masked by RepeatMasker:	2769568
-	The number of bases masked by TransposonPSI:	865813
-	The total number of masked bases are:	3005423
+	F.oxysporum_fsp_cepae		PG
+	The number of bases masked by RepeatMasker:		2769568
+	The number of bases masked by TransposonPSI:		865813
+	The total number of masked bases are:		3005423
 
-	F.oxysporum_fsp_narcissi	N139
-	The number of bases masked by RepeatMasker:	5404179
-	The number of bases masked by TransposonPSI:	1655249
-	The total number of masked bases are:	5709023
+	F.oxysporum_fsp_narcissi		N139
+	The number of bases masked by RepeatMasker:		5404179
+	The number of bases masked by TransposonPSI:		1655249
+	The total number of masked bases are:		5709023
 
-	F.oxysporum_fsp_pisi	FOP1
-	The number of bases masked by RepeatMasker:	0
-	The number of bases masked by TransposonPSI:	0
-	The total number of masked bases are:	0
+	F.oxysporum_fsp_pisi		FOP1
+	The number of bases masked by RepeatMasker:		0
+	The number of bases masked by TransposonPSI:		0
+	The total number of masked bases are:		0
 
-	F.oxysporum_fsp_pisi	FOP5
-	The number of bases masked by RepeatMasker:	3880611
-	The number of bases masked by TransposonPSI:	1313995
-	The total number of masked bases are:	4193700
+	F.oxysporum_fsp_pisi		FOP5
+	The number of bases masked by RepeatMasker:		3880611
+	The number of bases masked by TransposonPSI:		1313995
+	The total number of masked bases are:		4193700
 
-	F.oxysporum_fsp_pisi	L5
-	The number of bases masked by RepeatMasker:	1287737
-	The number of bases masked by TransposonPSI:	417513
-	The total number of masked bases are:	1456488
+	F.oxysporum_fsp_pisi		L5
+	The number of bases masked by RepeatMasker:		1287737
+	The number of bases masked by TransposonPSI:		417513
+	The total number of masked bases are:		1456488
 
-	F.oxysporum_fsp_pisi	PG18
-	The number of bases masked by RepeatMasker:	5349661
-	The number of bases masked by TransposonPSI:	1627436
-	The total number of masked bases are:	5673770
+	F.oxysporum_fsp_pisi		PG18
+	The number of bases masked by RepeatMasker:		5349661
+	The number of bases masked by TransposonPSI:		1627436
+	The total number of masked bases are:		5673770
 
-	F.oxysporum_fsp_pisi	PG3
-	The number of bases masked by RepeatMasker:	4686428
-	The number of bases masked by TransposonPSI:	1663269
-	The total number of masked bases are:	5011872
+	F.oxysporum_fsp_pisi		PG3
+	The number of bases masked by RepeatMasker:		4686428
+	The number of bases masked by TransposonPSI:		1663269
+	The total number of masked bases are:		5011872
 
-	F.proliferatum	A8
-	The number of bases masked by RepeatMasker:	1065627
-	The number of bases masked by TransposonPSI:	278366
-	The total number of masked bases are:	1266227
+	F.proliferatum		A8
+	The number of bases masked by RepeatMasker:		1065627
+	The number of bases masked by TransposonPSI:		278366
+	The total number of masked bases are:		1266227
 ```
 
 # Gene Prediction
@@ -814,12 +814,12 @@ Then Rnaseq data was aligned to each genome assembly:
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-for File in $(ls gene_pred/braker/F.*/*/*_braker/augustus.gff ); do
-getAnnoFasta.pl $File
-OutDir=$(dirname $File)
-echo "##gff-version 3" > $OutDir/augustus_extracted.gff
-cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
-done
+	for File in $(ls gene_pred/braker/F.*/*/*_braker/augustus.gff ); do
+		getAnnoFasta.pl $File
+		OutDir=$(dirname $File)
+		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+		cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+	done
 ```
 
 
@@ -833,19 +833,19 @@ also printing ORFs in .gff format.
 
 
 ```bash
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
-qsub $ProgDir/run_ORF_finder.sh $Genome
-done
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+		qsub $ProgDir/run_ORF_finder.sh $Genome
+	done
 ```
 
-The Gff files produced by ORF finder have some formatting errors. The following
-script was run to correct these:
+The Gff files from the the ORF finder are not in true Gff3 format. These were
+corrected using the following commands:
 
 ```bash
 	ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation
 	for ORF_Gff in $(ls gene_pred/ORF_finder/*/*/*_ORF.gff | grep -v '_F_atg_' | grep -v '_R_atg_'); do
-		ORF_Gff_mod=$(echo $ORF_Gff | sed 's/_ORF.gff/_ORF_mod.gff/g')
+		ORF_Gff_mod=$(echo $ORF_Gff | sed 's/_ORF.gff/_ORF_corrected.gff3/g')
 		echo ""
 		echo "Correcting the following file:"
 		echo $ORF_Gff
@@ -854,7 +854,6 @@ script was run to correct these:
 		$ProgDir/gff_corrector.pl $ORF_Gff > $ORF_Gff_mod
 	done
 ```
-
 
 #Functional annotation
 
@@ -872,7 +871,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v 'Fus2'| grep -v '125'); do
+	for Genes in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
 		echo $Genes
 		$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -883,13 +882,43 @@ commands:
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for StrainPath in $(ls -d gene_pred/interproscan/F.*/*); do
-		Strain=$(basename $StrainPath)
-		Organism=$(echo $StrainPath | rev | cut -d "/" -f2 | rev)
+		for Proteins in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep '125'); do
+		Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
 		echo $Strain
-		PredGenes=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
-		InterProRaw=gene_pred/interproscan/"$Organism"/"$Strain"/raw
-		$ProgDir/append_interpro.sh $PredGenes $InterProRaw
+		InterProRaw=gene_pred/interproscan/"$Strain"/"$Organism"_"$Strain"_braker/raw
+		$ProgDir/append_interpro.sh $Proteins $InterProRaw
+	done
+```
+
+
+Following interproscan annotation split files were combined using the following
+commands:
+
+```bash
+	for PredGenes in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v '125'); do
+		Strain=$(echo $PredGenes | rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $PredGenes | rev | cut -d '/' -f4 | rev)
+		InterProRaw=gene_pred/interproscan/"$Strain"/"$Organism"_"$Strain"_braker/raw
+		OutDir=gene_pred/interproscan/$Organism/$Strain
+		mkdir -p $OutDir
+		printf "" > $OutDir/"$Strain"_interproscan.tsv
+		printf "" > $OutDir/"$Strain"_interproscan.xml
+		printf "" > $OutDir/interpro_features.gff
+		printf "" > $OutDir/"$Strain"_interpro.gff3
+		for File in $(ls -v $InterProRaw/*_split_*.tsv); do
+			cat $File >> $OutDir/"$Strain"_interproscan.tsv
+		done
+		for File in $(ls -v $InterProRaw/*_split_*.xml); do
+			cat $File >> $OutDir/"$Strain"_interproscan.xml
+		done
+		for File in $(ls -v $InterProRaw/*_split_*.gff3); do
+			FastaStart=$(cat $File | grep -E "^##FASTA" -n | cut -d ':' -f1)
+			cat $File | head -n "$FastaStart" | grep -v -E "^#" >> $OutDir/interpro_features.gff
+		done
+		cat $OutDir/interpro_features.gff $PredGenes >> $OutDir/"$Strain"_interpro.gff3
+		rm $OutDir/interpro_features.gff
 	done
 ```
 
@@ -900,20 +929,17 @@ commands:
 Putative RxLR genes were identified within Augustus gene models using a number
 of approaches:
 
- * A) From Augustus gene models - Signal peptide & RxLR motif  
- * B) From Augustus gene models - Hmm evidence of WY domains  
- * C) From Augustus gene models - Hmm evidence of RxLR effectors  
+ * A) From Augustus gene models - Signal peptide identification
+ * B) From Augustus gene models - Effector identification using EffectorP
  * D) From ORF fragments - Signal peptide & RxLR motif  
  * E) From ORF fragments - Hmm evidence of WY domains  
  * F) From ORF fragments - Hmm evidence of RxLR effectors  
 
 
-### A) From Augustus gene models - Signal peptide & RxLR motif
+### A) From Augustus gene models - Signal peptide identification
 
 Required programs:
- * SigP
- * biopython
-
+ * SignalP-4.1
 
 Proteins that were predicted to contain signal peptides were identified using
 the following commands:
@@ -925,7 +951,7 @@ the following commands:
 	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v -w 'Fus2'); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		SplitDir=gene_pred/augustus_split/$Organism/$Strain
+		SplitDir=gene_pred/braker_split/$Organism/$Strain
 		mkdir -p $SplitDir
 		BaseName="$Organism""_$Strain"_augustus_preds
 		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
@@ -943,826 +969,83 @@ the following commands:
 	done
 ```
 
+
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-	for SplitDir in $(ls -d gene_pred/sigP/F.*/*/split); do
-		Strain=$(echo $SplitDir | cut -d '/' -f4)
-		Organism=$(echo $SplitDir | cut -d '/' -f3)
-		InStringAA=''
-		InStringNeg=''
-		InStringTab=''
-		InStringTxt=''
-		for GRP in $(ls -l $SplitDir/*_augustus_preds_*_sp.aa | rev | cut -d '_' -f2 | rev | sort -n); do  
-		InStringAA="$InStringAA gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
-		InStringNeg="$InStringNeg gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
-		InStringTab="$InStringTab gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
-		InStringTxt="$InStringTxt gene_pred/sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
-		done
-		cat $InStringAA > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.aa
-		cat $InStringNeg > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-		tail -n +2 -q $InStringTab > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.tab
-		cat $InStringTxt > gene_pred/sigP/$Organism/$Strain/"$Strain"_aug_sp.txt
-	done
-```
-The regular expression R.LR.{,40}[ED][ED][KR] has previously been used to identfy RxLR effectors. The addition of an EER motif is significant as it has been shown as required for host uptake of the protein.
-
-The RxLR_EER_regex_finder.py script was used to search for this regular expression and annotate the EER domain where present.
-
-```bash
-	for Secretome in $(ls gene_pred/sigP/F.*/*/*_aug_sp.aa); do
-		ProgDir=~/git_repos/emr_repos/tools/pathogen/RxLR_effectors;
-		Strain=$(echo $Secretome | cut -d '/' -f4);
-		Organism=$(echo $Secretome | cut -d '/' -f3) ;
-		OutDir=analysis/RxLR_effectors/RxLR_EER_regex_finder/"$Organism"/"$Strain";
-		mkdir -p $OutDir;
-		printf "\nstrain: $Strain\tspecies: $Organism\n";
-		printf "the number of SigP gene is:\t";
-		cat $Secretome | grep '>' | wc -l;
-		printf "the number of SigP-RxLR genes are:\t";
-		$ProgDir/RxLR_EER_regex_finder.py $Secretome > $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa;
-		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_regex.txt
-		cat $OutDir/"$Strain"_Aug_RxLR_regex.txt | wc -l
-		printf "the number of SigP-RxLR-EER genes are:\t";
-		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt
-		cat $OutDir/"$Strain"_Aug_RxLR_EER_regex.txt | wc -l
-		printf "\n"
-		# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-		# Col2=RxLR_EER_regex_finder.py
-		# GeneNames=$OutDir/"$Strain"_Aug_RxLR_regex.txt
-		# GeneModels=gene_pred/augustus/"$Organism"/"$Strain"/"$Strain"_augustus_preds.aa
-		# $ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_Aug_RxLR_regex.gff3
-	done
+for SplitDir in $(ls -d gene_pred/braker_split/*/*); do
+Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
+Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=augustus_signalp-4.1
+for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
+InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
+InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
+InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+done
 ```
 
-The results were as follows:
 
-strain: 125	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1340  
-the number of SigP-RxLR genes are:	13  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: 55	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1333  
-the number of SigP-RxLR genes are:	12  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: A23	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1335  
-the number of SigP-RxLR genes are:	13  
-the number of SigP-RxLR-EER genes are:	2  
-
-strain: A28	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1354  
-the number of SigP-RxLR genes are:	16  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: D2	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1156  
-the number of SigP-RxLR genes are:	8  
-the number of SigP-RxLR-EER genes are:	0  
-
-strain: Fus2	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1346  
-the number of SigP-RxLR genes are:	13  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: HB17	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1350  
-the number of SigP-RxLR genes are:	13  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: PG	species: F.oxysporum_fsp_cepae  
-the number of SigP gene is:	1334  
-the number of SigP-RxLR genes are:	11  
-the number of SigP-RxLR-EER genes are:	0  
-
-strain: N139	species: F.oxysporum_fsp_narcissi  
-the number of SigP gene is:	1765  
-the number of SigP-RxLR genes are:	22  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: PG18	species: F.oxysporum_fsp_pisi  
-the number of SigP gene is:	1807  
-the number of SigP-RxLR genes are:	28  
-the number of SigP-RxLR-EER genes are:	1  
-
-strain: PG3	species: F.oxysporum_fsp_pisi  
-the number of SigP gene is:	1386  
-the number of SigP-RxLR genes are:	11  
-the number of SigP-RxLR-EER genes are:	0  
-
-strain: A8	species: F.proliferatum  
-the number of SigP gene is:	1975  
-the number of SigP-RxLR genes are:	40  
-the number of SigP-RxLR-EER genes are:	3  
-
-
-
-### B) From Augustus gene models - Hmm evidence of WY domains
-Hmm models for the WY domain contained in many RxLRs were used to search gene models predicted with Augustus. These were run with the following commands:
-
-```bash
-	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
-	HmmModel=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer/WY_motif.hmm
-	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
-		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		OutDir=analysis/RxLR_effectors/hmmer_WY/$Organism/$Strain
-		mkdir -p $OutDir
-		HmmResults="$Strain"_Aug_WY_hmmer.txt
-		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
-		echo "$Organism $Strain"
-		cat $OutDir/$HmmResults | grep 'Initial search space'
-		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
-		HmmFasta="$Strain"_Aug_WY_hmmer.fa
-		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
-	done
-```
-
-Results were as follows:  
-
-F.oxysporum_fsp_cepae 125
-Initial search space (Z):              11203  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae 55  
-Initial search space (Z):              11047  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae A23  
-Initial search space (Z):              11108  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae A28  
-Initial search space (Z):              11131  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae D2  
-Initial search space (Z):              10632  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae Fus2  
-Initial search space (Z):              11104  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae HB17  
-Initial search space (Z):              11126  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae PG  
-Initial search space (Z):              11011  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_narcissi N139  
-Initial search space (Z):              14757  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_pisi PG18  
-Initial search space (Z):              14859  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.oxysporum_fsp_pisi PG3  
-Initial search space (Z):              11517  [actual number of targets]  
-Domain search space  (domZ):               0  [number of targets reported over threshold]  
-F.proliferatum A8  
-Initial search space (Z):              15034  [actual number of targets]  
-Domain search space  (domZ):               1  [number of targets reported over threshold]  
-
-
-
-### C) From Augustus gene models - Hmm evidence of RxLR effectors
-```bash
-	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
-	HmmModel=/home/armita/git_repos/emr_repos/SI_Whisson_et_al_2007/cropped.hmm
-	for Proteome in $(ls gene_pred/augustus/F.*/*/*_augustus_preds.aa | grep -v '_old'); do
-		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		OutDir=analysis/RxLR_effectors/hmmer_RxLR/$Organism/$Strain
-		mkdir -p $OutDir
-		HmmResults="$Strain"_Aug_RxLR_hmmer.txt
-		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
-		echo "$Organism $Strain"
-		cat $OutDir/$HmmResults | grep 'Initial search space'
-		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
-		HmmFasta="$Strain"__Aug_RxLR_hmmer.fa
-		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
-	done
-```
-
-F.oxysporum_fsp_cepae 125  
-Initial search space (Z):              11203  [actual number of targets]  
-Domain search space  (domZ):               3  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae 55  
-Initial search space (Z):              11047  [actual number of targets]  
-Domain search space  (domZ):               3  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae A23  
-Initial search space (Z):              11108  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae A28  
-Initial search space (Z):              11131  [actual number of targets]  
-Domain search space  (domZ):               1  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae D2  
-Initial search space (Z):              10632  [actual number of targets]  
-Domain search space  (domZ):               1  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae Fus2  
-Initial search space (Z):              11104  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae HB17  
-Initial search space (Z):              11126  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-F.oxysporum_fsp_cepae PG  
-Initial search space (Z):              11011  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-F.oxysporum_fsp_narcissi N139  
-Initial search space (Z):              14757  [actual number of targets]  
-Domain search space  (domZ):               1  [number of targets reported over threshold]  
-F.oxysporum_fsp_pisi PG18  
-Initial search space (Z):              14859  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-F.oxysporum_fsp_pisi PG3  
-Initial search space (Z):              11517  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-F.proliferatum A8  
-Initial search space (Z):              15034  [actual number of targets]  
-Domain search space  (domZ):               2  [number of targets reported over threshold]  
-
-### D) From ORF fragments - Signal peptide & RxLR motif
+### B) From Augustus gene models - Effector identification using EffectorP
 
 Required programs:
- * SigP
- * biopython
-
-
-Proteins that were predicted to contain signal peptides were identified using
-the following commands:
+ * EffectorP.py
 
 ```bash
-	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-	CurPath=$PWD
-	for Proteome in $(ls gene_pred/ORF_finder/F.*/*/*.aa_cat.fa); do
+	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		BaseName="$Organism"_"$Strain"_EffectorP
+		OutDir=analysis/effectorP/$Organism/$Strain
+		ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+		qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+	done
+	for Proteome in $(ls gene_pred/augustus_signalp-4.1/F.*/*/*_aug_sp.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
 		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		SplitDir=gene_pred/ORF_finder_split/$Organism/$Strain
-		mkdir -p $SplitDir
-		BaseName="$Organism""_$Strain"_ORF_finder_preds
-		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-		for File in $(ls $SplitDir/$BaseName_*.fa); do
-			Jobs=$(qstat | grep 'pred_sigP' | wc -l)
-			while [ $Jobs -ge 32 ]; do
-				sleep 10
-				printf "."
-				Jobs=$(qstat | grep 'pred_sigP' | wc -l)
-			done
-			printf "\n"
-			echo $File
-			qsub $ProgDir/pred_sigP.sh $File
-		done
+		BaseName="$Organism"_"$Strain"_EffectorP
+		OutDir=analysis/effectorP_secreted/$Organism/$Strain
+		ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+		qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
 	done
 ```
 
-The batch files of predicted secreted proteins needed to be combined into a
-single file for each strain. This was done with the following commands:
-```bash
-	for SplitDir in $(ls -d gene_pred/ORF_finder_sigP/F.*/*/split); do
-	Strain=$(echo $SplitDir | cut -d '/' -f4)
-	Organism=$(echo $SplitDir | cut -d '/' -f3)
-	InStringAA=''
-	InStringNeg=''
-	InStringTab=''
-	InStringTxt=''
-	for GRP in $(ls -l $SplitDir/*_ORF_finder_preds_*_sp.aa | rev | cut -d '_' -f2 | rev | sort -n); do  
-	InStringAA="$InStringAA gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp.aa";  
-	InStringNeg="$InStringNeg gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp_neg.aa";  
-	InStringTab="$InStringTab gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp.tab";
-	InStringTxt="$InStringTxt gene_pred/ORF_finder_sigP/$Organism/$Strain/split/"$Organism"_"$Strain"_ORF_finder_preds_$GRP""_sp.txt";  
-	done
-	cat $InStringAA > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_sp.aa
-	cat $InStringNeg > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_neg_sp.aa
-	tail -n +2 -q $InStringTab > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_sp.tab
-	cat $InStringTxt > gene_pred/ORF_finder_sigP/$Organism/$Strain/"$Strain"_ORF_finder_sp.txt
-	done
-```
-The regular expression R.LR.{,40}[ED][ED][KR] has previously been used to identfy RxLR effectors. The addition of an EER motif is significant as it has been shown as required for host uptake of the protein.
-
-The RxLR_EER_regex_finder.py script was used to search for this regular expression and annotate the EER domain where present.
+### C) Identification of MIMP-flanking genes
 
 ```bash
-	for Secretome in $(ls gene_pred/ORF_finder_sigP/F.*/*/*_ORF_finder_sp.aa); do
-		ProgDir=~/git_repos/emr_repos/tools/pathogen/RxLR_effectors;
-		Strain=$(echo $Secretome | cut -d '/' -f4);
-		Organism=$(echo $Secretome | cut -d '/' -f3) ;
-		OutDir=analysis/RxLR_effectors/RxLR_EER_regex_finder/"$Organism"/"$Strain";
-		mkdir -p $OutDir;
-		printf "\nstrain: $Strain\tspecies: $Organism\n";
-		printf "the number of SigP gene is:\t";
-		cat $Secretome | grep '>' | wc -l;
-		printf "the number of SigP-RxLR genes are:\t";
-		$ProgDir/RxLR_EER_regex_finder.py $Secretome > $OutDir/"$Strain"_ORF_RxLR_EER_regex.fa;
-		cat $OutDir/"$Strain"_ORF_RxLR_EER_regex.fa | grep '>' | cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_ORF_RxLR_regex.txt
-		cat $OutDir/"$Strain"_ORF_RxLR_regex.txt | wc -l
-		printf "the number of SigP-RxLR-EER genes are:\t";
-		cat $OutDir/"$Strain"_ORF_RxLR_EER_regex.fa | grep '>' | grep 'EER_motif_start' |  cut -f1 | sed 's/>//g' | sed 's/ //g' > $OutDir/"$Strain"_ORF_RxLR_EER_regex.txt
-		cat $OutDir/"$Strain"_ORF_RxLR_EER_regex.txt | wc -l
-		printf "\n"
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-		Col2=RxLR_EER_regex_finder.py
-		#GeneNames=$OutDir/"$Strain"_ORF_RxLR_regex.txt
-		#GeneModels=gene_pred/ORF_finder/"$Organism"/"$Strain"/"$Strain"*.aa_cat.fa
-		#$ProgDir/gene_list_to_gff.pl $GeneNames $GeneModels $Col2 Name > $OutDir/"$Strain"_ORF_RxLR_regex.gff3
-	done
-```
-
-The results were as follows:
-```
-	strain: 125	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	15312
-	the number of SigP-RxLR genes are:	685
-	the number of SigP-RxLR-EER genes are:	17
-
-
-	strain: 55	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16347
-	the number of SigP-RxLR genes are:	724
-	the number of SigP-RxLR-EER genes are:	17
-
-
-	strain: A23	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16402
-	the number of SigP-RxLR genes are:	731
-	the number of SigP-RxLR-EER genes are:	17
-
-
-	strain: A28	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16617
-	the number of SigP-RxLR genes are:	716
-	the number of SigP-RxLR-EER genes are:	16
-
-
-	strain: D2	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16169
-	the number of SigP-RxLR genes are:	686
-	the number of SigP-RxLR-EER genes are:	15
-
-
-	strain: Fus2	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16262
-	the number of SigP-RxLR genes are:	722
-	the number of SigP-RxLR-EER genes are:	18
-
-
-	strain: HB17	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16326
-	the number of SigP-RxLR genes are:	720
-	the number of SigP-RxLR-EER genes are:	17
-
-
-	strain: PG	species: F.oxysporum_fsp_cepae
-	the number of SigP gene is:	16390
-	the number of SigP-RxLR genes are:	720
-	the number of SigP-RxLR-EER genes are:	15
-
-
-	strain: N139	species: F.oxysporum_fsp_narcissi
-	the number of SigP gene is:	22180
-	the number of SigP-RxLR genes are:	986
-	the number of SigP-RxLR-EER genes are:	22
-
-
-	strain: PG18	species: F.oxysporum_fsp_pisi
-	the number of SigP gene is:	22146
-	the number of SigP-RxLR genes are:	1014
-	the number of SigP-RxLR-EER genes are:	14
-
-
-	strain: PG3	species: F.oxysporum_fsp_pisi
-	the number of SigP gene is:	17424
-	the number of SigP-RxLR genes are:	740
-	the number of SigP-RxLR-EER genes are:	11
-
-
-	strain: A8	species: F.proliferatum
-	the number of SigP gene is:	24561
-	the number of SigP-RxLR genes are:	1203
-	the number of SigP-RxLR-EER genes are:	27
-```
-
-### E) From ORF fragments - Hmm evidence of WY domains
-```bash
-	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
-	HmmModel=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer/WY_motif.hmm
-	for Proteome in $(ls gene_pred/ORF_finder/F.*/*/*.aa_cat.fa); do
-		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		OutDir=analysis/RxLR_effectors/hmmer_WY/$Organism/$Strain
-		mkdir -p $OutDir
-		HmmResults="$Strain"_ORF_WY_hmmer.txt
-		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
-		echo "$Organism $Strain"
-		cat $OutDir/$HmmResults | grep 'Initial search space'
-		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
-		HmmFasta="$Strain"_ORF_WY_hmmer.fa
-		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
-	done
-```
-Results were as follows:
-```
-	F.oxysporum_fsp_cepae 125
-	Initial search space (Z):             357389  [actual number of targets]
-	Domain search space  (domZ):              11  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae 55
-	Initial search space (Z):             356765  [actual number of targets]
-	Domain search space  (domZ):              11  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae A23
-	Initial search space (Z):             357686  [actual number of targets]
-	Domain search space  (domZ):              11  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae A28
-	Initial search space (Z):             365675  [actual number of targets]
-	Domain search space  (domZ):              10  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae D2
-	Initial search space (Z):             352139  [actual number of targets]
-	Domain search space  (domZ):               9  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae Fus2
-	Initial search space (Z):             353490  [actual number of targets]
-	Domain search space  (domZ):              11  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae HB17
-	Initial search space (Z):             355148  [actual number of targets]
-	Domain search space  (domZ):              11  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae PG
-	Initial search space (Z):             356817  [actual number of targets]
-	Domain search space  (domZ):              15  [number of targets reported over threshold]
-	F.oxysporum_fsp_narcissi N139
-	Initial search space (Z):             449092  [actual number of targets]
-	Domain search space  (domZ):               9  [number of targets reported over threshold]
-	F.oxysporum_fsp_pisi PG18
-	Initial search space (Z):             445079  [actual number of targets]
-	Domain search space  (domZ):              13  [number of targets reported over threshold]
-	F.oxysporum_fsp_pisi PG3
-	Initial search space (Z):             384712  [actual number of targets]
-	Domain search space  (domZ):              10  [number of targets reported over threshold]
-	F.proliferatum A8
-	Initial search space (Z):             456646  [actual number of targets]
-	Domain search space  (domZ):               6  [number of targets reported over threshold]
-```
-
-### F) From ORF fragments - Hmm evidence of RxLR effectors
-```bash
-	ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/hmmer
-	HmmModel=/home/armita/git_repos/emr_repos/SI_Whisson_et_al_2007/cropped.hmm
-	for Proteome in $(ls gene_pred/ORF_finder/F.*/*/*.aa_cat.fa); do
-		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		OutDir=analysis/RxLR_effectors/hmmer_RxLR/$Organism/$Strain
-		mkdir -p $OutDir
-		HmmResults="$Strain"_ORF_RxLR_hmmer.txt
-		hmmsearch -T 0 $HmmModel $Proteome > $OutDir/$HmmResults
-		echo "$Organism $Strain"
-		cat $OutDir/$HmmResults | grep 'Initial search space'
-		cat $OutDir/$HmmResults | grep 'number of targets reported over threshold'
-		HmmFasta="$Strain"_ORF_RxLR_hmmer.fa
-		$ProgDir/hmmer2fasta.pl $OutDir/$HmmResults $Proteome > $OutDir/$HmmFasta
-	done
-```
-
-The results were as follows:
-
-```
-	F.oxysporum_fsp_cepae 125
-	Initial search space (Z):             357389  [actual number of targets]
-	Domain search space  (domZ):              46  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae 55
-	Initial search space (Z):             356765  [actual number of targets]
-	Domain search space  (domZ):              46  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae A23
-	Initial search space (Z):             357686  [actual number of targets]
-	Domain search space  (domZ):              46  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae A28
-	Initial search space (Z):             365675  [actual number of targets]
-	Domain search space  (domZ):              45  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae D2
-	Initial search space (Z):             352139  [actual number of targets]
-	Domain search space  (domZ):              41  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae Fus2
-	Initial search space (Z):             353490  [actual number of targets]
-	Domain search space  (domZ):              46  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae HB17
-	Initial search space (Z):             355148  [actual number of targets]
-	Domain search space  (domZ):              46  [number of targets reported over threshold]
-	F.oxysporum_fsp_cepae PG
-	Initial search space (Z):             356817  [actual number of targets]
-	Domain search space  (domZ):              51  [number of targets reported over threshold]
-	F.oxysporum_fsp_narcissi N139
-	Initial search space (Z):             449092  [actual number of targets]
-	Domain search space  (domZ):              58  [number of targets reported over threshold]
-	F.oxysporum_fsp_pisi PG18
-	Initial search space (Z):             445079  [actual number of targets]
-	Domain search space  (domZ):              48  [number of targets reported over threshold]
-	F.oxysporum_fsp_pisi PG3
-	Initial search space (Z):             384712  [actual number of targets]
-	Domain search space  (domZ):              35  [number of targets reported over threshold]
-	F.proliferatum A8
-	Initial search space (Z):             456646  [actual number of targets]
-	Domain search space  (domZ):              45  [number of targets reported over threshold]
-```
-
-### G) Combined evidence file
-
-Evidence of RxLR effectors from different sources was combined into a single gff
-feature file.
-
-This was done using the following commands:
-<!--
-```bash
-		ProgDir=~/git_repos/emr_repos/scripts/phytophthora/pathogen/merge_gff
-    # Infiles
-    GffAug=gene_pred/augustus_unmasked/P.cactorum/414/414_augustus_preds.gtf
-    ORF_RxLRs=analysis/rxlr_atg_unmasked/P.cactorum/414/414_ORF_sp_rxlr.gff3
-    ORF_WYs=analysis/hmmer/WY/P.cactorum/414/414_ORF_WY_hmmer.gff3
-    # Outfiles
-    AugDB=414_aug.db
-    WyDB=414_WY.db
-    WyID=WY_id.txt
-    WyDB_mod=414_WY_note.db
-    RxlrDB=414_rxlr.db
-    RxlrID=rxlr_id.txt
-    RxlrDB_mod=414_rxlr_note.db
-    Rxlr_Wy_DB=414_rxlr_WY.db
-
-    OrfMerged=414_rxlr_WY_merged.db
-    MergedDB=414_Aug_ORF_merged.db
-    FinalDB=414_Aug_ORF.db
-    FinalGff=414_Aug_ORF.gff
-```
-
-Make a db of aug genes and effector ORFs
-
-```bash
-$ProgDir/make_gff_database.py --inp $GffAug --db $AugDB
-	$ProgDir/make_gff_database.py --inp $ORF_WYs --db $WyDB
-	$ProgDir/make_gff_database.py --inp $ORF_RxLRs --db $RxlrDB
-``` -->
-
-
-## Mimps
-
-The presence of Mimp promotors in Fusarium genomes were identified. This was
-done in three steps:
- * Position of Mimps were identified in the genome
- * Genes within 1000bp downstream of the mimp were identified from Augustus
-predictions
- * ORFs within 1000bp downstream of the mimp were identified from ORF
-predictions
-
-### A) Position of Mimps were identified
-Position of Mimps
-gff predictions for the position of mimps in the genome were identified
-Fus2 was performed separately to ensure mimps are predicted from the correct assembly
-
-```bash
-	ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+	# for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
 		Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 		Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
-		OutDir=analysis/mimps/$Organism/"$Strain"
+		ProtGff=$(ls gene_pred/braker/$Organism/"$Strain"/*_braker/augustus_extracted.gff)
+		OutDir=analysis/mimps/$Organism/$Strain
 		mkdir -p "$OutDir"
-		"$ProgDir"/mimp_finder.pl "$Genome" "$OutDir"/"$Strain"_mimps.fa "$OutDir"/"$Strain"_mimps.gff3 > "$OutDir"/"$Strain"_mimps.log
+		echo "$Organism - $Strain"
+		ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
+		$ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
+		$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
+		echo "The number of mimps identified:"
+		cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
+		bedtools intersect -u -a $ProtGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+		echo "The following transcripts intersect mimps:"
+		MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
+		cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 > $MimpGenesTxt
+		cat $MimpGenesTxt | wc -l
 	done
 ```
 
-```bash
-ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
-# for Genome in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_AssemblyScaffolds.fasta); do
-for Genome in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Ma_et_al_2010/fusarium_oxysporum_f._sp._lycopersici_mitochondrion_2_contigs.fasta); do
-Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
-Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
-OutDir=analysis/mimps/$Organism/"$Strain"
-mkdir -p "$OutDir"
-"$ProgDir"/mimp_finder.pl "$Genome" "$OutDir"/"$Strain"_mimps.fa "$OutDir"/"$Strain"_mimps.gff3 > "$OutDir"/"$Strain"_mimps.log
-done
-```
-
-### B) Augustus genes flanking Mimps
-
-
-<!-- ```bash
-	ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
-	for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
-		Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
-		Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
-		MimpDir=$(dirname $Mimps)
-		echo "$Mimps"
-		"$ProgDir"/gffexpander.pl + 1500 "$Mimps" > "$MimpDir"/"$Strain"_mimps_expanded.gff3
-		StrainAugModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
-		StrainORFModels=$(ls gene_pred/ORF_finder/$Organism/"$Strain"/*_ORF_mod.gff)
-		bedtools intersect -s -a "$StrainAugModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes.gff
-		cat "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt
-		bedtools intersect -s -a "$StrainORFModels"  -b "$MimpDir"/"$Strain"_mimps_expanded.gff3 > "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes.gff
-		cat "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt
-		printf "Augustus genes intersected:\t"
-		cat "$MimpDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt | wc -l
-		printf "ORF fragments intersected:\t"
-		cat "$MimpDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt | wc -l
-		echo ""
-	done
-```
-
-Results were as follows:
-```
-	analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3
-	Augustus genes intersected:	21
-	ORF fragments intersected:	285
-
-	analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3
-	Augustus genes intersected:	15
-	ORF fragments intersected:	254
-
-	analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3
-	Augustus genes intersected:	20
-	ORF fragments intersected:	307
-
-	analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3
-	Augustus genes intersected:	5
-	ORF fragments intersected:	99
-
-	analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3
-	Augustus genes intersected:	0
-	ORF fragments intersected:	87
-
-	analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3
-	Augustus genes intersected:	20
-	ORF fragments intersected:	260
-
-	analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3
-	Augustus genes intersected:	29
-	ORF fragments intersected:	328
-
-	analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3
-	Augustus genes intersected:	5
-	ORF fragments intersected:	170
-
-	analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3
-	Augustus genes intersected:	15
-	ORF fragments intersected:	395
-
-	analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3
-	Augustus genes intersected:	5
-	ORF fragments intersected:	155
-
-	analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3
-	Augustus genes intersected:	3
-	ORF fragments intersected:	146
-
-	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3
-	Augustus genes intersected:	2
-	ORF fragments intersected:	20
-``` -->
-
-```bash
-	ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
-	for Mimps in $(ls -d analysis/mimps/F.*/*/*_mimps.gff3); do
-		Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
-		Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
-		OutDir=analysis/mimps_+-2000bp/$Organism/$Strain
-		mkdir -p $OutDir
-		MimpDir=$(dirname $Mimps)
-		echo "$Mimps"
-		"$ProgDir"/gffexpander.pl +- 2000 "$Mimps" > "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3
-		StrainAugModels=$(ls gene_pred/augustus/$Organism/"$Strain"/*_augustus_preds.gtf)
-		StrainORFModels=$(ls gene_pred/ORF_finder/$Organism/"$Strain"/*_ORF_mod.gff)
-		bedtools intersect -a "$StrainAugModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff
-		#bedtools intersect -s -a "$StrainAugModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff
-		cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt
-		bedtools intersect -s -a "$StrainORFModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_ORF_genes.gff
-		cat "$OutDir"/"$Strain"_mimps_intersected_ORF_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$OutDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt
-		printf "Augustus genes intersected:\t"
-		cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt | wc -l
-		printf "ORF fragments intersected:\t"
-		cat "$OutDir"/"$Strain"_mimps_intersected_ORF_genes_names.txt | wc -l
-		echo ""
-	done
-```
-
-```
-	analysis/mimps/F.oxysporum_fsp_cepae/125/125_mimps.gff3
-	Augustus genes intersected:	62
-	ORF fragments intersected:	767
-
-	analysis/mimps/F.oxysporum_fsp_cepae/55/55_mimps.gff3
-	Augustus genes intersected:	47
-	ORF fragments intersected:	757
-
-	analysis/mimps/F.oxysporum_fsp_cepae/A23/A23_mimps.gff3
-	Augustus genes intersected:	64
-	ORF fragments intersected:	755
-
-	analysis/mimps/F.oxysporum_fsp_cepae/A28/A28_mimps.gff3
-	Augustus genes intersected:	17
-	ORF fragments intersected:	393
-
-	analysis/mimps/F.oxysporum_fsp_cepae/D2/D2_mimps.gff3
-	Augustus genes intersected:	11
-	ORF fragments intersected:	326
-
-	analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff3
-	Augustus genes intersected:	60
-	ORF fragments intersected:	654
-
-	analysis/mimps/F.oxysporum_fsp_cepae/HB17/HB17_mimps.gff3
-	Augustus genes intersected:	68
-	ORF fragments intersected:	830
-
-	analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_mimps.gff3
-	Augustus genes intersected:	16
-	ORF fragments intersected:	415
-
-	analysis/mimps/F.oxysporum_fsp_narcissi/N139/N139_mimps.gff3
-	Augustus genes intersected:	39
-	ORF fragments intersected:	951
-
-	analysis/mimps/F.oxysporum_fsp_pisi/PG18/PG18_mimps.gff3
-	Augustus genes intersected:	20
-	ORF fragments intersected:	470
-
-	analysis/mimps/F.oxysporum_fsp_pisi/PG3/PG3_mimps.gff3
-	Augustus genes intersected:	19
-	ORF fragments intersected:	425
-
-	analysis/mimps/F.proliferatum/A8/A8_mimps.gff3
-	Augustus genes intersected:	5
-	ORF fragments intersected:	58
-```
-
-### for FoL reference genome
-
-```bash
-ProgDir=~/git_repos/emr_repos/tools/pathogen/mimp_finder
-for Mimps in $(ls -d analysis/mimps/F.oxysporum_fsp_lycopersici/4287/*_mimps.gff3); do
-Organism=$(echo "$Mimps" | rev | cut -d '/' -f3 | rev)
-Strain=$(echo "$Mimps" | rev | cut -f2 -d '/' | rev)
-OutDir=analysis/mimps_+-2000bp/$Organism/$Strain
-mkdir -p $OutDir
-MimpDir=$(dirname $Mimps)
-echo "$Mimps"
-"$ProgDir"/gffexpander.pl +- 2000 "$Mimps" > "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3
-StrainAugModels=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1.filtered_proteins.ExternalModels.gff3
-bedtools intersect -a "$StrainAugModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff
-cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes.gff | grep 'gene' | rev | cut -f1 -d '=' | rev | sort | uniq > "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt
-bedtools intersect -s -a "$StrainORFModels"  -b "$OutDir"/"$Strain"_mimps_2000bp_expanded.gff3 > 		printf "Augustus genes intersected:\t"
-cat "$OutDir"/"$Strain"_mimps_intersected_Aug_genes_names.txt | wc -l
-echo ""
-done
-```
-
-## Merging effector evidence:
-
-```bash
-	for Strain in $(ls -d gene_pred/ORF_finder/F.*/* | rev | cut -f1 -d '/' | rev); do
-		Queue=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' |  cut -f5 -d ' ' | grep -c 'qw' | sed 's/ //g')
-		while [[ $Queue -ge 1 ]]; do
-			sleep 10
-			printf "."
-			Queue=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' |  cut -f5 -d ' ' | grep -c 'qw')
-		done
-		# Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
-		Node2Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
-		# Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
-		Node4Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
-		#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
-		Node6Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace06' | sed 's/ //g')
-		Node11Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace11' | sed 's/ //g')
-		# while [[ $Node1Jobs -ge 1  && $Node2Jobs -ge 1 && $Node3Jobs -ge 1 && $Node4Jobs -ge 1 ]]; do
-		while [[ $Node2Jobs -ge 1 && $Node4Jobs -ge 1 && $Node6Jobs -ge 1 && $Node11Jobs -ge 1 ]]; do
-			#while [ [ $Node1Jobs -ge 1 ] && [ $Node2Jobs -ge 1 ] && [ $Node3Jobs -ge 1 ] && [ $Node4Jobs -ge 1 ] && [ $Node5Jobs -ge 1 ] ]; do
-			sleep 10
-			printf "."
-			# Node1Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace01' | sed 's/ //g')
-			Node2Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace02' | sed 's/ //g')
-			# Node3Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace03' | sed 's/ //g')
-			Node4Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace04' | sed 's/ //g')
-			#Node5Jobs=$(qstat | grep 'merge_fus' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace05' | sed 's/ //g')
-			Node6Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace06' | sed 's/ //g')
-			Node11Jobs=$(qstat | grep 'merge' | sed -E 's/ +/ /g' | cut -f 8 -d ' ' | sort | grep -c 'blacklace11' | sed 's/ //g')
-		done
-		ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/merge_gff;
-		echo $Strain;
-		Orf_Gff=$(ls gene_pred/ORF_finder/*/$Strain/"$Strain"_ORF.gff);
-		Aug_Gff=$(ls gene_pred/augustus/*/"$Strain"/"$Strain"_augustus_preds.gtf | grep -v 'old');
-		echo $Orf_Gff;
-		echo $Aug_Gff;
-		# if [[ $Node1Jobs -lt 1 ]]; then
-		# 	qsub -l h=blacklace01.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		# elif [[ $Node2Jobs -lt 1 ]]; then
-		if [[ $Node2Jobs -lt 1 ]]; then
-			qsub -l h=blacklace02.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		# elif [[ $Node3Jobs -lt 1 ]]; then
-		# 	qsub -l h=blacklace03.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		elif [[ $Node4Jobs -lt 1 ]]; then
-			qsub -l h=blacklace04.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-			# elif [[ $Node5Jobs -lt 1 ]]; then
-			# qsub -l h=blacklace05.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		elif [[ $Node6Jobs -lt 1 ]]; then
-			qsub -l h=blacklace06.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		elif [[ $Node11Jobs -lt 1 ]]; then
-			qsub -l h=blacklace11.blacklace $ProgDir/merge_fus_effectors.sh $Orf_Gff $Aug_Gff;
-		else
-			echo "Error something has jumped the queue"
-		fi
-	done
-```
 
 # 4. Genomic analysis
-
+<!--
 ## 4.1 Identifcation of protospacers
 
 To facilitate CriprCas editing of the Fusarium oxysporum genome target sites
@@ -1783,7 +1066,7 @@ commands to do this were as follows:
 	  $ProgDir/OPTIMuS_EMR.pl $GeneSeq "threshold" 1 > $OutDir/"$Strain"_protospacer_sites.txt
 	  $ProgDir/Optimus2csv.py --inp $OutDir/"$Strain"_protospacer_sites.txt  --out $OutDir/"$Strain"_protospacer_by_gene.csv
 	done
-```
+``` -->
 
 
 ## 4.2 Orthology
@@ -1801,7 +1084,7 @@ subspecies group. Orthology was also determined between subspecies groups.
 
 
 
-
+<!--
 ### 4.2.a) Orthology between pathogenic isolates
 
 The Commands used to run this analysis are shown in
@@ -1812,7 +1095,7 @@ pathogen/orthology/F.oxysporum_fsp.cepae_pathogenic_orthology.md
 
 The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_non-pathogenic_orthology.md
-
+ -->
 
 ### 4.2.c) Orthology between pathogenic and non-pathogenic isolates
 
@@ -1820,10 +1103,10 @@ The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_pathogen_vs_non-pathogen_orthology.md
 
 
-### 4.2.d) Orthology between all isolates
+<!-- ### 4.2.d) Orthology between all isolates
 
 The Commands used to run this analysis are shown in
-pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md
+pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md -->
 
 
 ## 5. BLAST Searches

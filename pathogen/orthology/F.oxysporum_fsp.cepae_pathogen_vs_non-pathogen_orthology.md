@@ -561,6 +561,10 @@ were extracted for these genes.
   echo "The number of pathogen genes in 2kb of Mimps:"
   MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
   cat $MimpGenesTxt | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt | wc -l
+
+  echo "The number of pathogen common genes in the top 20 expressed Fus2 genes at 72hr"
+  TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
+  cat $TopGenes | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt | wc -l
 ```
 
 ```
@@ -625,6 +629,36 @@ The number of annotations summarised is:
 248
 ```
 
+#### Orthogroups of FTF genes
+
+The orthogroups containing FTF1 and FTF2 genes were identified. The top blast hit
+of CDS from FTF1a, FTFb, FTFc and FTF2 against the Fus2 genome were found to be
+Fus2 genes g8884 (FTF2, FTF1a, FTF1b) and g11787 (FTF1c). To identify FTF
+inparalogs and orthologs between species the orthogroup containing these genes
+was extracted. This identified a single orthogroup containing both identified
+FTF genes.   
+
+```bash
+cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep 'Fus2|g8884'
+cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep 'Fus2|g8884' | grep -o -E '\w+\|' | sort | uniq -c
+```
+
+```
+  orthogroup1422: 125|g2735.t1 PG|g14594.t1 Fus2|g8884.t1 D2|g9595.t1 A23|g9320.t1 A28|g1094.t1 Fus2|g11787.t1 A23|g11656.t1 PG|g7400.t1 125|g13904.t1
+  2 125|    <-pathogen
+  2 A23|    <-pathogen
+  1 A28|    <-non-pathogen
+  1 D2|     <-non-pathogen
+  2 Fus2|   <-pathogen
+  2 PG|     <-non-pathogen
+```
+
+Orthogroup 1422 was extracted:
+
+
+
+
+<!--
 The non-pathogen A28 was used to investigate non-pathogen unique genes.
 Non-pathogens contain 28 orthogroups, within which the non-pathogen A28 has 34
 genes.
@@ -642,4 +676,4 @@ genes.
   NonPathOrthogroupsA28Anno=$NonPathgeneDir/A28_nonpathgene_orthogroup_annotation.tsv
   cat $A28Genes | grep -w -f $NonPathOrthogroupsA28 > $NonPathOrthogroupsA28Gff
   cat $A28Annotations | grep -w -f $NonPathOrthogroupsA28 > $NonPathOrthogroupsA28Anno
-```
+``` -->

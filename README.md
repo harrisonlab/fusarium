@@ -397,7 +397,7 @@ Quast
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'FOP5' -e 'PG8'); do
   # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2' -e 'HB6' -e 'PG8' -e 'FOP1'); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
@@ -428,7 +428,7 @@ Contigs were renamed in accordance with ncbi recomendations.
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2'); do
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'FOP5' -e 'PG8'); do
   # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2'); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
@@ -451,7 +451,7 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	for BestAss in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -e 'Fus2'); do
+	for BestAss in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -e 'FOP5' -e 'PG8'); do
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
 	done
@@ -759,11 +759,11 @@ Your job 6436219 ("rna_qc_fastq-mcf.sh") has been submitted
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v 'Fus2'); do
+		for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'F.oxysporum_fsp_cepae' | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
-		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v -e '55_72hrs' -e 'FO47_72hrs' -e 'control_72hrs_rep2' -e 'control_72hrs_rep3' | grep 'Fus2_72hrs_rep1'); do
+		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
 			Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 			echo "$Timepoint"
 			FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -775,7 +775,7 @@ Then Rnaseq data was aligned to each genome assembly:
 	done
 ```
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -w '55'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -948,7 +948,7 @@ the following commands:
 	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	CurPath=$PWD
-	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v -w 'Fus2'); do
+	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -w '55'); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		SplitDir=gene_pred/braker_split/$Organism/$Strain
@@ -973,25 +973,25 @@ the following commands:
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-for SplitDir in $(ls -d gene_pred/braker_split/*/*); do
-Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
-Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
-InStringAA=''
-InStringNeg=''
-InStringTab=''
-InStringTxt=''
-SigpDir=augustus_signalp-4.1
-for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
-InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
-InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
-InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
-done
-cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
-cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
-cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
-done
+	for SplitDir in $(ls -d gene_pred/braker_split/*/55); do
+		Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
+		Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+		InStringAA=''
+		InStringNeg=''
+		InStringTab=''
+		InStringTxt=''
+		SigpDir=braker_signalp-4.1
+		for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+		InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
+		InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
+		InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
+		InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+		done
+		cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+		cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+		tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+		cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+	done
 ```
 
 
@@ -1023,7 +1023,7 @@ Required programs:
 
 ```bash
 	# for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -w '55'); do
 		Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 		Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 		ProtGff=$(ls gene_pred/braker/$Organism/"$Strain"/*_braker/augustus_extracted.gff)
@@ -1118,9 +1118,11 @@ assemlies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
 		echo $Assembly
+		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+		Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
 	done
 ```
@@ -1129,12 +1131,24 @@ Once blast searches had completed, the BLAST hits were converted to GFF
 annotations:
 
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	BlastHits=analysis/blast_homology/FeChina/dip_spades/dip_spades_six-appended_parsed.fa_homologs.csv
-	HitsGff=analysis/blast_homology/FeChina/dip_spades/dip_spades_six-appended_parsed.fa_homologs.gff
-	Column2=SIX_homolog
-	NumHits=5
-	$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv); do
+		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
+		Column2=SIX_homolog
+		NumHits=1
+		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+	done
+	for BlastHits in $(ls analysis/blast_homology/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_homologs.csv); do
+		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
+		Column2=FTF_homolog
+		NumHits=1
+		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+	done
 ```
 
 ## 5.2 Identifying PHIbase homologs
@@ -1153,7 +1167,7 @@ virulence.
 First the a tab seperated file was made in the clusters core directory containing
 PHIbase. These commands were run as part of previous projects but have been
 included here for completeness.
-
+<!--
 ```bash
 	PhibaseDir=/home/groups/harrisonlab/phibase/v3.8
 	printf "header\n" > $PhibaseDir/PHI_headers.csv
@@ -1310,4 +1324,41 @@ The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 	for Proteins in $(ls gene_pred/augustus/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa); do
 		qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh $Proteins protein ../../phibase/v3.8/PHI_accessions.fa
 	done
+``` -->
+
+### Expressed Genes
+
+As a preliminary analysis of the RNAseq data, highly expressed genes at 72hrs
+post infection were identified in Fus2.
+
+```bash
+	samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
+	cufflinks -o timecourse/2016_genes/Fus2/72hrs/cufflinks -p 16 --max-intron-length 4000 alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam
+
+	Transcripts=timecourse/2016_genes/Fus2/72hrs/cufflinks/transcripts.gtf
+	GeneGff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+	ExpressedGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
+	bedtools intersect -s -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
+
+	TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
+	cat $ExpressedGenes | sort -r -n -t'"' -k6 | grep -w 'gene' | head -n 20 | cut -f18 > $TopGenes
+	InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
+	TopFunctions=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.tsv
+	cat $InterPro | grep -w -f $TopGenes > $TopFunctions
+
+	IsolateAbrv=FoC_path_vs_non_path
+	WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+	Orthogroups=$WorkDir/"$IsolateAbrv"_orthogroups.txt
+	PathDir=$WorkDir/path_orthogroups
+	echo "The number of pathogen common genes in the top 20 expressed Fus2 genes at 72hr"
+	TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
+	cat $TopGenes | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt
+	# secreted
+	PathOrthogroupsFus2Secreted=$PathDir/Fus2_path_orthogroup_secreted.txt
+	cat $PathOrthogroupsFus2Secreted | grep -w -f $TopGenes
+	# near mimps
+	MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
+  cat $MimpGenesTxt | grep -w -f $TopGenes
+	# Intersecting SIX genes
+
 ```

@@ -558,7 +558,7 @@ were extracted for these genes.
   echo "The following number of genes are predicted as secreted and look like effectors:"
   cat $PathOrthogroupsFus2EffectorP $PathOrthogroupsFus2Secreted | grep -v 'Non-effector' | cut -f1 -d '.'| sort | uniq -d | wc -l
   # The number of pathogen genes in 2kb of Mimps:
-  echo "The number of pathogen genes in 2kb of Mimps:"
+  echo "The number of pathogen genes in 2kb of Mimps:x"
   MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
   cat $MimpGenesTxt | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt | wc -l
 
@@ -656,6 +656,16 @@ cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthog
 Orthogroup 1422 was extracted:
 
 
+#### Orthogroups of top 20 expressed genes
+
+```bash
+Orthogroups=analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt
+ExpressDir=analysis/orthology/orthomcl/FoC_path_vs_non_path/top_expressed
+mkdir -p $ExpressDir
+Top20Expressed=$ExpressDir/orthogroups_top20_expressed.txt
+cat analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt | grep -w -e 'Fus2|g11792' -e 'Fus2|g4762' -e 'Fus2|g12630' -e 'Fus2|g10978' -e 'Fus2|g12344' -e 'Fus2|10974' -e 'Fus2|g10975' -e 'Fus2|g10973' -e 'Fus2|g4720' -e 'Fus2|g10346' -e 'Fus2|g11653' -e 'Fus2|g11849' -e 'Fus2|g1141' -e 'Fus2|g12149' -e 'Fus2|g2148' -e 'Fus2|g9529' -e 'Fus2|g10347' -e 'Fus2|g11958' -e 'Fus2|g13070' -e 'Fus2|g12418' >  $Top20Expressed
+
+```
 
 
 <!--

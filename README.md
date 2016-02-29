@@ -457,6 +457,18 @@ The best assemblies were used to perform repeatmasking
 	done
 ```
 
+The published non-pathogen genome for isolate FO47 was also repeatmasked as
+this isolate awas also used in experimental work.
+
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+	Fo47Ass=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_contigs.fasta
+	for BestAss in $(ls $Fo47Ass); do
+		qsub $ProgDir/rep_modeling.sh $BestAss
+		qsub $ProgDir/transposonPSI.sh $BestAss
+	done
+```
+
 The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
@@ -775,7 +787,7 @@ Then Rnaseq data was aligned to each genome assembly:
 	done
 ```
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -w '55'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v -w '55' | grep -w -e 'FOP5' -e 'A8'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1339,7 +1351,50 @@ post infection were identified in Fus2.
 	GeneGff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
 	ExpressedGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
 	bedtools intersect -s -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
+```
 
+It was noted that not all the top expressed transcripts had gene models. The
+transcripts without gene models were identified:
+
+```bash
+	ExpressedTranscriptsTxt=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts.txt
+	cat $ExpressedGenes | sort -r -n -t'"' -k6 | cut -f2 -d'"' | uniq | head -n20 > $ExpressedTranscriptsTxt
+	ExpressedTranscriptsInter=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts_intersect.gff
+	cat $ExpressedGenes | sort -r -n -t'"' -k6 | head -n500 | grep -w -f $ExpressedTranscriptsTxt > $ExpressedTranscriptsInter
+	ExpressedTranscriptsGff=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts.gff
+	cat $ExpressedTranscriptsInter | cut -f1-9 | uniq> $ExpressedTranscriptsGff
+	cat $ExpressedTranscriptsInter | cut -f2,18 -d'"' --output-delimiter " - " | uniq | less
+```
+
+The top 20 expressed transcripts are shown below with genes they correspond to.
+10 of the 20 top expressed transcripts have not been predicted as genes - why?
+
+```
+	CUFF.4396
+	CUFF.2444
+	CUFF.540
+	CUFF.11337
+	CUFF.14001 - g11792
+	CUFF.5007
+	CUFF.4291
+	CUFF.12587
+	CUFF.4090
+	CUFF.12214 - g4762
+	CUFF.8542
+	CUFF.13998 - g12630
+	CUFF.13635 - g10978
+	CUFF.4290
+	CUFF.2922 - g12344
+	CUFF.9876 - g10974
+	CUFF.13435 - g10975
+	CUFF.9559 - g10973
+	CUFF.12530 - g4720
+	CUFF.6539 - g10346
+```
+
+
+
+```bash
 	TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
 	cat $ExpressedGenes | sort -r -n -t'"' -k6 | grep -w 'gene' | head -n 20 | cut -f18 > $TopGenes
 	InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv

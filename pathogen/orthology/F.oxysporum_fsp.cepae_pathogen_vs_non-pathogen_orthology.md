@@ -524,6 +524,15 @@ were extracted for these genes.
   cat $Orthogroups | grep -w 'Fus2' | grep -w 'A23' | grep -w '125' | grep -v -w -e 'A28' -e 'D2' -e 'PG' | grep -o -E 'Fus2\|g\w+\.\w+' | sed 's/Fus2|//g' | sed -E 's/.t\w+//g' | sort | uniq > $PathDir/Fus2_path_orthogroup_genes.txt
   cat $PathDir/Fus2_path_orthogroup_genes.txt | wc -l
 
+  # Fasta accessions were extracted for pathogen genes:
+  cat $Orthogroups | grep -w 'Fus2' | grep -w 'A23' | grep -w '125' | grep -v -w -e 'A28' -e 'D2' -e 'PG' | grep -o -E 'Fus2\|g\w+\.\w+' | sed 's/Fus2|//g' | sort | uniq > $PathDir/Fus2_path_orthogroup_transcripts.txt
+  GeneModels=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus.aa
+  GeneList=$PathDir/Fus2_path_orthogroup_transcripts.txt
+  OutFile=$PathDir/Fus2_path_orthogroup_genes.fa
+  ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+  $ProgDir/extract_from_fasta.py --fasta $GeneModels --headers $GeneList > $OutFile
+  rm $PathDir/Fus2_path_orthogroup_transcripts.txt
+
 
   # Exract gff annotations for pathogen genes
   Fus2Gff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
@@ -556,12 +565,16 @@ were extracted for these genes.
   cat $PathOrthogroupsFus2EffectorP | grep -w 'Effector' | wc -l
   #
   echo "The following number of genes are predicted as secreted and look like effectors:"
-  cat $PathOrthogroupsFus2EffectorP $PathOrthogroupsFus2Secreted | grep -v 'Non-effector' | cut -f1 -d '.'| sort | uniq -d | wc -l
+  PathOrthogroupsFus2SecretedEffectorP=$PathDir/Fus2_path_orthogroup_secreted_effectorP.txt
+  cat $PathOrthogroupsFus2EffectorP $PathOrthogroupsFus2Secreted | grep -v 'Non-effector' | cut -f1 -d '.'| sort | uniq -d > $PathOrthogroupsFus2SecretedEffectorP
+  cat $PathOrthogroupsFus2SecretedEffectorP | wc -l
   # The number of pathogen genes in 2kb of Mimps:
   echo "The number of pathogen genes in 2kb of Mimps:x"
   MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
-  cat $MimpGenesTxt | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt | wc -l
-
+  Path
+  PathOrthogroupsFus2Mimps=$PathDir/Fus2_path_orthogroup_mimp_genes.txt
+  cat $MimpGenesTxt | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt > $PathOrthogroupsFus2Mimps
+  cat $PathOrthogroupsFus2Mimps | wc -l
   echo "The number of pathogen common genes in the top 20 expressed Fus2 genes at 72hr"
   TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
   cat $TopGenes | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt | wc -l

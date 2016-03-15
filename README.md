@@ -397,8 +397,8 @@ Quast
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'FOP5' -e 'PG8'); do
-  # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2' -e 'HB6' -e 'PG8' -e 'FOP1'); do
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+  # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_contigs.fasta); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -589,6 +589,11 @@ using the following commands:
 	The number of bases masked by RepeatMasker:		1065627
 	The number of bases masked by TransposonPSI:		278366
 	The total number of masked bases are:		1266227
+
+	F.oxysporum	fo47
+	The number of bases masked by RepeatMasker:	2610912
+	The number of bases masked by TransposonPSI:	806717
+	The total number of masked bases are:	2842870
 ```
 
 # Gene Prediction
@@ -734,17 +739,18 @@ This contained the following data:
 
 Perform qc of RNAseq timecourse data
 ```bash
-for num in $(qstat | grep 'rna_qc' | cut -f1 -d ' '); do
-Treatment=$(head -n1 rna_qc_fastq-mcf.sh.o$num | cut -f10 -d '/')
-for FilePath in $(raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep1); do
-echo $FilePath
-FileF=$(ls $FilePath/F/*.gz)
-FileR=$(ls $FilePath/R/*.gz)
-IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
-qsub /home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
-sleep 10
-done
-done
+	for num in $(qstat | grep 'rna_qc' | cut -f1 -d ' '); do
+		Treatment=$(head -n1 rna_qc_fastq-mcf.sh.o$num | cut -f10 -d '/')
+		for FilePath in $(raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep1); do
+			echo $FilePath
+			FileF=$(ls $FilePath/F/*.gz)
+			FileR=$(ls $FilePath/R/*.gz)
+			IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
+			qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+			sleep 10
+		done
+	done
 ```
 ```
 raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep1
@@ -771,7 +777,8 @@ Your job 6436219 ("rna_qc_fastq-mcf.sh") has been submitted
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-		for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'F.oxysporum_fsp_cepae' | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/fo47/*/*_contigs_unmasked.fa); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -786,8 +793,11 @@ Then Rnaseq data was aligned to each genome assembly:
 		done
 	done
 ```
+
+#### Braker prediction
+
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v -w '55' | grep -w -e 'FOP5' -e 'A8'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -820,7 +830,7 @@ Then Rnaseq data was aligned to each genome assembly:
 		GeneModelName="$Organism"_"$Strain"_braker
 		rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker
 		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-		qsub $ProgDir/sub_braker.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+		qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 	done
 ```
 Fasta and gff files were extracted from Braker1 output.
@@ -831,6 +841,30 @@ Fasta and gff files were extracted from Braker1 output.
 		OutDir=$(dirname $File)
 		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
 		cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+	done
+```
+
+#### Cufflinks identification of additional transcripts
+
+To ensure all highly expressed genes were predicted additional transcripts were
+identified using cufflinks.
+
+Note - cufflinks doesn't always predict direction of a transcript and
+therefore features can not be restricted by strand when they are intersected.
+
+```bash
+	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_unmasked.fa); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
+		mkdir -p $OutDir
+		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+		cufflinks -o $OutDir -p 8 --max-intron-length 4000 $AcceptedHits
+		Transcripts=$OutDir/transcripts.gtf
+		GeneGff=$(ls gene_pred/braker/$Organism/$Strain/*/augustus_extracted.gff)
+		AdditionalGenes=$OutDir/"$Strain"_additional_genes.gff
+		bedtools intersect -s -u -a $Transcripts -b $GeneGff > $AdditionalGenes
 	done
 ```
 
@@ -1333,7 +1367,7 @@ PHIbase database:
 The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 
 ```bash
-	for Proteins in $(ls gene_pred/augustus/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa); do
+	for Proteins in $(ls _pred/augustus/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa); do
 		qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh $Proteins protein ../../phibase/v3.8/PHI_accessions.fa
 	done
 ``` -->
@@ -1343,6 +1377,9 @@ The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 As a preliminary analysis of the RNAseq data, highly expressed genes at 72hrs
 post infection were identified in Fus2.
 
+Note - cufflinks doesn't always predict direction of a transcript and
+therefore features can not be restricted by strand when they are intersected.
+
 ```bash
 	samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
 	cufflinks -o timecourse/2016_genes/Fus2/72hrs/cufflinks -p 16 --max-intron-length 4000 alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam
@@ -1350,7 +1387,7 @@ post infection were identified in Fus2.
 	Transcripts=timecourse/2016_genes/Fus2/72hrs/cufflinks/transcripts.gtf
 	GeneGff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
 	ExpressedGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
-	bedtools intersect -s -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
+	bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
 ```
 
 It was noted that not all the top expressed transcripts had gene models. The
@@ -1360,30 +1397,33 @@ transcripts without gene models were identified:
 	ExpressedTranscriptsTxt=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts.txt
 	cat $ExpressedGenes | sort -r -n -t'"' -k6 | cut -f2 -d'"' | uniq | head -n20 > $ExpressedTranscriptsTxt
 	ExpressedTranscriptsInter=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts_intersect.gff
-	cat $ExpressedGenes | sort -r -n -t'"' -k6 | head -n500 | grep -w -f $ExpressedTranscriptsTxt > $ExpressedTranscriptsInter
+	cat $ExpressedGenes | grep -v -P "\ttranscript_id" | sort -r -n -t'"' -k6 | grep -w -f $ExpressedTranscriptsTxt > $ExpressedTranscriptsInter
 	ExpressedTranscriptsGff=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts.gff
 	cat $ExpressedTranscriptsInter | cut -f1-9 | uniq> $ExpressedTranscriptsGff
-	cat $ExpressedTranscriptsInter | cut -f2,18 -d'"' --output-delimiter " - " | uniq | less
+	cat $ExpressedTranscriptsInter | grep -v -w 'exon' | cut -f2,18 -d'"' --output-delimiter " - " | uniq | less
 ```
 
 The top 20 expressed transcripts are shown below with genes they correspond to.
-10 of the 20 top expressed transcripts have not been predicted as genes - why?
+9 of the 20 top expressed transcripts have not been predicted as genes. This was
+determined, in large, to be a result of transposon being expressed. It was also
+noted that cufflinks doesn't always predict direction of a transcript and
+therefore when features are intersected, they can not be restricted by strand.
 
 ```
-	CUFF.4396
-	CUFF.2444
-	CUFF.540
-	CUFF.11337
-	CUFF.14001 - g11792
-	CUFF.5007
-	CUFF.4291
-	CUFF.12587
-	CUFF.4090
+	CUFF.4396 - 33 bp - A-rich
+	CUFF.2444 - 69 bp - T-rich - repmasked
+	CUFF.540 - 60 bp - C-Rich - repmasked
+	CUFF.11337 - 92 bp - T-rich - repmasked
+	CUFF.14001 - g11792 - Six5
+	CUFF.5007 - repmasked
+	CUFF.4291 - repmasked
+	CUFF.12587 - g11716 - Six3
+	CUFF.4090 - repmasked
 	CUFF.12214 - g4762
-	CUFF.8542
+	CUFF.8542 - 103 bp - A-rich - repmasked
 	CUFF.13998 - g12630
 	CUFF.13635 - g10978
-	CUFF.4290
+	CUFF.4290 - no gene - Six9
 	CUFF.2922 - g12344
 	CUFF.9876 - g10974
 	CUFF.13435 - g10975

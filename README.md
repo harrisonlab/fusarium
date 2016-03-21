@@ -793,44 +793,55 @@ Then Rnaseq data was aligned to each genome assembly:
 		done
 	done
 ```
+```
+	Processed 22484 loci.                        [*************************] 100%
+	Map Properties:
+	     Normalized Map Mass: 50507412.55
+	     Raw Map Mass: 50507412.55
+	     Fragment Length Distribution: Empirical (learned)
+	                   Estimated Mean: 181.98
+	                Estimated Std Dev: 78.39
+	[13:02:48] Assembling transcripts and estimating abundances.
+	Processed 22506 loci.                        [*************************] 100%
+```
 
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
-		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		mkdir -p merge alignment/$Organism/$Strain/concatenated
-		samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-		OutDir=gene_pred/braker/$Organism/$Strain
-		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
-		GeneModelName="$Organism"_"$Strain"_braker
-		rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-		qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_softmasked.fa); do
+	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+	echo "$Organism - $Strain"
+	mkdir -p merge alignment/$Organism/$Strain/concatenated
+	samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+	OutDir=gene_pred/braker/$Organism/"$Strain"_fungi_softmasked
+	AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+	GeneModelName="$Organism"_"$Strain"_braker_softmasked
+	rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+	qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 	done
 ```
 Fasta and gff files were extracted from Braker1 output.
@@ -864,7 +875,7 @@ therefore features can not be restricted by strand when they are intersected.
 		Transcripts=$OutDir/transcripts.gtf
 		GeneGff=$(ls gene_pred/braker/$Organism/$Strain/*/augustus_extracted.gff)
 		AdditionalGenes=$OutDir/"$Strain"_additional_genes.gff
-		bedtools intersect -s -u -a $Transcripts -b $GeneGff > $AdditionalGenes
+		bedtools intersect -u -a $Transcripts -b $GeneGff > $AdditionalGenes
 	done
 ```
 

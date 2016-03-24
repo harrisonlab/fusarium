@@ -72,3 +72,38 @@ Convert top blast hits into gff annotations
   ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
   $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
 ```
+
+
+# Mauve was used to align Fus2 to Fol genomes
+
+Progressive mauve was used to align all Fusarium oxysporum genomes against the
+FoL genome.
+
+Note - For the commands below to work you must have logged into the cluster using
+        'ssh -X'.
+
+## Ordering contigs in reference to FoL
+
+```bash
+  ProjDir=/home/groups/harrisonlab/project_files/fusarium
+  WorkDir=$ProjDir/analysis/genome_alignment/mauve
+  mkdir -p $WorkDir
+  Reference=$(ls $ProjDir/assembly/external_group/F.oxysporum_fsp_lycopersici/4287/ncbi/FoL_4287_chromosomes.fa)
+  # Use move_contigs to order genomes based on reference for each phylogroup
+  for Assembly in $(ls $ProjDir/repeat_masked/F.oxysporum*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $Assembly| rev | cut -f3 -d '/' | rev)
+    echo "$Organism - $Strain"
+    MauveDir=~/prog/mauve/mauve_snapshot_2015-02-13
+    OutDir=$WorkDir/"$Strain"_contigs
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/genome_alignment/mauve
+    rm -r $OutDir
+    qsub $ProgDir/mauve_order_contigs.sh $MauveDir $Reference  $Assembly $OutDir
+  done
+```
+
+## Running Progressive Mauve
+
+```bash
+
+```

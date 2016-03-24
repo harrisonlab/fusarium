@@ -105,5 +105,19 @@ Note - For the commands below to work you must have logged into the cluster usin
 ## Running Progressive Mauve
 
 ```bash
-
+  ProjDir=/home/groups/harrisonlab/project_files/fusarium
+  WorkDir=$ProjDir/analysis/genome_alignment/mauve
+  OutDir=$WorkDir/alignment
+  GenomeList=''
+  for Assembly in $(ls $ProjDir/repeat_masked/F.oxysporum*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $Assembly| rev | cut -f3 -d '/' | rev)
+    echo "$Organism - $Strain"
+    NumAlignments=$(ls -d $WorkDir/"$Strain"_contigs/alignment* | wc -l)
+    AlignedContigs=$(ls $WorkDir/"$Strain"_contigs/alignment"$NumAlignments"/"$Strain"_contigs_softmasked.fa.fas)
+    echo $AlignedContigs
+    GenomeList="$GenomeList""$AlignedContigs "
+  done
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/genome_alignment/mauve
+  qsub $ProgDir/run_progressive_mauve.sh $OutDir "$GenomeList"
 ```

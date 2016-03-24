@@ -771,8 +771,94 @@ raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep3
 Your job 6436219 ("rna_qc_fastq-mcf.sh") has been submitted
 ```
 
+Data quality was visualised using fastqc:
+```bash
+	for RawData in $(ls qc_rna/paired/F.oxysporum_fsp_cepae/*/*/*.fq.gz); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+		echo $RawData;
+		qsub $ProgDir/run_fastqc.sh $RawData
+	done
+```
 
 #### Aligning
+
+Insert sizes of the RNA seq library were unknown until a draft alignment could
+be made. To do this tophat and cufflinks were run, aligning the reads against a
+single genome. The fragment length and stdev were printed to stdout while
+cufflinks was running.
+
+```bash
+	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_unmasked.fa); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
+			Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+			echo "$Timepoint"
+			FileF=$(ls $RNADir/F/*_trim.fq.gz)
+			FileR=$(ls $RNADir/R/*_trim.fq.gz)
+			OutDir=alignment/$Organism/$Strain/$Timepoint
+			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+			qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+		done
+	done
+```
+Alignments were concatenated prior to running cufflinks:
+Cufflinks was run to produce the fragment length and stdev statistics:
+
+```bash
+	for Assembly in $(ls repeat_masked/*/Fo47/*/*_contigs_softmasked.fa); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+		OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim
+		echo "$Organism - $Strain"
+		mkdir -p $OutDir
+		samtools merge -f $AcceptedHits \
+		alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+		cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>& | tee $OutDir/cufflinks/cufflinks.log
+	done
+```
+
+Output from stdout included:
+```
+	Processed 22484 loci.                        [*************************] 100%
+	Map Properties:
+	     Normalized Map Mass: 50507412.55
+	     Raw Map Mass: 50507412.55
+	     Fragment Length Distribution: Empirical (learned)
+	                   Estimated Mean: 181.98
+	                Estimated Std Dev: 78.39
+	[13:02:48] Assembling transcripts and estimating abundances.
+	Processed 22506 loci.                        [*************************] 100%
+```
+
+The Estimated Mean: 181.98 allowed calculation of of the mean insert gap to be
+-20bp 182-(97*2) where 97 was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
 
 Then Rnaseq data was aligned to each genome assembly:
 
@@ -788,22 +874,14 @@ Then Rnaseq data was aligned to each genome assembly:
 			FileF=$(ls $RNADir/F/*_trim.fq.gz)
 			FileR=$(ls $RNADir/R/*_trim.fq.gz)
 			OutDir=alignment/$Organism/$Strain/$Timepoint
+			InsertGap='-20'
+			InsertStdDev='78'
 			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-			qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+			qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
 		done
 	done
 ```
-```
-	Processed 22484 loci.                        [*************************] 100%
-	Map Properties:
-	     Normalized Map Mass: 50507412.55
-	     Raw Map Mass: 50507412.55
-	     Fragment Length Distribution: Empirical (learned)
-	                   Estimated Mean: 181.98
-	                Estimated Std Dev: 78.39
-	[13:02:48] Assembling transcripts and estimating abundances.
-	Processed 22506 loci.                        [*************************] 100%
-```
+
 
 #### Braker prediction
 

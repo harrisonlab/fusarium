@@ -864,7 +864,7 @@ Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
-	for Assembly in $(ls repeat_masked/*/fo47/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e '55'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -886,7 +886,7 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_softmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/fo47/*/*_contigs_softmasked.fa); do
 	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 	echo "$Organism - $Strain"

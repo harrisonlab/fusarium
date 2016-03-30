@@ -44,6 +44,16 @@ column_list=[]
 # Step 2
 # Read Blast csv file and store in a dictionary of hits.
 #-----------------------------------------------------
+# The csv file may contain columns showing relationship
+# between query sequences. The first line of the file
+# contains column headers. The number of column headers
+# containg 'Grp' can be counted and this number of
+# columns skipped when reading lines.
+#
+# Not all columns will contain blast hits. The number
+# of columns in a line must be counted to check if a
+# blast hit is present.
+
 
 blast_id_set = Set([])
 i=0
@@ -52,57 +62,40 @@ for line in blast_csv_lines:
     line = line.rstrip()
     split_line = line.split()
     if "ID" in split_line[0]:
-        # print line
         for column in split_line:
             if "Grp" in column:
                 i+=1
-        # print i
-        useful_start=i+1
         hit_contig=i+4
-        # print hit_contig
         hit_stand=i+9
         hit_start=i+10
         hit_end=i+11
-        # extract_list=split_lines[hit_contig, hit_start, hit_end]
         extract_list=itemgetter(hit_contig, hit_start, hit_end)(split_line)
-        # print extract_list
         continue
-    # print line
     blast_id=split_line[0]
     blast_id_set.add(blast_id)
     if len(split_line) > hit_contig:
         column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
-    # useful_columns=split_line[useful_start:]
-    # print useful_columns
-    # blast_dict[blast_id].append(blast_id)
     for column in column_list:
         blast_dict[blast_id].append(column)
 
 #-----------------------------------------------------
-# Step 2
+# Step 3
 # Build a dictionary of intersected genes
 #-----------------------------------------------------
-
-# blast_id_set = Set([])
 
 intersect_dict = defaultdict(list)
 for line in FoL_intersect_lines:
     line = line.rstrip()
     split_line = line.split("\t")
-    # print line
-    # print split_line[11]
     if "gene" in split_line[11]:
-        # print line
         blast_id = split_line[8].strip('";')
         blast_id = blast_id.replace('ID=', '').replace('_BlastHit_1', '')
-        # blast_id_set.add(blast_id)
-        # print blast_id
         column_list=itemgetter(12, 13, 15, 17)(split_line)
         for column in column_list:
             intersect_dict[blast_id].append(column)
 
 #-----------------------------------------------------
-# Step 3
+# Step 4
 # Append co-ordinates from the FoC genome, showing
 # source of original Blast queries
 #-----------------------------------------------------
@@ -120,7 +113,12 @@ for line in FoC_genes_lines:
             FoC_genes_dict[gene_id].append(column)
 
 
-#---
+#-----------------------------------------------------
+# Step 5
+# Print final table of information on query, blast
+# results and genes intersecting blast results
+#-----------------------------------------------------
+
 print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID"]))
 
 for blast_id in blast_id_set:

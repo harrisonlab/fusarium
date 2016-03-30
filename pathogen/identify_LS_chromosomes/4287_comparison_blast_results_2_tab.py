@@ -73,6 +73,7 @@ for line in blast_csv_lines:
         continue
     blast_id=split_line[0]
     blast_id_set.add(blast_id)
+    column_list = ["no hit"]
     if len(split_line) > hit_contig:
         column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
     for column in column_list:

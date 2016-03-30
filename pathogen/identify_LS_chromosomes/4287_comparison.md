@@ -213,18 +213,33 @@ For SIX genes:
 
 ### 2.4 Creating an output table of blast results
 
-```bash
-ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
-OutDir=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal
-Blast_csv=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_homologs.csv
-FoL_intersected=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_intersect.bed
-FoC_genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
-Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
+For Fus2 Pathogen unique genes:
 
-$ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes > $Results_table
-cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+  OutDir=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal
+  Blast_csv=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_homologs.csv
+  FoL_intersected=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_intersect.bed
+  FoC_genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+  Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
+
+  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes > $Results_table
+  # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
 ```
 
+For SIX genes:
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+  OutDir=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal
+  Blast_csv=$OutDir/4287_chromosomal_Fo_path_genes_CRX.fa_homologs.csv
+  FoL_intersected=$OutDir/4287_chromosomal_Fo_path_genes_CRX.fa_intersect.bed
+  FoC_genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+  Results_table=$OutDir/4287_chromosomal_Fo_path_genes_CRX.tab
+
+  $ProgDir/Fo_path_genes_vs_FoL_chormosomal.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes > $Results_table
+  # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
+```
 
 # Whole genome alignment
 

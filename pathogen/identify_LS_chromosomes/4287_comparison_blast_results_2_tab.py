@@ -73,7 +73,8 @@ for line in blast_csv_lines:
         continue
     blast_id=split_line[0]
     blast_id_set.add(blast_id)
-    column_list = ["no hit"]
+    # column_list = ["no hit", ".", ".", "."]
+    column_list = ["", "", "", ""]
     if len(split_line) > hit_contig:
         column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
     for column in column_list:
@@ -108,6 +109,7 @@ for line in FoC_genes_lines:
     line = line.rstrip()
     split_line = line.split()
     gene_id=split_line[8]
+    column_list = ["", "", "", ""]
     if gene_id in blast_id_set:
         column_list=itemgetter(0, 3, 4, 6)(split_line)
         for column in column_list:
@@ -126,5 +128,9 @@ for blast_id in blast_id_set:
     useful_columns=[blast_id]
     useful_columns.extend(FoC_genes_dict[blast_id])
     useful_columns.extend(blast_dict[blast_id])
-    useful_columns.extend(intersect_dict[blast_id])
+    if intersect_dict[blast_id]:
+        useful_columns.extend(intersect_dict[blast_id])
+    else:
+        # useful_columns.extend([".", ".", ".", "no gene"])
+        useful_columns.extend(["", "", "", ""])
     print ("\t".join(useful_columns))

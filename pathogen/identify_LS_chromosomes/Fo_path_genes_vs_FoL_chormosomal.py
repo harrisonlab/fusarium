@@ -25,7 +25,7 @@ from operator import itemgetter
 ap = argparse.ArgumentParser()
 ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh results file')
 ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
-ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
+# ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
 conf = ap.parse_args()
 
 
@@ -35,8 +35,8 @@ with open(conf.blast_csv) as f:
 with open(conf.FoL_intersected_genes) as f:
     FoL_intersect_lines = f.readlines()
 
-with open(conf.FoC_genes_gff) as f:
-    FoC_genes_lines = f.readlines()
+# with open(conf.FoC_genes_gff) as f:
+#     FoC_genes_lines = f.readlines()
 
 column_list=[]
 
@@ -73,7 +73,8 @@ for line in blast_csv_lines:
         continue
     blast_id=split_line[0]
     blast_id_set.add(blast_id)
-    column_list = ["no hit"]
+    # column_list = ["no hit", ".", ".", "."]
+    column_list = ["", "", "", ""]
     if len(split_line) > hit_contig:
         column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
     for column in column_list:
@@ -126,5 +127,9 @@ for blast_id in blast_id_set:
     useful_columns=[blast_id]
     # useful_columns.extend(FoC_genes_dict[blast_id])
     useful_columns.extend(blast_dict[blast_id])
-    useful_columns.extend(intersect_dict[blast_id])
+    if intersect_dict[blast_id]:
+        useful_columns.extend(intersect_dict[blast_id])
+    else:
+        # useful_columns.extend([".", ".", ".", "no gene"])
+        useful_columns.extend(["", "", "", ""])
     print ("\t".join(useful_columns))

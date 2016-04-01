@@ -26,6 +26,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh results file')
 ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
 ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
+ap.add_argument('--FoC_interescted_reblast',required=True,type=str,help='A bed file of FoC genes intersecting the location of reciprocal blast hits')
 conf = ap.parse_args()
 
 
@@ -37,6 +38,9 @@ with open(conf.FoL_intersected_genes) as f:
 
 with open(conf.FoC_genes_gff) as f:
     FoC_genes_lines = f.readlines()
+
+with open(conf.FoC_interescted_reblast) as f:
+    FoC_reblast_lines = f.readlines()
 
 column_list=[]
 
@@ -115,19 +119,54 @@ for line in FoC_genes_lines:
         for column in column_list:
             FoC_genes_dict[gene_id].append(column)
 
-
 #-----------------------------------------------------
 # Step 5
+# Build a dictionary of FoC genes intersecting the hit
+# location of reciprocal blast queries.
+#-----------------------------------------------------
+
+FoC_reblast_dict = defaultdict(list)
+for line in FoC_reblast_lines:
+    line = line.rstrip()
+    split_line = line.split("\t")
+    if "transcript" in split_line[11]:
+        query_id = split_line[8].strip('";')
+        query_id = query_id.replace('ID=', '').replace('_BlastHit_1', '').replace('extracted_hit_of_', '')
+        column_list = []
+        # column_list=itemgetter(12, 13, 15, 17)(split_line)
+        intersect_id = split_line[17]
+        # for column in column_list:
+            # FoC_reblast_dict[query_id].append(column)
+            # print column
+        # print (intersect_id + " - " + query_id)
+        if query_id in intersect_id:
+            # print "match"
+            FoC_reblast_dict[query_id]=[intersect_id, "match"]
+        # Bedtools may intersect a number of transcripts with the blast hit.
+        # This keeps the best transcript.
+        elif "match" in FoC_reblast_dict[query_id]:
+            pass
+        else:
+            # print "nomatch"
+            FoC_reblast_dict[query_id]=[intersect_id, "no_match"]
+
+
+#-----------------------------------------------------
+# Step 6
 # Print final table of information on query, blast
 # results and genes intersecting blast results
 #-----------------------------------------------------
 
-print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID"]))
+print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID"]))
 
 for blast_id in blast_id_set:
     useful_columns=[blast_id]
     useful_columns.extend(FoC_genes_dict[blast_id])
     useful_columns.extend(blast_dict[blast_id])
+    if FoC_reblast_dict[blast_id]:
+        useful_columns.extend(FoC_reblast_dict[blast_id])
+    else:
+        useful_columns.extend(["", ""])
     if intersect_dict[blast_id]:
         useful_columns.extend(intersect_dict[blast_id])
     else:

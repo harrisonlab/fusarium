@@ -211,7 +211,90 @@ For SIX genes:
 ```
 
 
-### 2.4 Creating an output table of blast results
+## 2.4 Reciprocal blasting of hits
+
+Blast hit locations were extracted from blast hit csv files and used to extract
+nucleotide sequence in fasta format for reblasting against the FoC genome.
+
+### 2.4.1 FoC pathogen unique genes
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  BlastHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fus2_path_orthogroup_genes.fa_homologs.csv
+  HeadCol=$((5+34))
+  StartCol=$((11+34))
+  StopCol=$((12+34))
+  StrandCol=$((10+34))
+  IdCol=1
+  FastaFile=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
+  ExtractedHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fus2_path_orthogroup_genes.fa_extracted_hits.fa
+  $ProgDir/sequence_extractor.py --coordinates_file $BlastHits --header_column $HeadCol --start_column $StartCol --stop_column $StopCol --strand_column $StrandCol --id_column $IdCol --fasta_file $FastaFile | sed -E 's/^>/>extracted_hit_of_/g' > $ExtractedHits
+```
+
+
+```bash
+  ExtractedHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fus2_path_orthogroup_genes.fa_extracted_hits.fa
+  FocGenomeFa=repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_unmasked.fa
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  qsub $ProgDir/blast_pipe.sh $ExtractedHits dna $FocGenomeFa
+```
+
+Convert top blast hits into gff annotations and intersect the reblast hits with
+genes from the FoC genome.
+
+```bash
+  BlastHitsCsv=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_4287_chromosomal_Fus2_path_orthogroup_genes.fa_extracted_hits.fa_homologs.csv
+  HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+  Column2=reblast_of_FoC_path_gene_hit
+  NumHits=1
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+
+  OutDir=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2
+  Fus2Genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+  Fus2Intersect=$OutDir/Fus2_4287_chromosomal_Fus2_path_orthogroup_genes_extracted_hits_intersect.bed
+  bedtools intersect -wo -a $HitsGff -b $Fus2Genes > $Fus2Intersect
+```
+
+### 2.4.2 Six genes
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  BlastHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fo_path_genes_CRX.fa_homologs.csv
+  HeadCol=$((5+1))
+  StartCol=$((11+1))
+  StopCol=$((12+1))
+  StrandCol=$((10+1))
+  IdCol=1
+  FastaFile=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
+  ExtractedHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fo_path_genes_CRX.fa_extracted_hits.fa
+  $ProgDir/sequence_extractor.py --coordinates_file $BlastHits --header_column $HeadCol --start_column $StartCol --stop_column $StopCol --strand_column $StrandCol --id_column $IdCol --fasta_file $FastaFile | sed -E 's/^>/>extracted_hit_of_/g' > $ExtractedHits
+```
+
+```bash
+  ExtractedHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fo_path_genes_CRX.fa_extracted_hits.fa
+  FocGenomeFa=repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_unmasked.fa
+  qsub $ProgDir/blast_pipe.sh $ExtractedHits dna $FocGenomeFa
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+  BlastHitsCsv=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_4287_chromosomal_Fo_path_genes_CRX.fa_extracted_hits.fa_homologs.csv
+  HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+	Column2=reblast_of_SIX_hit
+  NumHits=1
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+
+  OutDir=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2
+  Fus2Genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+  Fus2Intersect=$OutDir/Fus2_4287_chromosomal_Fo_path_genes_CRX_extracted_hits_intersect.bed
+  bedtools intersect -wo -a $HitsGff -b $Fus2Genes > $Fus2Intersect
+```
+
+
+### 2.5 Creating an output table of blast results
 
 For Fus2 Pathogen unique genes:
 
@@ -221,9 +304,10 @@ For Fus2 Pathogen unique genes:
   Blast_csv=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_homologs.csv
   FoL_intersected=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_intersect.bed
   FoC_genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+  Fus2Intersect=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_4287_chromosomal_Fus2_path_orthogroup_genes_extracted_hits_intersect.bed
   Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes > $Results_table
+  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect > $Results_table
   # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
 ```
 
@@ -269,33 +353,6 @@ Final table for SIX genes:
 ```
 
 
-## 2.5 Reciprocal blasting of hits
-
-```bash
-  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-  BlastHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fus2_path_orthogroup_genes.fa_homologs.csv
-  HeadCol=$((5+34))
-  StartCol=$((11+34))
-  StopCol=$((12+34))
-  StrandCol=$((10+34))
-  IdCol=1
-  FastaFile=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
-  ExtractedHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fus2_path_orthogroup_genes.fa_extracted_hits.fa
-  $ProgDir/sequence_extractor.py --coordinates_file $BlastHits --header_column $HeadCol --start_column $StartCol --stop_column $StopCol --strand_column $StrandCol --id_column $IdCol --fasta_file $FastaFile > $ExtractedHits
-```
-
-```bash
-  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-  BlastHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fo_path_genes_CRX.fa_homologs.csv
-  HeadCol=$((5+1))
-  StartCol=$((11+1))
-  StopCol=$((12+1))
-  StrandCol=$((10+1))
-  IdCol=1
-  FastaFile=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
-  ExtractedHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_Fo_path_genes_CRX.fa_extracted_hits.fa
-  $ProgDir/sequence_extractor.py --coordinates_file $BlastHits --header_column $HeadCol --start_column $StartCol --stop_column $StopCol --strand_column $StrandCol --id_column $IdCol --fasta_file $FastaFile > $ExtractedHits
-```
 
 # Whole genome alignment
 

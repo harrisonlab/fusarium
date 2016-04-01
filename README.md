@@ -886,7 +886,7 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '55'); do
+	for Assembly in $(ls repeat_masked/*/fo47/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '55' -e 'fo47'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -926,12 +926,28 @@ Then Rnaseq data was aligned to each genome assembly:
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-	for File in $(ls gene_pred/braker/F.*/fo47_fungi_softmasked/*/augustus.gff ); do
+	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff | grep -e 'Fus2' -e '55'); do
 		getAnnoFasta.pl $File
 		OutDir=$(dirname $File)
 		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
 		cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
 	done
+```
+
+The relationship between gene models and aligned reads was investigated. To do
+this aligned reads needed to be sorted and indexed:
+
+Note - IGV was used to view aligned reads against the Fus2 genome on my local
+machine.
+
+```bash
+	InBam=alignment/F.oxysporum_fsp_cepae/Fus2/concatenated/concatenated.bam
+	ViewBam=alignment/F.oxysporum_fsp_cepae/Fus2/concatenated/concatenated_view.bam
+	SortBam=alignment/F.oxysporum_fsp_cepae/Fus2/concatenated/concatenated_sorted
+	IndexBam=
+	samtools view -b $InBam > $ViewBam
+	samtools sort $ViewBam $SortBam
+	samtools index $SortBam
 ```
 
 <!--

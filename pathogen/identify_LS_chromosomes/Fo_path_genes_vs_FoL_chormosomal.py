@@ -25,7 +25,8 @@ from operator import itemgetter
 ap = argparse.ArgumentParser()
 ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh results file')
 ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
-# ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
+# ap.add_argument('--FoC_interescted_reblast',required=True,type=str,help='A bed file of FoC genes intersecting the location of reciprocal blast hits')
+
 conf = ap.parse_args()
 
 
@@ -35,8 +36,8 @@ with open(conf.blast_csv) as f:
 with open(conf.FoL_intersected_genes) as f:
     FoL_intersect_lines = f.readlines()
 
-# with open(conf.FoC_genes_gff) as f:
-#     FoC_genes_lines = f.readlines()
+# with open(conf.FoC_interescted_reblast) as f:
+#     FoC_reblast_lines = f.readlines()
 
 column_list=[]
 
@@ -60,7 +61,7 @@ i=0
 blast_dict = defaultdict(list)
 for line in blast_csv_lines:
     line = line.rstrip()
-    split_line = line.split()
+    split_line = line.split("\t")
     if "ID" in split_line[0]:
         for column in split_line:
             if "Grp" in column:
@@ -73,9 +74,10 @@ for line in blast_csv_lines:
         continue
     blast_id=split_line[0]
     blast_id_set.add(blast_id)
-    # column_list = ["no hit", ".", ".", "."]
     column_list = ["", "", "", ""]
+    # print(str(len(split_line)) + "-" + str(hit_contig))
     if len(split_line) > hit_contig:
+        # print "pass"
         column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
     for column in column_list:
         blast_dict[blast_id].append(column)
@@ -98,21 +100,35 @@ for line in FoL_intersect_lines:
 
 #-----------------------------------------------------
 # Step 4
-# Append co-ordinates from the FoC genome, showing
-# source of original Blast queries
+# Build a dictionary of FoC genes intersecting the hit
+# location of reciprocal blast queries.
 #-----------------------------------------------------
 #
-# FoC_genes_dict = defaultdict(list)
-# for line in FoC_genes_lines:
-#     if "gff-version" in line:
-#         continue
+# FoC_reblast_dict = defaultdict(list)
+# for line in FoC_reblast_lines:
 #     line = line.rstrip()
-#     split_line = line.split()
-#     gene_id=split_line[8]
-#     if gene_id in blast_id_set:
-#         column_list=itemgetter(0, 3, 4, 6)(split_line)
-#         for column in column_list:
-#             FoC_genes_dict[gene_id].append(column)
+#     split_line = line.split("\t")
+#     if "transcript" in split_line[11]:
+#         query_id = split_line[8].strip('";')
+#         query_id = query_id.replace('ID=', '').replace('_BlastHit_1', '').replace('extracted_hit_of_', '')
+#         column_list = []
+#         # column_list=itemgetter(12, 13, 15, 17)(split_line)
+#         intersect_id = split_line[17]
+#         # for column in column_list:
+#             # FoC_reblast_dict[query_id].append(column)
+#             # print column
+#         # print (intersect_id + " - " + query_id)
+#         if query_id in intersect_id:
+#             # print "match"
+#             FoC_reblast_dict[query_id]=[intersect_id, "match"]
+#         # Bedtools may intersect a number of transcripts with the blast hit.
+#         # This keeps the best transcript.
+#         elif "match" in FoC_reblast_dict[query_id]:
+#             pass
+#         else:
+#             # print "nomatch"
+#             FoC_reblast_dict[query_id]=[intersect_id, "no_match"]
+#
 #
 
 #-----------------------------------------------------
@@ -127,9 +143,14 @@ for blast_id in blast_id_set:
     useful_columns=[blast_id]
     # useful_columns.extend(FoC_genes_dict[blast_id])
     useful_columns.extend(blast_dict[blast_id])
+    # if FoC_reblast_dict[blast_id]:
+    #     useful_columns.extend(FoC_reblast_dict[blast_id])
+    # else:
+    #     useful_columns.extend(["", ""])
     if intersect_dict[blast_id]:
         useful_columns.extend(intersect_dict[blast_id])
     else:
         # useful_columns.extend([".", ".", ".", "no gene"])
         useful_columns.extend(["", "", "", ""])
-    print ("\t".join(useful_columns))
+    # print ("\t".join(useful_columns))
+    print useful_columns

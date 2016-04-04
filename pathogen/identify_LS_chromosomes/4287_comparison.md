@@ -319,7 +319,6 @@ For SIX genes:
   Blast_csv=$OutDir/4287_chromosomal_Fo_path_genes_CRX.fa_homologs.csv
   FoL_intersected=$OutDir/4287_chromosomal_Fo_path_genes_CRX.fa_intersect.bed
   Results_table=$OutDir/4287_chromosomal_Fo_path_genes_CRX.tab
-
   $ProgDir/Fo_path_genes_vs_FoL_chormosomal.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected > $Results_table
   # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
 ```
@@ -348,8 +347,13 @@ Final table for SIX genes:
 ```bash
   Fus2Tab=$OutDir/Fus2_Fo_path_genes_CRX.tab
   FolTab=$OutDir/4287_chromosomal_Fo_path_genes_CRX.tab
+  TmpTab=$OutDir/4287_chromosomal_Fo_path_genes_CRX_tmp.tab
   Results_table=$OutDir/4287_chromosomal_Fo_path_genes_CRX_final.tab
-  paste $Fus2Tab $FolTab | sed 's/hit_FoL_contig/hit_FoC_contig/' | sed 's/FoL_gene_start/FoC_gene_start/' | sed 's/FoL_gene_end/FoC_gene_end/' | sed 's/FoL_strand/FoC_strand/' |  sed 's/FoL_gene_ID/FoC_gene_ID/' | cut -f-9,11- > $Results_table
+  paste $Fus2Tab $FolTab | sed 's/hit_FoL_contig/hit_FoC_contig/' | sed 's/FoL_gene_start/FoC_gene_start/' | sed 's/FoL_gene_end/FoC_gene_end/' | sed 's/FoL_strand/FoC_strand/' |  sed 's/FoL_gene_ID/FoC_gene_ID/' | cut -f-9,11- > $TmpTab
+
+  Fus2Intersect=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_4287_chromosomal_Fo_path_genes_CRX_extracted_hits_intersect.bed
+  $ProgDir/Fo_path_genes_vs_FoL_chromosomal_part2.py --results_table $TmpTab --FoC_interescted_reblast $Fus2Intersect > $Results_table
+  rm $TmpTab
 ```
 
 

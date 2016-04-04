@@ -64,7 +64,7 @@ i=0
 blast_dict = defaultdict(list)
 for line in blast_csv_lines:
     line = line.rstrip()
-    split_line = line.split()
+    split_line = line.split("\t")
     if "ID" in split_line[0]:
         for column in split_line:
             if "Grp" in column:
@@ -111,7 +111,7 @@ for line in FoC_genes_lines:
     if "gff-version" in line:
         continue
     line = line.rstrip()
-    split_line = line.split()
+    split_line = line.split("\t")
     gene_id=split_line[8]
     column_list = ["", "", "", ""]
     if gene_id in blast_id_set:
@@ -148,7 +148,7 @@ for line in FoC_reblast_lines:
             pass
         else:
             # print "nomatch"
-            FoC_reblast_dict[query_id]=[intersect_id, "no_match"]
+            FoC_reblast_dict[query_id]=[intersect_id, ""]
 
 
 #-----------------------------------------------------

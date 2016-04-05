@@ -27,6 +27,11 @@ ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh res
 ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
 ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
 ap.add_argument('--FoC_interescted_reblast',required=True,type=str,help='A bed file of FoC genes intersecting the location of reciprocal blast hits')
+ap.add_argument('--FoC_SigP',required=True,type=str,help='A file containing a list of signal-peptide containing genes')
+ap.add_argument('--FoC_TM_list',required=True,type=str,help='A file containing a list of transmembrane containing genes')
+ap.add_argument('--FoC_MIMP_list',required=True,type=str,help='A file containing a list of genes within 2kb of MIMPs')
+# ap.add_argument('--FoC_expression',required=True,type=str,help='A file containing details of gene expression')
+
 conf = ap.parse_args()
 
 
@@ -41,6 +46,15 @@ with open(conf.FoC_genes_gff) as f:
 
 with open(conf.FoC_interescted_reblast) as f:
     FoC_reblast_lines = f.readlines()
+
+with open(conf.FoC_SigP) as f:
+    FoC_SigP_lines = f.readlines()
+
+with open(conf.FoC_TM_list) as f:
+    FoC_tmhmm_lines = f.readlines()
+
+with open(conf.FoC_MIMP_list) as f:
+    FoC_mimp_lines = f.readlines()
 
 column_list=[]
 
@@ -133,35 +147,77 @@ for line in FoC_reblast_lines:
         query_id = split_line[8].strip('";')
         query_id = query_id.replace('ID=', '').replace('_BlastHit_1', '').replace('extracted_hit_of_', '')
         column_list = []
-        # column_list=itemgetter(12, 13, 15, 17)(split_line)
         intersect_id = split_line[17]
-        # for column in column_list:
-            # FoC_reblast_dict[query_id].append(column)
-            # print column
-        # print (intersect_id + " - " + query_id)
         if query_id in intersect_id:
-            # print "match"
             FoC_reblast_dict[query_id]=[intersect_id, "match"]
-        # Bedtools may intersect a number of transcripts with the blast hit.
-        # This keeps the best transcript.
         elif "match" in FoC_reblast_dict[query_id]:
             pass
         else:
-            # print "nomatch"
             FoC_reblast_dict[query_id]=[intersect_id, ""]
+
+#-----------------------------------------------------
+# Step 5
+# Build a dictionary of FoC genes containing Signal
+# peptides
+#-----------------------------------------------------
+
+FoC_SigP_dict = defaultdict(list)
+for line in FoC_SigP_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    gene_id = split_line[0].replace('>', '')
+    FoC_SigP_dict[gene_id] = split_line[1:]
+
+#-----------------------------------------------------
+# Step 7
+# Build a dictionary of FoC genes containing TMHMM
+# domains
+#-----------------------------------------------------
+
+FoC_tmhmm_dict = defaultdict(list)
+for line in FoC_tmhmm_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    gene_id = split_line[0]
+    num_helices = split_line[4].replace('PredHel=', '')
+    if num_helices == '0':
+        FoC_tmhmm_dict[gene_id] = ["No", num_helices]
+    else:
+        FoC_tmhmm_dict[gene_id] = ["Yes", num_helices]
+
 
 
 #-----------------------------------------------------
-# Step 6
+# Step 8
+# Build a dictionary of FoC genes within 2Kb of MIMPs
+#-----------------------------------------------------
+
+FoC_mimp_set =  Set([])
+
+for line in FoC_mimp_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    gene_id = split_line[0]
+    FoC_mimp_set.add(gene_id)
+
+
+#-----------------------------------------------------
+# Step 7
 # Print final table of information on query, blast
 # results and genes intersecting blast results
 #-----------------------------------------------------
 
-print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID"]))
+print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "SigP", "P-value", "TransMem_protein", "No._helices", "MIMP_in_2Kb", "cleavage_site", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID"]))
 
 for blast_id in blast_id_set:
     useful_columns=[blast_id]
     useful_columns.extend(FoC_genes_dict[blast_id])
+    useful_columns.extend(FoC_SigP_dict[blast_id])
+    useful_columns.extend(FoC_tmhmm_dict[blast_id])
+    mimp_col="No"
+    if blast_id in FoC_mimp_set:
+        mimp_col="Yes"
+    useful_columns.append(mimp_col)
     useful_columns.extend(blast_dict[blast_id])
     if FoC_reblast_dict[blast_id]:
         useful_columns.extend(FoC_reblast_dict[blast_id])
@@ -170,6 +226,5 @@ for blast_id in blast_id_set:
     if intersect_dict[blast_id]:
         useful_columns.extend(intersect_dict[blast_id])
     else:
-        # useful_columns.extend([".", ".", ".", "no gene"])
         useful_columns.extend(["", "", "", ""])
     print ("\t".join(useful_columns))

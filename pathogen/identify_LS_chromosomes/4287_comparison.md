@@ -304,9 +304,12 @@ For Fus2 Pathogen unique genes:
   FoL_intersected=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.fa_intersect.bed
   FoC_genes=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
   Fus2Intersect=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_4287_chromosomal_Fus2_path_orthogroup_genes_extracted_hits_intersect.bed
+  Fus2SigP=gene_pred/augustus_signalp-4.1/F.oxysporum_fsp_cepae/Fus2/Fus2_aug_sp.tab
+  Fus2TMHMM=gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2/Fus2_tmhmm_out.txt
+  Fus2Mimps=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
   Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect > $Results_table
+  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps > $Results_table
   # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
 ```
 
@@ -413,7 +416,7 @@ Convert top blast hits into gff annotations
   bedtools intersect -wo -a $FoLBlastHits -b $FoLGenes > $FoLIntersect
 ```
 
-## 2.6.4 Reciprocal blasting of hits
+## 2.6.4) Reciprocal blasting of hits
 
 Blast hit locations were extracted from blast hit csv files and used to extract
 nucleotide sequence in fasta format for reblasting against the FoC genome.

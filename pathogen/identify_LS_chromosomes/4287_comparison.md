@@ -307,9 +307,10 @@ For Fus2 Pathogen unique genes:
   Fus2SigP=gene_pred/augustus_signalp-4.1/F.oxysporum_fsp_cepae/Fus2/Fus2_aug_sp.tab
   Fus2TMHMM=gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2/Fus2_tmhmm_out.txt
   Fus2Mimps=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
+  Fus2EffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_EffectorP.txt
   Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps > $Results_table
+  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP > $Results_table
   # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
 ```
 

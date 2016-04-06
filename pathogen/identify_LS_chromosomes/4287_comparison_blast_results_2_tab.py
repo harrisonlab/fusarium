@@ -31,7 +31,7 @@ ap.add_argument('--FoC_SigP',required=True,type=str,help='A file containing a li
 ap.add_argument('--FoC_TM_list',required=True,type=str,help='A file containing a list of transmembrane containing genes')
 ap.add_argument('--FoC_MIMP_list',required=True,type=str,help='A file containing a list of genes within 2kb of MIMPs')
 ap.add_argument('--FoC_effectorP',required=True,type=str,help='A file containing results of effectorP')
-
+ap.add_argument('--FoC_expression',required=True,type=str,help='A file showing cufflinks gff features intersected with Braker gene models')
 
 # ap.add_argument('--FoC_expression',required=True,type=str,help='A file containing details of gene expression')
 
@@ -61,6 +61,9 @@ with open(conf.FoC_MIMP_list) as f:
 
 with open(conf.FoC_effectorP) as f:
     FoC_effectorP_lines = f.readlines()
+
+with open(conf.FoC_expression) as f:
+    FoC_expression_lines = f.readlines()
 
 column_list=[]
 
@@ -229,15 +232,12 @@ for line in FoC_mimp_lines:
 FoC_effectorP_dict = defaultdict(list)
 First = True
 for line in FoC_effectorP_lines:
-    # print line
     if First == True:
         First = False
         continue
     line = line.rstrip("\n")
     split_line = line.split("\t")
     gene_id = split_line[0]
-    # print gene_id
-    # FoC_effectorP_dict[gene_id] = [split_line[1], split_line[2]]
     if gene_id in blast_id_set:
         split_line[1] = split_line[1].replace('Effector', 'Yes').replace("Non-effector", "")
         column_list = itemgetter(1, 2)(split_line)
@@ -248,15 +248,55 @@ for line in FoC_effectorP_lines:
 
 #-----------------------------------------------------
 # Step 10
+# Build a dictionary of Fus2 genes that intersect with
+# cufflinks assembled transcripts. Extract information
+# on FPKM from cufflinks transcripts intersecting Braker
+# gene models
+#
+# In some cases a gene may intersect multiple cufflinks
+# Transcripts. In this case take the stats from the
+# one with the longest overlap
+#
+#-----------------------------------------------------
+
+FoC_expression_dict = defaultdict(list)
+for line in FoC_expression_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    if "transcript" in split_line[2] and "transcript" in split_line[11]:
+        gene_id = split_line[17]
+        overlap = split_line[18]
+        cufflinks_features = split_line[8].split(";")
+        cufflinks_id = str(cufflinks_features[0])
+        cufflinks_id = cufflinks_id[9:-1]
+        FPKM = str(cufflinks_features[2])
+        FPKM = FPKM[7:-1]
+        cov = str(cufflinks_features[6])
+        cov = cov[6:-1]
+        column_list = [cufflinks_id, FPKM, cov, overlap]
+        if not FoC_expression_dict[gene_id]:
+            FoC_expression_dict[gene_id].extend(column_list)
+        else:
+            prev_overlap_lgth = FoC_expression_dict[gene_id][3]
+            if overlap > prev_overlap_lgth:
+                FoC_expression_dict[gene_id].extend(column_list)
+
+
+#-----------------------------------------------------
+# Step 10
 # Print final table of information on query, blast
 # results and genes intersecting blast results
 #-----------------------------------------------------
 
-print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID", "FoL_gene_description"]))
+print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "cufflinks_id","FPKM", "cov", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID", "FoL_gene_description"]))
 
 for blast_id in blast_id_set:
     useful_columns=[blast_id]
     useful_columns.extend(FoC_genes_dict[blast_id])
+    if FoC_expression_dict[blast_id]:
+        useful_columns.extend(FoC_expression_dict[blast_id][0:3])
+    else:
+        useful_columns.extend(["", "", ""])
     useful_columns.extend(FoC_secreted_dict[blast_id])
     # useful_columns.extend(FoC_tmhmm_dict[blast_id])
     mimp_col=""

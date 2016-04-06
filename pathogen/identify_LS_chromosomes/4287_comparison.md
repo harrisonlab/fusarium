@@ -308,9 +308,10 @@ For Fus2 Pathogen unique genes:
   Fus2TMHMM=gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2/Fus2_tmhmm_out.txt
   Fus2Mimps=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
   Fus2EffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_EffectorP.txt
+  Fus2Expression=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
   Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP > $Results_table
+  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP --FoC_expression $Fus2Expression > $Results_table
   # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
 ```
 
@@ -478,9 +479,10 @@ For Fus2 SIX genes:
   Fus2TMHMM=gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2/Fus2_tmhmm_out.txt
   Fus2Mimps=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
   Fus2EffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_EffectorP.txt
+  Fus2Expression=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
   Results_table=$OutDir/4287_chromosomal_Fus2_six_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP > $Results_table
+  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP --FoC_expression $Fus2Expression > $Results_table
 ```
 
 

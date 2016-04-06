@@ -837,7 +837,7 @@ Cufflinks was run to produce the fragment length and stdev statistics:
 		alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
 		alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
 		alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-		cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>& | tee $OutDir/cufflinks/cufflinks.log
+		cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
 	done
 ```
 
@@ -948,6 +948,44 @@ machine.
 	samtools view -b $InBam > $ViewBam
 	samtools sort $ViewBam $SortBam
 	samtools index $SortBam
+```
+
+
+Cufflinks was run to compare the predicted genes to assembled transcripts:
+
+```bash
+	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_softmasked.fa); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+		OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
+		echo "$Organism - $Strain"
+		mkdir -p $OutDir
+		samtools merge -f $AcceptedHits \
+		alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+		alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+		cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+	done
 ```
 
 <!--
@@ -1092,17 +1130,18 @@ commands:
 Putative RxLR genes were identified within Augustus gene models using a number
 of approaches:
 
- * A) From Augustus gene models - Signal peptide identification
+ * A) From Augustus gene models - Identifying secreted proteins
  * B) From Augustus gene models - Effector identification using EffectorP
  * D) From ORF fragments - Signal peptide & RxLR motif  
  * E) From ORF fragments - Hmm evidence of WY domains  
  * F) From ORF fragments - Hmm evidence of RxLR effectors  
 
 
-### A) From Augustus gene models - Signal peptide identification
+### A) From Augustus gene models - Identifying secreted proteins
 
 Required programs:
  * SignalP-4.1
+ * TMHMM
 
 Proteins that were predicted to contain signal peptides were identified using
 the following commands:
@@ -1154,6 +1193,21 @@ single file for each strain. This was done with the following commands:
 		cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
 		tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
 		cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+	done
+```
+
+Some proteins that are incorporated into the cell membrane require secretion.
+Therefore proteins with a transmembrane domain are not likely to represent
+cytoplasmic or apoplastic effectors.
+
+Proteins containing a transmembrane domain were identified:
+
+```bash
+	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
+		qsub $ProgDir/submit_TMHMM.sh $Proteome
 	done
 ```
 
@@ -1498,6 +1552,8 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
+	Organism=F.oxysporum_fsp_cepae
+	Strain=Fus2
 	samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
 	cufflinks -o timecourse/2016_genes/Fus2/72hrs/cufflinks -p 16 --max-intron-length 4000 alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam
 

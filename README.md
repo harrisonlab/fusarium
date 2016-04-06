@@ -1562,6 +1562,7 @@ therefore features can not be restricted by strand when they are intersected.
 	ExpressedGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
 	bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
 ```
+<- not run below here for latest alignment
 
 It was noted that not all the top expressed transcripts had gene models. The
 transcripts without gene models were identified:

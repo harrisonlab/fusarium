@@ -29,3 +29,11 @@ As this was a trial run of codingquary a qlogin sesison was started in screen.
   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
   $ProgDir/run_CQ-PM_unstranded_EMR.sh $Assembly $CufflinksGFF3 2>&1 | tee codingquaryPM_log.txt
 ```
+
+```bash
+  OutDir=$ProjDir/gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2
+  mkdir -p $OutDir
+  mv codingquaryPM_log.txt $OutDir
+  mv out $OutDir
+  rm -r $WorkDir
+```

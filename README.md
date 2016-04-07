@@ -428,8 +428,25 @@ Contigs were renamed in accordance with ncbi recomendations.
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'FOP5' -e 'PG8'); do
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -v 'Fus2'); do
   # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2'); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
+
+
+The Fus2 was manually edited as SIX9 was noted to be split over 2 contigs. These
+contigs were manually joined in geneious and exported back to the cluster
+at the location indicated below. These contigs were renamed.
+
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+	for Assembly in $(ls assembly/spades/*/Fus2/edited/Fus2_edited_assembly.fasta); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -451,14 +468,14 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	for BestAss in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -e 'FOP5' -e 'PG8'); do
+	for BestAss in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta); do
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
 	done
 ```
 
 The published non-pathogen genome for isolate FO47 was also repeatmasked as
-this isolate awas also used in experimental work.
+this isolate was also used in experimental work.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
@@ -886,34 +903,34 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/fo47/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '55' -e 'fo47'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '55' -e 'fo47'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
 		mkdir -p merge alignment/$Organism/$Strain/concatenated
-		samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+		# samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+		# 	alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+		# 	alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
 		OutDir=gene_pred/braker/$Organism/"$Strain"_braker_new
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
 		GeneModelName="$Organism"_"$Strain"_braker_new

@@ -490,7 +490,7 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-	for RepDir in $(ls -d repeat_masked/F.*/*/*); do
+	for RepDir in $(ls -d repeat_masked/F.*/Fus2/*); do
 		Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 		RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -552,10 +552,10 @@ using the following commands:
 	The number of bases masked by TransposonPSI:		594012
 	The total number of masked bases are:		1632798
 
-	F.oxysporum_fsp_cepae		Fus2
-	The number of bases masked by RepeatMasker:		3619961
-	The number of bases masked by TransposonPSI:		1280301
-	The total number of masked bases are:		3857605
+	F.oxysporum_fsp_cepae	Fus2
+	The number of bases masked by RepeatMasker:	3716805
+	The number of bases masked by TransposonPSI:	1280301
+	The total number of masked bases are:	3934042
 
 	F.oxysporum_fsp_cepae		HB17
 	The number of bases masked by RepeatMasker:		3385838
@@ -630,7 +630,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 	cd /home/groups/harrisonlab/project_files/fusarium
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+	for Genome in $(ls repeat_masked/F.*/Fus2/*/*_contigs_unmasked.fa); do
 		echo $Genome;
 		qsub $ProgDir/sub_cegma.sh $Genome dna;
 	done
@@ -881,7 +881,7 @@ Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e '55'); do
+	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_unmasked.fa | grep -w -e 'Fus2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"

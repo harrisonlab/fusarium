@@ -642,6 +642,155 @@ The number of annotations summarised is:
 248
 ```
 
+#### Investigating Non-pathogen unique genes using PG:
+
+PG predicted genes were used to investigate the 72 pathogen-unique orthogroups.
+90 PG genes (90 incl. alternative transcripts) were contained within these
+72 orthogroups (orthogroups may contain inparalogs).
+
+Gff tracks were extracted for the 90 genes. Furthermore interproscan annotations
+were extracted for these genes.
+
+```bash
+  ProjDir=/home/groups/harrisonlab/project_files/fusarium
+  cd $ProjDir
+  IsolateAbrv=FoC_path_vs_non_path
+  WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+  Orthogroups=$WorkDir/"$IsolateAbrv"_orthogroups.txt
+  PathDir=$WorkDir/path_orthogroups
+  NonPathDir=$WorkDir/non-path_orthogroups
+```
+
+```bash
+  for i in 1; do
+    cat $Orthogroups | grep -w 'PG' | grep -w 'A28' | grep -w 'D2' | grep -v -w -e 'Fus2' -e 'A23' -e '125' | sort | uniq | wc -l
+    cat $Orthogroups | grep -w 'PG' | grep -w 'A28' | grep -w 'D2' | grep -v -w -e 'Fus2' -e 'A23' -e '125' |  grep -o -E 'PG\|g\w+\.\w+' | sed 's/PG|//g' | sed -E 's/.t\w+//g' | sort | uniq > $NonPathDir/PG_non-path_orthogroup_genes.txt
+    cat $NonPathDir/PG_non-path_orthogroup_genes.txt | wc -l
+
+    # Fasta accessions were extracted for non-pathogen genes:
+    cat $Orthogroups | grep -w 'PG' | grep -w 'A28' | grep -w 'D2' | grep -v -w -e 'Fus2' -e 'A23' -e '125' | grep -o -E 'PG\|g\w+\.\w+' | sed 's/PG|//g' | sort | uniq > $NonPathDir/PG_non-path_orthogroup_transcripts.txt
+    GeneModels=gene_pred/braker/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_braker/augustus.aa
+    GeneList=$NonPathDir/PG_non-path_orthogroup_transcripts.txt
+    OutFile=$NonPathDir/PG_non-path_orthogroup_genes.fa
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+    $ProgDir/extract_from_fasta.py --fasta $GeneModels --headers $GeneList > $OutFile
+    rm $NonPathDir/PG_non-path_orthogroup_transcripts.txt
+
+
+    # Exract gff annotations for non-pathogen genes
+    PGGff=gene_pred/braker/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_braker/augustus_extracted.gff
+    NonPathOrthogroupsPGGff=$NonPathDir/PG_non-path_orthogroup_genes.gff
+    echo "Gff annotations were extracted for the following number of genes/transcripts:"
+    cat $PGGff | grep -w -f $NonPathDir/PG_non-path_orthogroup_genes.txt > $NonPathOrthogroupsPGGff
+    cat $NonPathOrthogroupsPGGff | grep -w 'gene' | wc -l
+    cat $NonPathOrthogroupsPGGff | grep -w 'transcript' | wc -l
+
+    # Extract interproscan predicted functions for non-pathogen genes
+    PGAnnotations=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
+    NonPathOrthogroupsPGAnno=$NonPathDir/PG_non-path_orthogroup_genes.tsv
+    cat $PGAnnotations | grep -w -f $NonPathDir/PG_non-path_orthogroup_genes.txt > $NonPathOrthogroupsPGAnno
+    echo "Functional annotations were extracted for the following number of transcripts:"
+    cat $NonPathOrthogroupsPGAnno | cut -f1 | sort | uniq | wc -l
+    echo "This totaled the following number of annotations:"
+    cat $NonPathOrthogroupsPGAnno | wc -l
+
+    # Identify number of non-pathogen genes that are secreted
+    PGSecreted=gene_pred/augustus_signalp-4.1/F.oxysporum_fsp_cepae/Fus2/Fus2_aug_sp.tab
+    NonPathOrthogroupsPGSecreted=$NonPathDir/PG_non-path_orthogroup_secreted.txt
+    echo "The following number of Fus2 pathogen unique transcripts were predicted to be secreted:"
+    cat $PGSecreted | grep -w -f $NonPathDir/PG_non-path_orthogroup_genes.txt | grep -w 'YES' | cut -f1 | tr -d '>' > $NonPathOrthogroupsPGSecreted
+    cat $NonPathOrthogroupsPGSecreted  | wc -l
+    # Identify number of non-pathogen genes with coding signals implicating them as effectors
+    PGEffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_braker_augustus.aa_effectorP.txt
+    NonPathOrthogroupsPGEffectorP=$NonPathDir/PG_non-path_orthogroup_effectorP.txt
+    echo "The following number of pathogen unique transcripts look like fungal effectors:"
+    cat $PGEffectorP | grep -w -f $NonPathDir/PG_non-path_orthogroup_genes.txt | grep -v 'Effector probability' > $NonPathOrthogroupsPGEffectorP
+    cat $NonPathOrthogroupsPGEffectorP | grep -w 'Effector' | wc -l
+    #
+    echo "The following number of genes are predicted as secreted and look like effectors:"
+    NonPathOrthogroupsPGSecretedEffectorP=$NonPathDir/PG_non-path_orthogroup_secreted_effectorP.txt
+    cat $NonPathOrthogroupsPGEffectorP $NonPathOrthogroupsPGSecreted | grep -v 'Non-effector' | cut -f1 -d '.'| sort | uniq -d > $NonPathOrthogroupsPGSecretedEffectorP
+    cat $NonPathOrthogroupsPGSecretedEffectorP | wc -l
+    # The number of non-pathogen genes in 2kb of Mimps:
+    echo "The number of pathogen genes in 2kb of Mimps:"
+    MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_genes_in_2kb_mimp.txt
+    NonPathOrthogroupsPGMimps=$NonPathDir/PG_non-path_orthogroup_mimp_genes.txt
+    cat $MimpGenesTxt | grep -w -f $NonPathDir/PG_non-path_orthogroup_genes.txt > $NonPathOrthogroupsPGMimps
+    cat $NonPathOrthogroupsPGMimps | wc -l
+    # echo "The number of pathogen common genes in the top 20 expressed Fus2 genes at 72hr"
+    # TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
+    # cat $TopGenes | grep -w -f $NonPathDir/PG_non-path_orthogroup_genes.txt | wc -l
+  done
+```
+
+```
+72
+90
+Gff annotations were extracted for the following number of genes/transcripts:
+90
+90
+Functional annotations were extracted for the following number of transcripts:
+84
+This totaled the following number of annotations:
+726
+The following number of Fus2 pathogen unique transcripts were predicted to be secreted:
+5
+The following number of pathogen unique transcripts look like fungal effectors:
+24
+The following number of genes are predicted as secreted and look like effectors:
+3
+The number of pathogen genes in 2kb of Mimps:
+0
+```
+
+
+The occurence of predicted functions in genes was investigated.
+
+```bash
+  for i in 1; do
+    echo "The following number of anontations were investigated:"
+    cat $NonPathOrthogroupsPGAnno | cut -f1,5,6 | wc -l
+    echo "Taking into account redundancy in a gene, there were this many annotations:"
+    cat $NonPathOrthogroupsPGAnno | cut -f1,5,6 | sort | uniq | wc -l
+    echo "The most common domains in pathogen genes were identified:"
+    cat $NonPathOrthogroupsPGAnno | cut -f1,5,6 | sort | uniq | cut -f2,3 | sort | uniq -c | sort -n -r | head -n 20
+    echo "The number of annotations summarised is:"
+    cat $NonPathOrthogroupsPGAnno | cut -f1,5,6 | sort | uniq | cut -f2,3 | sort | uniq -c | sort -n -r | wc -l
+  done
+```
+
+```
+The following number of anontations were investigated:
+726
+Taking into account redundancy in a gene, there were this many annotations:
+494
+The most common domains in pathogen genes were identified:
+     20 Coil
+     17 TMhelix	Region of a membrane-bound protein predicted to be embedded in the membrane.
+      7 SSF52540
+      7 G3DSA:3.40.50.300
+      5 SSF51735
+      5 G3DSA:3.40.50.720
+      3 SSF57701
+      3 SSF53335
+      3 SSF51905
+      3 SSF103473
+      3 PTHR13789
+      3 PTHR11711
+      3 PS50048	Zn(2)-C6 fungal-type DNA-binding domain profile.
+      3 PS00463	Zn(2)-C6 fungal-type DNA-binding domain signature.
+      3 PR00420	Aromatic-ring hydroxylase (flavoprotein monooxygenase) signature
+      3 PF01494	FAD binding domain
+      3 PF00172	Fungal Zn(2)-Cys(6) binuclear cluster domain
+      3 G3DSA:4.10.240.10
+      3 G3DSA:3.50.50.60
+      3 G3DSA:3.40.50.150
+The number of annotations summarised is:
+366
+
+```
+
+
 #### Orthogroups of FTF genes
 
 The orthogroups containing FTF1 and FTF2 genes were identified. The top blast hit

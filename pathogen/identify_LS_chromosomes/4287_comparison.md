@@ -1,4 +1,4 @@
-# 4287 Comparison
+# Fus2 vs 4287 Comparison
 
 This document details the commands used to compare FoC genes or contigs to those
 from scaffolded FoL assembly.
@@ -485,9 +485,146 @@ For Fus2 SIX genes:
   $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP --FoC_expression $Fus2Expression > $Results_table
 ```
 
+# 3) PG vs 4287 Comparison
+
+### 3.6) BLASTing Six genes vs FoL (4287) genome.
+
+A similar analysis was perfromed for the Six genes that are present in Fus2.
+
+Six genes present in Fus2 were extracted and Blasted against the FoL genome.
+
+#### 3.6.1) Extracting Non-pathogen unique genes for PG:
+
+```bash
+  Orthogroups=$WorkDir/"$IsolateAbrv"_orthogroups.txt
+  PathDir=$WorkDir/path_orthogroups
+  NonPathDir=$WorkDir/non-path_orthogroups
+```
+
+#### 3.6.2) Blasting non-pathogen unique genes and extracting blast hits:
+
+```bash
+  PGNonPathFa=analysis/orthology/orthomcl/FoC_path_vs_non_path/non-path_orthogroups/PG_non-path_orthogroup_genes.fa
+  FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  qsub $ProgDir/blast_pipe.sh $PGNonPathFa protein $FoLGenomeFa
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+  BlastHitsCsv=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_PG_non-path_orthogroup_genes.fa_homologs.csv
+  HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+  Column2=FoC_non-path_gene_homolog
+  NumHits=1
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+```
 
 
-# Whole genome alignment
+#### 3.6.3) Intersecting blast hits with genes from FoL
+
+```bash
+  FoBlastHits=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_PG_non-path_orthogroup_genes.fa_homologs.gff
+  FoLGenes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
+  PGIntersect=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_PG_non-path_orthogroup_genes.fa_intersect.bed
+  bedtools intersect -wo -a $FoBlastHits -b $FoLGenes > $PGIntersect
+```
+
+## 3.6.4) Reciprocal blasting of hits
+
+Blast hit locations were extracted from blast hit csv files and used to extract
+nucleotide sequence in fasta format for reblasting against the FoC genome.
+
+```bash
+  HitsDir=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal
+  BlastHitsCsv=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_chromosomal_PG_non-path_orthogroup_genes.fa_homologs.csv
+
+  HeadCol=$((5+10))
+  StartCol=$((11+10))
+  StopCol=$((12+10))
+  StrandCol=$((10+10))
+  IdCol=1
+  FastaFile=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
+  ExtractedHits=$HitsDir/4287_chromosomal_PG_non-path_orthogroup_genes.fa_extracted_hits.fa
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  $ProgDir/sequence_extractor.py --coordinates_file $BlastHitsCsv --header_column $HeadCol --start_column $StartCol --stop_column $StopCol --strand_column $StrandCol --id_column $IdCol --fasta_file $FastaFile | sed -E 's/^>/>extracted_hit_of_/g' > $ExtractedHits
+```
+
+Reblast the extracted fasta sequences:
+```bash
+  HitsDir=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal
+  ExtractedHits=$HitsDir/4287_chromosomal_PG_non-path_orthogroup_genes.fa_extracted_hits.fa
+  FocGenomeFa=repeat_masked/F.oxysporum_fsp_cepae/PG/filtered_contigs_repmask/PG_contigs_unmasked.fa
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  qsub $ProgDir/blast_pipe.sh $ExtractedHits dna $FocGenomeFa
+```
+
+Convert top blast hits into gff annotations and intersect the reblast hits with
+genes from the FoC genome.
+
+```bash
+  PGDir=analysis/blast_homology/F.oxysporum_fsp_cepae/PG
+  BlastHitsCsv=$PGDir/PG_4287_chromosomal_PG_non-path_orthogroup_genes.fa_extracted_hits.fa_homologs.csv
+  HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+  Column2=reblast_of_FoC_non-pathogen_gene
+  NumHits=1
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+
+  PGGenes=gene_pred/braker/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_braker/augustus_extracted.gff
+  PGIntersect=$PGDir/PG_4287_chromosomal_PG_non-path_orthogroup_genes.fa_extracted_hits_intersect.bed
+  bedtools intersect -wo -a $HitsGff -b $PGGenes > $PGIntersect
+```
+
+### 3.6.5) Non-pathogen Expressed Genes
+
+As a preliminary analysis of the RNAseq data, highly expressed genes at 72hrs
+post infection were identified in PG.
+
+Note - cufflinks doesn't always predict direction of a transcript and
+therefore features can not be restricted by strand when they are intersected.
+
+```bash
+  screen -a
+  qlogin -pe smp 16 -l virtual_free=2G
+  cd /home/groups/harrisonlab/project_files/fusarium
+	Organism=F.oxysporum_fsp_cepae
+	Strain=PG
+	samtools merge -f alignment/$Organism/$Strain/concatenated/FO47_72hpi.bam alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam
+	cufflinks -o timecourse/2016_genes/FO47/72hrs/cufflinks -p 16 --max-intron-length 4000 alignment/$Organism/$Strain/concatenated/FO47_72hpi.bam
+
+	Transcripts=timecourse/2016_genes/FO47/72hrs/cufflinks/transcripts.gtf
+	GeneGff=gene_pred/braker/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_braker/augustus_extracted.gff
+	ExpressedGenes=timecourse/2016_genes/FO47/72hrs/cufflinks/PG_expressed_genes.gff
+	bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
+```
+
+
+### 3.6.6) Creating an output table of blast results
+
+For PG SIX genes:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+OutDir=analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287_chromosomal
+Blast_csv=$OutDir/4287_chromosomal_PG_non-path_orthogroup_genes.fa_homologs.csv
+FoL_intersected=$OutDir/4287_chromosomal_PG_non-path_orthogroup_genes.fa_intersect.bed
+FoC_genes=gene_pred/braker/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_braker/augustus_extracted.gff
+PGDir=analysis/blast_homology/F.oxysporum_fsp_cepae/PG
+PGIntersect=$PGDir/PG_4287_chromosomal_PG_non-path_orthogroup_genes.fa_extracted_hits_intersect.bed
+PGSigP=gene_pred/augustus_signalp-4.1/F.oxysporum_fsp_cepae/PG/PG_aug_sp.tab
+PGTMHMM=gene_pred/trans_mem/F.oxysporum_fsp_cepae/PG/PG_tmhmm_out.txt
+PGMimps=analysis/mimps/F.oxysporum_fsp_cepae/PG/PG_genes_in_2kb_mimp.txt
+PGEffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG_EffectorP.txt
+PGExpression=timecourse/2016_genes/FO47/72hrs/cufflinks/PG_expressed_genes.gff
+Results_table=$OutDir/4287_chromosomal_PG_non-path_orthogroup_genes.tab
+
+$ProgDir/FoC_genes_vs_FoL_chromosomal.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $PGIntersect --FoC_SigP $PGSigP --FoC_TM_list $PGTMHMM --FoC_MIMP_list $PGMimps --FoC_effectorP $PGEffectorP --FoC_expression $PGExpression > $Results_table
+```
+
+
+# FoC genomes vs FoL Whole genome alignment
 
 ## Mauve alignment
 

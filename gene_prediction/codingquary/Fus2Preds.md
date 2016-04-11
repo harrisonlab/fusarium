@@ -46,7 +46,7 @@ As this was a trial run of codingquary a qlogin sesison was started in screen.
   qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 ```
 
-
+<!--
 ```bash
   cd /home/groups/harrisonlab/project_files/fusarium
   Assembly=repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_softmasked.fa
@@ -54,10 +54,10 @@ As this was a trial run of codingquary a qlogin sesison was started in screen.
   OutDir=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_72hr
   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
   qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
-```
+``` -->
 
 
-# Supplimenting BRaker gene models with CodingQuary genes
+# Supplimenting Braker gene models with CodingQuary genes
 
 ```bash
   BrakerGff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
@@ -78,7 +78,7 @@ As this was a trial run of codingquary a qlogin sesison was started in screen.
 ```
 
 
-
+<!--
 # Mining intergenic regions of Braker predictions for Path genes:
 
 CodingQuary can be used to search between gene features:
@@ -101,4 +101,4 @@ CodingQuary can be used to search between gene features:
   CufflinksGTF_to_CodingQuarryGFF3.py $CufflinksGTF > $CufflinksGFF3
   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
   $ProgDir/run_CQ-PM_unstranded_EMR.sh $Assembly $CufflinksGFF3 2>&1 | tee codingquaryPM_log.txt
-```
+``` -->

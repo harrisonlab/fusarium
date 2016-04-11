@@ -429,7 +429,6 @@ Contigs were renamed in accordance with ncbi recomendations.
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
 	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -v 'Fus2'); do
-  # for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -e 'Fus2'); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -446,7 +445,7 @@ at the location indicated below. These contigs were renamed.
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-	for Assembly in $(ls assembly/spades/*/Fus2/edited/Fus2_edited_assembly.fasta); do
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_edited_*.fasta); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -880,8 +879,8 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
-	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_unmasked.fa | grep -w -e 'Fus2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+	# for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep -e 'Fus2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -893,6 +892,13 @@ Then Rnaseq data was aligned to each genome assembly:
 			OutDir=alignment/$Organism/$Strain/$Timepoint
 			InsertGap='-20'
 			InsertStdDev='78'
+			Jobs=$(qstat | grep 'tophat' | wc -l)
+			while [ $Jobs -ge 24 ]; do
+				sleep 10
+				printf "."
+				Jobs=$(qstat | grep 'tophat' | wc -l)
+			done
+			printf "\n"
 			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
 			qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
 		done
@@ -903,34 +909,34 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '55' -e 'fo47'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
 		mkdir -p merge alignment/$Organism/$Strain/concatenated
-		# samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-		# 	alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-		# 	alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+		samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+			alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+			alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+			alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+			alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+			alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
 		OutDir=gene_pred/braker/$Organism/"$Strain"_braker_new
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
 		GeneModelName="$Organism"_"$Strain"_braker_new
@@ -964,7 +970,7 @@ machine.
 	IndexBam=
 	samtools view -b $InBam > $ViewBam
 	samtools sort $ViewBam $SortBam
-	samtools index $SortBam
+	samtools index $SortBam.bam
 ```
 
 
@@ -1014,31 +1020,67 @@ The number of Fo47 genes was determined for comparison to number predicted by Br
 ```
  -->
 
-<!--
-#### Cufflinks identification of additional transcripts
 
-To ensure all highly expressed genes were predicted additional transcripts were
-identified using cufflinks.
+
+## Supplimenting Braker gene models with CodingQuary genes
+
+Additional genes were added to Braker gene predictions, using CodingQuary in
+pathogen mode to predict additional regions.
+
+Fistly, aligned RNAseq data was assembled into transcripts using Cufflinks.
 
 Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -e 'Fus2' -e '55'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
 		OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
 		mkdir -p $OutDir
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
-		cufflinks -o $OutDir -p 8 --max-intron-length 4000 $AcceptedHits
-		Transcripts=$OutDir/transcripts.gtf
-		GeneGff=$(ls gene_pred/braker/$Organism/$Strain/*/augustus_extracted.gff)
-		AdditionalGenes=$OutDir/"$Strain"_additional_genes.gff
-		bedtools intersect -u -a $Transcripts -b $GeneGff > $AdditionalGenes
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+		qsub $ProgDir/run_cufflinks.sh $AcceptedHits $OutDir
 	done
 ```
--->
+
+Secondly, genes were predicted using CodingQuary:
+
+```bash
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -v -e 'Fus2'); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		OutDir=gene_pred/codingquary/$Organism/$Strain
+		CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+		qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+	done
+```
+
+Then, additional transcripts were added to Braker gene models, when CodingQuary
+genes were predicted in regions of the genome, not containing Braker gene
+models:
+
+```bash
+  BrakerGff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+  CodingQuaryGff=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/out/PredictedPass.gff3
+  PGNGff=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/out/PGN_predictedPass.gff3
+  OutDir=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/additional
+  AddGenesList=$OutDir/additional_genes.txt
+  AddGenesGff=$OutDir/additional_genes.gff
+  FinalGff=$OutDir/combined_genes.gff
+  mkdir -p $OutDir
+
+  bedtools intersect -v -s -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+  bedtools intersect -v -s -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+  $ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+  $ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+  cat $BrakerGff $AddGenesGff | bedtools sort > $FinalGff
+```
+
 
 
 ## ORF finder
@@ -1548,14 +1590,15 @@ results were:
 	     82 Unaffected pathogenicity
 
 ```
+-->
 
-The analysis was also performed by blasting the predicted proteins against the
+<!-- The analysis was also performed by blasting the predicted proteins against the
 PHIbase database:
 
 The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 
 ```bash
-	for Proteins in $(ls _pred/augustus/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa); do
+	for Proteins in $(ls gene_pred/braker/F.oxysporum_fsp_cepae/*/*/*.aa); do
 		qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh $Proteins protein ../../phibase/v3.8/PHI_accessions.fa
 	done
 ``` -->

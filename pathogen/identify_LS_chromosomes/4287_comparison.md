@@ -311,8 +311,17 @@ For Fus2 Pathogen unique genes:
   Fus2Expression=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
   Results_table=$OutDir/4287_chromosomal_Fus2_path_orthogroup_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP --FoC_expression $Fus2Expression > $Results_table
-  # cat $Results_table | tail -n +2 | sort -n -k6 > $OutDir/4287_chromosomal_Fus2_path_orthogroup_genes_sorted.tab
+  $ProgDir/FoC_genes_vs_FoL_chromosomal.py \
+    --blast_csv $Blast_csv \
+    --FoL_intersected_genes $FoL_intersected \
+    --FoC_genes_gff $FoC_genes \
+    --FoC_interescted_reblast $PGIntersect \
+    --FoC_SigP $PGSigP \
+    --FoC_TM_list $PGTMHMM \
+    --FoC_MIMP_list $PGMimps \
+    --FoC_effectorP $PGEffectorP \
+    --FoC_expression $PGExpression \
+    > $Results_table
 ```
 
 For SIX genes:
@@ -482,7 +491,17 @@ For Fus2 SIX genes:
   Fus2Expression=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
   Results_table=$OutDir/4287_chromosomal_Fus2_six_genes.tab
 
-  $ProgDir/4287_comparison_blast_results_2_tab.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $Fus2Intersect --FoC_SigP $Fus2SigP --FoC_TM_list $Fus2TMHMM --FoC_MIMP_list $Fus2Mimps --FoC_effectorP $Fus2EffectorP --FoC_expression $Fus2Expression > $Results_table
+  $ProgDir/FoC_genes_vs_FoL_chromosomal.py \
+    --blast_csv $Blast_csv \
+    --FoL_intersected_genes $FoL_intersected \
+    --FoC_genes_gff $FoC_genes \
+    --FoC_interescted_reblast $PGIntersect \
+    --FoC_SigP $PGSigP \
+    --FoC_TM_list $PGTMHMM \
+    --FoC_MIMP_list $PGMimps \
+    --FoC_effectorP $PGEffectorP \
+    --FoC_expression $PGExpression \
+    > $Results_table
 ```
 
 # 3) PG vs 4287 Comparison
@@ -620,7 +639,18 @@ PGEffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/PG/F.oxysporum_fsp_cepae_PG
 PGExpression=timecourse/2016_genes/FO47/72hrs/cufflinks/PG_expressed_genes.gff
 Results_table=$OutDir/4287_chromosomal_PG_non-path_orthogroup_genes.tab
 
-$ProgDir/FoC_genes_vs_FoL_chromosomal.py --blast_csv $Blast_csv --FoL_intersected_genes $FoL_intersected --FoC_genes_gff $FoC_genes --FoC_interescted_reblast $PGIntersect --FoC_SigP $PGSigP --FoC_TM_list $PGTMHMM --FoC_MIMP_list $PGMimps --FoC_effectorP $PGEffectorP --FoC_expression $PGExpression > $Results_table
+$ProgDir/FoC_genes_vs_FoL_chromosomal.py \
+  --blast_csv $Blast_csv \
+  --FoL_intersected_genes $FoL_intersected \
+  --FoC_genes_gff $FoC_genes \
+  --FoC_interescted_reblast $PGIntersect \
+  --FoC_SigP $PGSigP \
+  --FoC_TM_list $PGTMHMM \
+  --FoC_MIMP_list $PGMimps \
+  --FoC_effectorP $PGEffectorP \
+  --FoC_expression $PGExpression \
+  > $Results_table
+
 ```
 
 

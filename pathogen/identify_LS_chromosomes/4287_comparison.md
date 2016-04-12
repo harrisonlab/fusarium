@@ -705,6 +705,48 @@ Note - For the commands below to work you must have logged into the cluster usin
 ```
 
 
+
+### Comparison of Fo47 to FoL 4287
+
+```bash
+  ProjDir=/home/groups/harrisonlab/project_files/fusarium
+  WorkDir=$ProjDir/analysis/genome_alignment/mauve/FO47_vs_FoL
+  mkdir -p $WorkDir
+  Reference=$(ls $ProjDir/assembly/external_group/F.oxysporum_fsp_lycopersici/4287/ncbi/FoL_4287_chromosomes.fa)
+  # Use move_contigs to order genomes based on reference for each phylogroup
+  for Assembly in $(ls $ProjDir/assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $Assembly| rev | cut -f3 -d '/' | rev)
+    echo "$Organism - $Strain"
+    MauveDir=~/prog/mauve/mauve_snapshot_2015-02-13
+    OutDir=$WorkDir/"$Strain"_contigs
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/genome_alignment/mauve
+    rm -r $OutDir
+    qsub $ProgDir/mauve_order_contigs.sh $MauveDir $Reference  $Assembly $OutDir
+  done
+```
+
+### Running Progressive Mauve
+
+```bash
+  ProjDir=/home/groups/harrisonlab/project_files/fusarium
+  WorkDir=$ProjDir/analysis/genome_alignment/mauve/FO47_vs_FoL
+  OutDir=$WorkDir/alignment
+  GenomeList=$(ls $ProjDir/assembly/external_group/F.oxysporum_fsp_lycopersici/4287/ncbi/FoL_4287_chromosomes.fa)
+  for Assembly in $(ls $ProjDir/assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $Assembly| rev | cut -f3 -d '/' | rev)
+    echo "$Organism - $Strain"
+    NumAlignments=$(ls -d $WorkDir/"$Strain"_contigs/alignment* | wc -l)
+    AlignedContigs=$(ls $WorkDir/"$Strain"_contigs/alignment"$NumAlignments"/fusarium_oxysporum_fo47_1_supercontigs.fasta)
+    echo $AlignedContigs
+    GenomeList="$GenomeList ""$AlignedContigs "
+  done
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/genome_alignment/mauve
+  qsub $ProgDir/run_progressive_mauve.sh $OutDir "$GenomeList"
+```
+
+
 ## TBA alignment
 
 

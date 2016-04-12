@@ -398,7 +398,7 @@ Quast
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
   for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
-  # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_contigs.fasta); do
+  # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -478,7 +478,7 @@ this isolate was also used in experimental work.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	Fo47Ass=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_contigs.fasta
+	Fo47Ass=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta
 	for BestAss in $(ls $Fo47Ass); do
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
@@ -880,7 +880,7 @@ Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
 	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
-	# for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep -e 'Fus2'); do
+	# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -909,11 +909,11 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2_edited_v2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
-		mkdir -p merge alignment/$Organism/$Strain/concatenated
+		mkdir -p alignment/$Organism/$Strain/concatenated
 		samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
 			alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
 			alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
@@ -964,10 +964,9 @@ Note - IGV was used to view aligned reads against the Fus2 genome on my local
 machine.
 
 ```bash
-	InBam=alignment/F.oxysporum_fsp_cepae/Fus2/concatenated/concatenated.bam
-	ViewBam=alignment/F.oxysporum_fsp_cepae/Fus2/concatenated/concatenated_view.bam
-	SortBam=alignment/F.oxysporum_fsp_cepae/Fus2/concatenated/concatenated_sorted
-	IndexBam=
+	InBam=alignment/F.oxysporum_fsp_cepae/Fus2_edited_v2/concatenated/concatenated.bam
+	ViewBam=alignment/F.oxysporum_fsp_cepae/Fus2_edited_v2/concatenated/concatenated_view.bam
+	SortBam=alignment/F.oxysporum_fsp_cepae/Fus2_edited_v2/concatenated/concatenated_sorted
 	samtools view -b $InBam > $ViewBam
 	samtools sort $ViewBam $SortBam
 	samtools index $SortBam.bam
@@ -1033,7 +1032,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -e 'Fus2' -e '55'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e '55' | grep -e 'Fus2_edited_v2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1041,14 +1040,21 @@ therefore features can not be restricted by strand when they are intersected.
 		mkdir -p $OutDir
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-		qsub $ProgDir/run_cufflinks.sh $AcceptedHits $OutDir
+		qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 	done
 ```
 
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -v -e 'Fus2'); do
+# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+# while [ $Jobs -ge 1 ]; do
+# sleep 10
+# printf "."
+# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+# done
+# printf "\n"
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2_edited_v2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1057,6 +1063,7 @@ Secondly, genes were predicted using CodingQuary:
 		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 		qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 	done
+# done
 ```
 
 Then, additional transcripts were added to Braker gene models, when CodingQuary
@@ -1081,7 +1088,16 @@ models:
   cat $BrakerGff $AddGenesGff | bedtools sort > $FinalGff
 ```
 
+## Suplimenting gene models with known genes
 
+Additional gene models were consrtucted in braker / transfered from other isolates
+and were exported to the following locations:
+
+```bash
+	Fus2Six9=assembly/spades/F.oxysporum_fsp_cepae/Fus2_edited_v2/filtered_contigs/Fus2_edited_v2_contig_1090_six9.gff
+```
+
+These gene models were then edited with nano to give names and IDs to these genes.
 
 ## ORF finder
 
@@ -1394,7 +1410,7 @@ assemlies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/Fus2*/*/*_contigs_unmasked.fa); do
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly

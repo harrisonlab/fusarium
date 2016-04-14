@@ -467,7 +467,8 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	for BestAss in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta); do
+	for BestAss in $(ls assembly/spades/*/fo47/*/contigs_min_500bp_renamed.fasta); do
+	# for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
 	done
@@ -483,6 +484,14 @@ this isolate was also used in experimental work.
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
 	done
+```
+
+Fo47 masked contigs were noted to still contain additional text following spaces.
+This disrupted downstream programs.
+```bash
+for File in $(ls repeat_masked/F.oxysporum/fo47/*/fo47_contigs_*masked.fa); do
+	sed -i 's/ of Fusarium oxysporum Fo47//g' $File
+done
 ```
 
 The number of bases masked by transposonPSI and Repeatmasker were summarised
@@ -909,7 +918,7 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2_edited_v2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'fo47'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -949,7 +958,7 @@ Then Rnaseq data was aligned to each genome assembly:
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff | grep -e 'Fus2' -e '55'); do
+	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff); do
 		getAnnoFasta.pl $File
 		OutDir=$(dirname $File)
 		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
@@ -1032,7 +1041,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e '55' | grep -e 'Fus2_edited_v2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e '55' | grep -e 'fo47'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1047,14 +1056,7 @@ therefore features can not be restricted by strand when they are intersected.
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-# while [ $Jobs -ge 1 ]; do
-# sleep 10
-# printf "."
-# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-# done
-# printf "\n"
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2_edited_v2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'fo47'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1063,7 +1065,6 @@ Secondly, genes were predicted using CodingQuary:
 		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 		qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 	done
-# done
 ```
 
 Then, additional transcripts were added to Braker gene models, when CodingQuary
@@ -1071,21 +1072,47 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-  BrakerGff=gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
-  CodingQuaryGff=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/out/PredictedPass.gff3
-  PGNGff=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/out/PGN_predictedPass.gff3
-  OutDir=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/additional
-  AddGenesList=$OutDir/additional_genes.txt
-  AddGenesGff=$OutDir/additional_genes.gff
-  FinalGff=$OutDir/combined_genes.gff
-  mkdir -p $OutDir
+	for BrakerGff in $(ls gene_pred/braker/F.*/fo47_braker_new/*/augustus.gff3); do
+		Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g')
+		Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		# BrakerGff=gene_pred/braker/$Organism/$Strain/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+		Assembly=$(ls repeat_masked/$Organism/$Strain/*/"$Strain"_contigs_softmasked.fa)
+		CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
+		PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
+		AddDir=gene_pred/codingquary/$Organism/$Strain/additional
+		FinalDir=gene_pred/codingquary/$Organism/$Strain/final
+		AddGenesList=$AddDir/additional_genes.txt
+		AddGenesGff=$AddDir/additional_genes.gff
+		FinalGff=$AddDir/combined_genes.gff
+		mkdir -p $AddDir
+		mkdir -p $FinalDir
 
-  bedtools intersect -v -s -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
-  bedtools intersect -v -s -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-  $ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
-  $ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
-  cat $BrakerGff $AddGenesGff | bedtools sort > $FinalGff
+		bedtools intersect -v -s -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+		bedtools intersect -v -s -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+		$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+		$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+		# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/additional/additional_genes.gff
+		# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/out/PredictedPass.gff3
+
+		$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/additional_gene_parsed.gff3
+		$ProgDir/gff2fasta.pl $Assembly $FinalDir/additional_gene_parsed.gff3 $FinalDir/final_genes_CodingQuary
+		cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+		$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+		# cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
+	done
+```
+
+The final number of genes per isolate was observed using:
+```bash
+	for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final); do
+		echo $DirPath;
+		cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+		cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+		echo "";
+	done
 ```
 
 ## Suplimenting gene models with known genes

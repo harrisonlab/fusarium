@@ -306,10 +306,10 @@ gene including 11 P. cactorum RxLRs.
 ### for FoC 125
 ```bash
   Taxon_code=125
-  Fasta_file=$(ls gene_pred/braker/F.oxysporum_fsp_cepae/125/*/augustus.aa)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+  cat "$Taxon_code".fasta | sed -r 's/\./_/g' | sed -r "s/_t/.t/g" > $WorkDir/formatted/"$Taxon_code".fasta
 ```
 <!--
 ### for FoC 55
@@ -324,43 +324,43 @@ gene including 11 P. cactorum RxLRs.
 ### for FoC A23
 ```bash
   Taxon_code=A23
-  Fasta_file=$(ls gene_pred/braker/F.oxysporum_fsp_cepae/A23/*/augustus.aa)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+  cat "$Taxon_code".fasta | sed -r 's/\./_/g' | sed -r "s/_t/.t/g" > $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
 ### for FoC A28
 ```bash
   Taxon_code=A28
-  Fasta_file=$(ls gene_pred/braker/F.oxysporum_fsp_cepae/A28/*/augustus.aa)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+  cat "$Taxon_code".fasta | sed -r 's/\./_/g' | sed -r "s/_t/.t/g" > $WorkDir/formatted/"$Taxon_code".fasta
 ```
 ### for FoC D2
 ```bash
   Taxon_code=D2
-  Fasta_file=$(ls gene_pred/braker/F.oxysporum_fsp_cepae/D2/*/augustus.aa)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/D2/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+  cat "$Taxon_code".fasta | sed -r 's/\./_/g' | sed -r "s/_t/.t/g" > $WorkDir/formatted/"$Taxon_code".fasta
 ```
 ### for FoC Fus2
 ```bash
   Taxon_code=Fus2
-  Fasta_file=$(ls gene_pred/braker/F.oxysporum_fsp_cepae/Fus2/*/augustus.aa)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+  cat "$Taxon_code".fasta | sed -r 's/\./_/g' | sed -r "s/_t/.t/g" > $WorkDir/formatted/"$Taxon_code".fasta
 ```
 ### for FoC PG
 ```bash
   Taxon_code=PG
-  Fasta_file=$(ls gene_pred/braker/F.oxysporum_fsp_cepae/PG/*/augustus.aa)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+  cat "$Taxon_code".fasta | sed -r 's/\./_/g' | sed -r "s/_t/.t/g" > $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
 
@@ -378,28 +378,28 @@ gene including 11 P. cactorum RxLRs.
 ## Perform an all-vs-all blast of the proteins
 
 ```bash
-  BlastDB=$WorkDir/blastall/$IsolateAbrv.db
+BlastDB=$WorkDir/blastall/$IsolateAbrv.db
 
-  makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
-  BlastOut=$WorkDir/all-vs-all_results.tsv
-  mkdir -p $WorkDir/splitfiles
+makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
+BlastOut=$WorkDir/all-vs-all_results.tsv
+mkdir -p $WorkDir/splitfiles
 
-  SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-  $SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
+SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+$SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
 
-  ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
-  for File in $(find $WorkDir/splitfiles); do
-    Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
-    while [ $Jobs -gt 1 ]; do
-      sleep 5
-      printf "."
-      Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
-    done
-    printf "\n"
-    echo $File
-    BlastOut=$(echo $File | sed 's/.fa/.tab/g')
-    qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
-  done
+ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
+for File in $(find $WorkDir/splitfiles); do
+Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 3
+printf "."
+Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+done
+printf "\n"
+echo $File
+BlastOut=$(echo $File | sed 's/.fa/.tab/g')
+qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
+done
 ```
 
 ## Merge the all-vs-all blast results  
@@ -849,3 +849,331 @@ genes.
   cat $A28Genes | grep -w -f $NonPathOrthogroupsA28 > $NonPathOrthogroupsA28Gff
   cat $A28Annotations | grep -w -f $NonPathOrthogroupsA28 > $NonPathOrthogroupsA28Anno
 ``` -->
+
+
+
+
+# Methodology 3
+
+
+```bash
+  ProjDir=/home/groups/harrisonlab/project_files/fusarium
+  cd $ProjDir
+  IsolateAbrv=FoC_vs_Fo_vs_FoL
+  WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+  mkdir -p $WorkDir
+  mkdir -p $WorkDir/formatted
+  mkdir -p $WorkDir/goodProteins
+  mkdir -p $WorkDir/badProteins  
+```
+
+## Format fasta files
+
+### Pathogenic isolates:
+
+### for FoC 125
+```bash
+  Taxon_code=125
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC A13
+```bash
+  Taxon_code=A13
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC A23
+```bash
+  Taxon_code=A23
+  Fasta_file=$(ls  gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC Fus2
+```bash
+  Taxon_code=Fus2
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### Intermediate isolates:
+
+### for FoC 55
+```bash
+  Taxon_code=55
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/55/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC A1/2
+```bash
+  Taxon_code=A1_2
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A1-2/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC CB3
+```bash
+  Taxon_code=CB3
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC HB17
+```bash
+  Taxon_code=HB17
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/HB17/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC HB6
+```bash
+  Taxon_code=HB6
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/HB6/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### Non-pathogenic isolates:
+
+### for FoC A28
+```bash
+  Taxon_code=A28
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC D2
+```bash
+  Taxon_code=D2
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/D2/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoC PG
+```bash
+  Taxon_code=PG
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for Fo Fo47
+```bash
+  Taxon_code=fo47
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum/fo47/final/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### Non-FoC isolates:
+<!--
+### for FoN N139
+```bash
+  Taxon_code=N139
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FoP FOP5
+```bash
+  Taxon_code=FOP5
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_pisi/FOP5/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+-->
+<!--
+### for FoP L5
+```bash
+  Taxon_code=FOP5
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_pisi/L5/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+``` -->
+<!--
+### for FoP PG3
+```bash
+  Taxon_code=PG3
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_pisi/PG3/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for FP A8
+```bash
+  Taxon_code=A8
+  Fasta_file=$(ls gene_pred/codingquary/F.proliferatum/A8/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+-->
+
+
+### for FoL 4287
+
+```bash
+  Taxon_code=4287
+  Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta)
+  Id_field=4
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+
+## Filter proteins into good and poor sets.
+
+```bash
+  Input_dir=$WorkDir/formatted
+  Min_length=10
+  Max_percent_stops=20
+  Good_proteins_file=$WorkDir/goodProteins/goodProteins.fasta
+  Poor_proteins_file=$WorkDir/badProteins/poorProteins.fasta
+  orthomclFilterFasta $Input_dir $Min_length $Max_percent_stops $Good_proteins_file $Poor_proteins_file
+```
+
+## Perform an all-vs-all blast of the proteins
+
+```bash
+  BlastDB=$WorkDir/blastall/$IsolateAbrv.db
+
+  makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
+  BlastOut=$WorkDir/all-vs-all_results.tsv
+  mkdir -p $WorkDir/splitfiles
+
+  SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+  $SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
+
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
+  for File in $(find $WorkDir/splitfiles); do
+    Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+    while [ $Jobs -gt 1 ]; do
+      sleep 3
+      printf "."
+      Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+    done
+    printf "\n"
+    echo $File
+    BlastOut=$(echo $File | sed 's/.fa/.tab/g')
+    qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
+  done
+```
+
+## Merge the all-vs-all blast results  
+```bash  
+  MergeHits="$IsolateAbrv"_blast.tab
+  printf "" > $MergeHits
+  for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
+  File=$(ls $WorkDir/splitfiles/*_$Num)
+  cat $File
+  done > $MergeHits
+```
+
+## Perform ortholog identification
+
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
+  MergeHits="$IsolateAbrv"_blast.tab
+  GoodProts=$WorkDir/goodProteins/goodProteins.fasta
+  qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts 5
+```
+
+## Manual identification of numbers of orthologous and unique genes
+
+
+```bash
+  echo "The number of ortholog groups unique to pathogens are:"
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|'| grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
+  echo "The number of ortholog groups unique to non-pathogens are:"
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' |  wc -l
+  echo "The number of ortholog groups common to all F. oxysporum isolates are:"
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | wc -l
+```
+
+```
+  The number of ortholog groups unique to pathogens are:
+  202
+  The number of ortholog groups unique to non-pathogens are:
+  72
+  The number of ortholog groups common to all F. oxysporum isolates are:
+  11275
+```
+
+
+## Plot venn diagrams:
+
+```bash
+ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
+$ProgDir/FoC_path_vs_non_path_venn_diag.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+```
+
+Output was a pdf file of the venn diagram.
+
+The following additional information was also provided. The format of the
+following lines is as follows:
+
+Isolate name (total number of orthogroups)
+number of unique singleton genes
+number of unique groups of inparalogs
+
+
+```
+[1] 11347 <- non-pathogen orthogroups
+[1] 11477 <- pathogen orthogroups
+  [[1] "A28"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  12573"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1226"
+  [1] "The total number of singleton genes not in the venn diagram:  237"
+  [1] "D2"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  12243"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  896"
+  [1] "The total number of singleton genes not in the venn diagram:  141"
+  [1] "PG"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  12305"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  958"
+  [1] "The total number of singleton genes not in the venn diagram:  203"
+  [1] "Fus2"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  12583"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1106"
+  [1] "The total number of singleton genes not in the venn diagram:  75"
+  [1] "125"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  12535"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1058"
+  [1] "The total number of singleton genes not in the venn diagram:  65"
+  [1] "A23"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  12555"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1078"
+  [1] "The total number of singleton genes not in the venn diagram:  60"
+```

@@ -490,7 +490,7 @@ Fo47 masked contigs were noted to still contain additional text following spaces
 This disrupted downstream programs.
 ```bash
 for File in $(ls repeat_masked/F.oxysporum/fo47/*/fo47_contigs_*masked.fa); do
-	sed -i 's/ of Fusarium oxysporum Fo47//g' $File
+sed -i 's/ of Fusarium oxysporum Fo47//g' $File
 done
 ```
 
@@ -1072,49 +1072,55 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-	for BrakerGff in $(ls gene_pred/braker/F.*/fo47_braker_new/*/augustus.gff3); do
-		Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g')
-		Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		# BrakerGff=gene_pred/braker/$Organism/$Strain/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
-		Assembly=$(ls repeat_masked/$Organism/$Strain/*/"$Strain"_contigs_softmasked.fa)
-		CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
-		PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
-		AddDir=gene_pred/codingquary/$Organism/$Strain/additional
-		FinalDir=gene_pred/codingquary/$Organism/$Strain/final
-		AddGenesList=$AddDir/additional_genes.txt
-		AddGenesGff=$AddDir/additional_genes.gff
-		FinalGff=$AddDir/combined_genes.gff
-		mkdir -p $AddDir
-		mkdir -p $FinalDir
+for BrakerGff in $(ls gene_pred/braker/F.*/55_braker_new/*/augustus.gff3 | grep -v -e 'fo47'); do
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g')
+Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+# BrakerGff=gene_pred/braker/$Organism/$Strain/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
+Assembly=$(ls repeat_masked/$Organism/$Strain/*/"$Strain"_contigs_softmasked.fa)
+CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
+PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
+AddDir=gene_pred/codingquary/$Organism/$Strain/additional
+FinalDir=gene_pred/codingquary/$Organism/$Strain/final
+AddGenesList=$AddDir/additional_genes.txt
+AddGenesGff=$AddDir/additional_genes.gff
+FinalGff=$AddDir/combined_genes.gff
+mkdir -p $AddDir
+mkdir -p $FinalDir
 
-		bedtools intersect -v -s -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
-		bedtools intersect -v -s -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-		$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
-		$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
-		# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/additional/additional_genes.gff
-		# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/out/PredictedPass.gff3
+bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/additional/additional_genes.gff
+# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/out/PredictedPass.gff3
 
-		$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/additional_gene_parsed.gff3
-		$ProgDir/gff2fasta.pl $Assembly $FinalDir/additional_gene_parsed.gff3 $FinalDir/final_genes_CodingQuary
-		cp $BrakerGff $FinalDir/final_genes_Braker.gff3
-		$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
-		# cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
-	done
+$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
+
+# cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
+done
 ```
 
 The final number of genes per isolate was observed using:
 ```bash
-	for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final); do
-		echo $DirPath;
-		cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
-		cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
-		echo "";
-	done
+for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -e 'Fus2_edited_v2' -e '55' -e 'fo47'); do
+echo $DirPath;
+cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+echo "";
+done
 ```
-
+<!--
 ## Suplimenting gene models with known genes
 
 Additional gene models were consrtucted in braker / transfered from other isolates
@@ -1124,7 +1130,7 @@ and were exported to the following locations:
 	Fus2Six9=assembly/spades/F.oxysporum_fsp_cepae/Fus2_edited_v2/filtered_contigs/Fus2_edited_v2_contig_1090_six9.gff
 ```
 
-These gene models were then edited with nano to give names and IDs to these genes.
+These gene models were then edited with nano to give names and IDs to these genes. -->
 
 ## ORF finder
 
@@ -1174,7 +1180,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+	for Genes in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
 		echo $Genes
 		$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1185,43 +1191,13 @@ commands:
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-		for Proteins in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep '125'); do
+	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
 		Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
 		echo $Strain
-		InterProRaw=gene_pred/interproscan/"$Strain"/"$Organism"_"$Strain"_braker/raw
+		InterProRaw=gene_pred/interproscan/F.oxysporum/fo47/raw
 		$ProgDir/append_interpro.sh $Proteins $InterProRaw
-	done
-```
-
-
-Following interproscan annotation split files were combined using the following
-commands:
-
-```bash
-	for PredGenes in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -v '125'); do
-		Strain=$(echo $PredGenes | rev | cut -d '/' -f3 | rev)
-		Organism=$(echo $PredGenes | rev | cut -d '/' -f4 | rev)
-		InterProRaw=gene_pred/interproscan/"$Strain"/"$Organism"_"$Strain"_braker/raw
-		OutDir=gene_pred/interproscan/$Organism/$Strain
-		mkdir -p $OutDir
-		printf "" > $OutDir/"$Strain"_interproscan.tsv
-		printf "" > $OutDir/"$Strain"_interproscan.xml
-		printf "" > $OutDir/interpro_features.gff
-		printf "" > $OutDir/"$Strain"_interpro.gff3
-		for File in $(ls -v $InterProRaw/*_split_*.tsv); do
-			cat $File >> $OutDir/"$Strain"_interproscan.tsv
-		done
-		for File in $(ls -v $InterProRaw/*_split_*.xml); do
-			cat $File >> $OutDir/"$Strain"_interproscan.xml
-		done
-		for File in $(ls -v $InterProRaw/*_split_*.gff3); do
-			FastaStart=$(cat $File | grep -E "^##FASTA" -n | cut -d ':' -f1)
-			cat $File | head -n "$FastaStart" | grep -v -E "^#" >> $OutDir/interpro_features.gff
-		done
-		cat $OutDir/interpro_features.gff $PredGenes >> $OutDir/"$Strain"_interpro.gff3
-		rm $OutDir/interpro_features.gff
 	done
 ```
 
@@ -1252,14 +1228,14 @@ the following commands:
 	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	CurPath=$PWD
-	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -w '55'); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		SplitDir=gene_pred/braker_split/$Organism/$Strain
+		SplitDir=gene_pred/final_genes_split/$Organism/$Strain
 		mkdir -p $SplitDir
-		BaseName="$Organism""_$Strain"_augustus_preds
+		BaseName="$Organism""_$Strain"_final_preds
 		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-		for File in $(ls $SplitDir/*_augustus_preds_*); do
+		for File in $(ls $SplitDir/*_final_preds_*); do
 			Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
 			while [ $Jobs -gt 1 ]; do
 				sleep 10
@@ -1277,19 +1253,19 @@ the following commands:
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-	for SplitDir in $(ls -d gene_pred/braker_split/*/55); do
+	for SplitDir in $(ls -d gene_pred/final_genes_split/*/55); do
 		Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
 		Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
 		InStringAA=''
 		InStringNeg=''
 		InStringTab=''
 		InStringTxt=''
-		SigpDir=braker_signalp-4.1
-		for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-		InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
-		InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
-		InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
-		InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+		SigpDir=final_genes_signalp-4.1
+		for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+			InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
+			InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
+			InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
+			InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
 		done
 		cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
 		cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
@@ -1305,7 +1281,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -1320,7 +1296,7 @@ Required programs:
  * EffectorP.py
 
 ```bash
-	for Proteome in $(ls gene_pred/braker/F.*/*/*_braker/augustus.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		BaseName="$Organism"_"$Strain"_EffectorP
@@ -1328,24 +1304,17 @@ Required programs:
 		ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
 		qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
 	done
-	for Proteome in $(ls gene_pred/augustus_signalp-4.1/F.*/*/*_aug_sp.aa | grep -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125'); do
-		Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		BaseName="$Organism"_"$Strain"_EffectorP
-		OutDir=analysis/effectorP_secreted/$Organism/$Strain
-		ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
-		qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
-	done
+
 ```
 
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-	# for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e 'A23' -e 'A28' -e 'D2' -e 'PG' -e '125' | grep -w '55'); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
 		Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 		Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
-		ProtGff=$(ls gene_pred/braker/$Organism/"$Strain"/*_braker/augustus_extracted.gff)
+		BrakerGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
+		QuaryGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_Braker.gff3)
 		OutDir=analysis/mimps/$Organism/$Strain
 		mkdir -p "$OutDir"
 		echo "$Organism - $Strain"
@@ -1354,11 +1323,13 @@ Required programs:
 		$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
 		echo "The number of mimps identified:"
 		cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
-		bedtools intersect -u -a $ProtGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+		bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+		bedtools intersect -u -a $QuaryGff -b $OutDir/"$Strain"_mimps_exp.gff >> $OutDir/"$Strain"_genes_in_2kb_mimp.gff
 		echo "The following transcripts intersect mimps:"
 		MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-		cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 > $MimpGenesTxt
+		cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' > $MimpGenesTxt
 		cat $MimpGenesTxt | wc -l
+		echo ""
 	done
 ```
 

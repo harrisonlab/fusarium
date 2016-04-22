@@ -428,7 +428,7 @@ Contigs were renamed in accordance with ncbi recomendations.
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep -v 'Fus2'); do
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
@@ -467,7 +467,7 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	for BestAss in $(ls assembly/spades/*/fo47/*/contigs_min_500bp_renamed.fasta); do
+	for BestAss in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta); do
 	# for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
@@ -498,20 +498,20 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-	for RepDir in $(ls -d repeat_masked/F.*/Fus2/*); do
-		Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
-		RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
-		TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-		printf "$Organism\t$Strain\n"
-		printf "The number of bases masked by RepeatMasker:\t"
-		sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
-		printf "The number of bases masked by TransposonPSI:\t"
-		sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
-		printf "The total number of masked bases are:\t"
-		cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
-		echo
-	done
+for RepDir in $(ls -d repeat_masked/F.*/FOP1/*); do
+Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
+RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+printf "$Organism\t$Strain\n"
+printf "The number of bases masked by RepeatMasker:\t"
+sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+printf "The number of bases masked by TransposonPSI:\t"
+sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+printf "The total number of masked bases are:\t"
+cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+echo
+done
 ```
 
 ```
@@ -585,10 +585,10 @@ using the following commands:
 	The number of bases masked by TransposonPSI:		1655249
 	The total number of masked bases are:		5709023
 
-	F.oxysporum_fsp_pisi		FOP1
-	The number of bases masked by RepeatMasker:		0
-	The number of bases masked by TransposonPSI:		0
-	The total number of masked bases are:		0
+	F.oxysporum_fsp_pisi	FOP1
+	The number of bases masked by RepeatMasker:	8494861
+	The number of bases masked by TransposonPSI:	2353732
+	The total number of masked bases are:	8868988
 
 	F.oxysporum_fsp_pisi		FOP5
 	The number of bases masked by RepeatMasker:		3880611
@@ -638,7 +638,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 	cd /home/groups/harrisonlab/project_files/fusarium
-	for Genome in $(ls repeat_masked/F.*/Fus2/*/*_contigs_unmasked.fa); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
 		echo $Genome;
 		qsub $ProgDir/sub_cegma.sh $Genome dna;
 	done
@@ -646,7 +646,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 
 Outputs were summarised using the commands:
 ```bash
-	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report); do
+	for File in $(ls gene_pred/cegma/F*/FOP1/*_dna_cegma.completeness_report); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
 		printf "$Species\t$Strain\n";
@@ -813,7 +813,7 @@ single genome. The fragment length and stdev were printed to stdout while
 cufflinks was running.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/Fo47/*/*_contigs_unmasked.fa); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -888,7 +888,7 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/FOP1/*/*_contigs_unmasked.fa); do
 	# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -901,11 +901,11 @@ Then Rnaseq data was aligned to each genome assembly:
 			OutDir=alignment/$Organism/$Strain/$Timepoint
 			InsertGap='-20'
 			InsertStdDev='78'
-			Jobs=$(qstat | grep 'tophat' | wc -l)
-			while [ $Jobs -ge 24 ]; do
+			Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+			while [ $Jobs -gt 1 ]; do
 				sleep 10
 				printf "."
-				Jobs=$(qstat | grep 'tophat' | wc -l)
+				Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
 			done
 			printf "\n"
 			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
@@ -1072,7 +1072,7 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-for BrakerGff in $(ls gene_pred/braker/F.*/55_braker_new/*/augustus.gff3 | grep -v -e 'fo47'); do
+for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -v -e 'fo47'); do
 Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1408,18 +1408,16 @@ pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md -->
 
 ## 5. BLAST Searches
 
-## 5.1 Identifying SIX genes
+## 5.1.A) Identifying SIX genes
 
 Protein sequence of previously characterised SIX genes used to BLAST against
 assemlies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/Fus2*/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
-		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
-		Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
 	done
 ```
@@ -1437,6 +1435,57 @@ annotations:
 		NumHits=1
 		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 	done
+```
+
+	The blast hits were summarised in a single table for all the genomes. The top
+	identity of the top blast hit in relation to the enquire query sequence was
+	presented for each blast hit.
+
+```bash
+	OutFile=analysis/blast_homology/Fo_path_genes_CRX_summary.tab
+	cat analysis/blast_homology/F.proliferatum/A8/A8_Fo_path_genes_CRX.fa_homologs.csv | cut -f1 > tmp2.tab
+	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv); do
+		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+		echo "$Organism" > tmp.tab
+		echo "$Strain" >> tmp.tab
+		cat $BlastHits | cut -f10 >> tmp.tab
+		paste tmp2.tab tmp.tab > $OutFile
+		cp $OutFile tmp2.tab
+	done
+	rm tmp.tab
+	rm tmp2.tab
+```
+
+```bash
+	for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity'); do
+		Strain=$(echo $HitsGff | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		GffBraker=gene_pred/codingquary/$Organism/$Strain/final/final_genes_Braker.gff3
+		GffQuary=gene_pred/codingquary/$Organism/$Strain/final/final_genes_CodingQuary.gff3
+		OutDir=$(dirname $HitsGff)
+		SixIntersect=$OutDir/"$Strain"_Fo_path_genes_CRX.fa_hit_genes.bed
+		bedtools intersect -wo -a $HitsGff -b $GffBraker > $SixIntersect
+		bedtools intersect -wo -a $HitsGff -b $GffQuary >> $SixIntersect
+		cat $SixIntersect | grep -w 'gene' | cut -f9,18
+		echo ""
+	done > analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX_hit_genes_summary.tab
+```
+
+
+## 5.1.B) Identifying FTF genes
+
+```bash
+	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+	for Assembly in $(ls repeat_masked/*/Fus2*/*/*_contigs_unmasked.fa); do
+		echo $Assembly
+		Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
+		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+	done
+```
+
+```bash
 	for BlastHits in $(ls analysis/blast_homology/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_homologs.csv); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
@@ -1447,6 +1496,8 @@ annotations:
 		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 	done
 ```
+
+
 
 ## 5.2 Identifying PHIbase homologs
 

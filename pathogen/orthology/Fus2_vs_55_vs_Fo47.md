@@ -1,6 +1,6 @@
 
 
-# Methodology 2
+# Methodology 1
 
 
 ```bash
@@ -37,11 +37,13 @@
 ```
 ### for Fo Fo47
 ```bash
-  Taxon_code=fo47
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum/fo47/final/final_genes_combined.pep.fasta)
-  Id_field=1
-  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+Taxon_code=fo47
+Fasta_file=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta)
+Id_field=1
+# Fasta_file=$(ls gene_pred/codingquary/F.oxysporum/fo47/final/final_genes_combined.pep.fasta)
+# Id_field=1
+orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
 
@@ -59,38 +61,38 @@
 ## Perform an all-vs-all blast of the proteins
 
 ```bash
-BlastDB=$WorkDir/blastall/$IsolateAbrv.db
+  BlastDB=$WorkDir/blastall/$IsolateAbrv.db
 
-makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
-BlastOut=$WorkDir/all-vs-all_results.tsv
-mkdir -p $WorkDir/splitfiles
+  makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
+  BlastOut=$WorkDir/all-vs-all_results.tsv
+  mkdir -p $WorkDir/splitfiles
 
-SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-$SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
+  SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+  $SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
 
-ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
-for File in $(find $WorkDir/splitfiles); do
-Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
-while [ $Jobs -gt 1 ]; do
-sleep 5
-printf "."
-Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
-done
-printf "\n"
-echo $File
-BlastOut=$(echo $File | sed 's/.fa/.tab/g')
-qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
-done
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
+  for File in $(find $WorkDir/splitfiles); do
+    Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+    while [ $Jobs -gt 1 ]; do
+      sleep 3
+      printf "."
+      Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+    done
+    printf "\n"
+    echo $File
+    BlastOut=$(echo $File | sed 's/.fa/.tab/g')
+    qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
+  done
 ```
 
 ## Merge the all-vs-all blast results  
 ```bash  
-MergeHits="$IsolateAbrv"_blast.tab
-printf "" > $MergeHits
-for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
-File=$(ls $WorkDir/splitfiles/*_$Num)
-cat $File
-done > $MergeHits
+  MergeHits="$IsolateAbrv"_blast.tab
+  printf "" > $MergeHits
+  for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
+    File=$(ls $WorkDir/splitfiles/*_$Num)
+    cat $File
+  done > $MergeHits
 ```
 
 ## Perform ortholog identification
@@ -107,20 +109,12 @@ done > $MergeHits
 
 ```bash
   echo "The number of ortholog groups common to all isolates is:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2' | grep '55' | grep 'Fo47' |  wc -l
-  echo "The number of ortholog groups unique to non-pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' |  wc -l
-  echo "The number of ortholog groups common to all F. oxysporum isolates are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | wc -l
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2' | grep '55' | grep 'fo47' |  wc -l
 ```
 
 ```
-  The number of ortholog groups unique to pathogens are:
-  202
-  The number of ortholog groups unique to non-pathogens are:
-  72
-  The number of ortholog groups common to all F. oxysporum isolates are:
-  11275
+  The number of ortholog groups unique to all isoaltes is:
+  12285
 ```
 
 
@@ -140,12 +134,22 @@ Isolate name (total number of orthogroups)
 number of unique singleton genes
 number of unique groups of inparalogs
 
-[1] "55 (14151)"
-[1] 437
-[1] 8
-[1] "Fus2 (14148)"
-[1] 440
-[1] 9
-[1] "PG (13200)"
-[1] 620
-[1] 30
+[1] "55 (14072)"
+[1] 14072
+[1] "Fus2 (14070)"
+[1] 14070
+[1] "fo47 (14238)"
+[1] 14238
+[1] 13580
+
+
+[1] "55 (14072)"
+[1] 422
+[1] 10
+[1] "Fus2 (14070)"
+[1] 447
+[1] 11
+[1] "fo47 (14238)"
+[1] 1701
+[1] 165
+NULL

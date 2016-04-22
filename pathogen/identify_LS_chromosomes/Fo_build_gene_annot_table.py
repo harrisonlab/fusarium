@@ -1,11 +1,15 @@
 #!/usr/bin/python
 
 '''
-These commands were used to build information on all the genes predicted in
+This program is used to build information on all the genes predicted in
 a fusarium genome. These commands take information on location of blast
 hits against reference genome & suppliment this information with information
 from other files detailing functional annotations and orthology status.
 '''
+
+# /home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/Fo_build_gene_annot_table.py --FoC_genes_gff gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/final/final_genes_appended.gff3 --FoC_SigP gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_final_sp.tab --FoC_TM_list gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_tmhmm_out.txt --FoC_MIMP_list analysis/mimps/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_genes_in_2kb_mimp.txt --FoC_effectorP analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_edited_v2/F.oxysporum_fsp_cepae_Fus2_edited_v2_EffectorP.txt --FoC_orthogroup analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt
+
+
 
 
 #-----------------------------------------------------

@@ -912,15 +912,6 @@ genes.
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### for FoC A13
-```bash
-  Taxon_code=A13
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
-  Id_field=1
-  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
-```
-
 ### for FoC A23
 ```bash
   Taxon_code=A23
@@ -989,6 +980,15 @@ HB17 was identified as a contaminated sequence.
 ```
 
 ### Non-pathogenic isolates:
+
+### for FoC A13
+```bash
+  Taxon_code=A13
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
 
 ### for FoC A28
 ```bash

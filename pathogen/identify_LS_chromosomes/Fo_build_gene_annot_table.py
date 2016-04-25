@@ -27,6 +27,7 @@ from operator import itemgetter
 ap = argparse.ArgumentParser()
 # ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh results file')
 # ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
+ap.add_argument('--genome',required=True,type=str,help='A fasta file of the assembled contigs')
 ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
 # ap.add_argument('--FoC_interescted_reblast',required=True,type=str,help='A bed file of FoC genes intersecting the location of reciprocal blast hits')
 ap.add_argument('--FoC_SigP',required=True,type=str,help='A file containing a list of signal-peptide containing genes')
@@ -35,8 +36,11 @@ ap.add_argument('--FoC_MIMP_list',required=True,type=str,help='A file containing
 ap.add_argument('--FoC_effectorP',required=True,type=str,help='A file containing results of effectorP')
 # ap.add_argument('--FoC_expression',required=True,type=str,help='A file showing cufflinks gff features intersected with Braker gene models')
 ap.add_argument('--FoC_orthogroup',required=True,type=str,help='A file containing results of orthology analysis')
-
-# ap.add_argument('--FoC_expression',required=True,type=str,help='A file containing details of gene expression')
+ap.add_argument('--OrthoMCL_id',required=True,type=str,help='The identifier of this strain as used in the orthology analysis')
+ap.add_argument('--OrthoMCL_all',required=True,type=str,nargs='+',help='The identifiers of all strains used in the orthology analysis')
+ap.add_argument('--OrthoMCL_path',required=True,type=str,nargs='+',help='The identifiers of pathogenic strains used in the orthology analysis')
+ap.add_argument('--OrthoMCL_nonpath',required=True,type=str,nargs='+',help='The identifiers of non-pathogenic strains used in the orthology analysis')
+ap.add_argument('--InterPro',required=True,type=str,help='The Interproscan functional annotation .tsv file')
 
 conf = ap.parse_args()
 
@@ -46,6 +50,8 @@ conf = ap.parse_args()
 #
 # with open(conf.FoL_intersected_genes) as f:
 #     FoL_intersect_lines = f.readlines()
+with open(conf.genome) as f:
+    contig_lines = f.readlines()
 
 with open(conf.FoC_genes_gff) as f:
     FoC_genes_lines = f.readlines()
@@ -71,7 +77,37 @@ with open(conf.FoC_effectorP) as f:
 with open(conf.FoC_orthogroup) as f:
     FoC_orthogroup_lines = f.readlines()
 
+with open(conf.InterPro) as f:
+    InterPro_lines = f.readlines()
+
 column_list=[]
+
+
+#-----------------------------------------------------
+# Step 2
+# Collect information on contig length from the genome
+# assembly file. This can be used to determine if a
+# gene has 2kb of sequence assembled up and downstream.
+# This important for knock out design.
+#-----------------------------------------------------
+
+gene_id_set = Set([])
+contig_len_dict = defaultdict(list)
+contig_id = ""
+seq_lines = ""
+for line in contig_lines:
+    line = line.rstrip()
+    if line.startswith(">"):
+        last_seq_length = len(seq_lines)
+        # print contig_id
+        # print last_seq_length
+        contig_len_dict[contig_id] = len(seq_lines)
+        split_line = line.split(" ")
+        contig_id = split_line[0].replace(">", "")
+        seq_lines = ""
+    else:
+        seq_lines += line
+
 
 #-----------------------------------------------------
 # Step 2
@@ -144,7 +180,10 @@ column_list=[]
 #-----------------------------------------------------
 # Step 4
 # Append co-ordinates from the FoC genome, showing
-# source of original Blast queries
+# source of original Blast queries.
+# Also identify whether there is 2kb sequence data up
+# and downstream of the gene allowing design of
+# knockouts
 #-----------------------------------------------------
 
 gene_id_set = Set([])
@@ -163,6 +202,17 @@ for line in FoC_genes_lines:
         column_list=itemgetter(0, 3, 4, 6)(split_line)
         for column in column_list:
             FoC_genes_dict[gene_id].append(column)
+
+        contig_id = column_list[0]
+        feature_start=int(column_list[1])
+        feature_end=int(column_list[2])
+        contig_length = contig_len_dict[contig_id]
+        if (feature_start - 2000) > 0 and (feature_end +2000) < contig_length:
+            FoC_genes_dict[gene_id].append("Flank")
+        else:
+            FoC_genes_dict[gene_id].append("")
+
+
 
 #-----------------------------------------------------
 # Step 5
@@ -297,35 +347,31 @@ for line in FoC_effectorP_lines:
 # Build a dictionary of orthogroups
 #-----------------------------------------------------
 
-# FoC_mimp_set =  Set([])
+strain_id = conf.OrthoMCL_id
+all_isolates = conf.OrthoMCL_all
+path_isolates = conf.OrthoMCL_path
+non_path_isolates = conf.OrthoMCL_nonpath
+
+strain_id = strain_id + "|"
+
 FoC_orthogroup_dict = defaultdict(list)
 orthogroup_content_dict = defaultdict(list)
-path_isolates = ["Fus2", "125", "A23"]
-non_path_isolates = ["A28", "D2", "PG"]
-all_isolates = path_isolates + non_path_isolates
+# path_isolates = ["Fus2", "125", "A23"]
+# non_path_isolates = ["A28", "D2", "PG"]
+# all_isolates = path_isolates + non_path_isolates
+
 for line in FoC_orthogroup_lines:
-    # print line
     line = line.rstrip("\n")
     split_line = line.split(" ")
     orthogroup_id = split_line[0].replace(":", "")
-    # line_mod = re.sub(r"\|[.*]\s", " ", line)
-    # print line_mod
     orthogroup_contents = []
     orthogroup_content_dict.clear()
-    # orthogroup_content_tupule = []
     for isolate in all_isolates:
-        # num_genes = line_mod.count(isolate)
         num_genes = line.count((isolate + "|"))
-        # print isolate
-        # print num_genes
         orthogroup_contents.append(str(isolate) + "(" + str(num_genes) + ")")
         content_str = ":".join(orthogroup_contents)
         orthogroup_content_dict[isolate] = num_genes
-        # orthogroup_content_tupule.append((str(isolate), str(num_genes)))
 
-    # print orthogroup_content_tupule
-    # sorted_content_tupule = sorted(orthogroup_content_tupule, key=lambda x: x[1], reverse=True)
-    # print sorted_content_tupule
     path_numbers = []
     for isolate in path_isolates:
         path_numbers.append(orthogroup_content_dict[isolate])
@@ -344,8 +390,8 @@ for line in FoC_orthogroup_lines:
         expansion_status = ""
 
     for gene_id in split_line[1:]:
-        if 'Fus2|' in gene_id:
-            gene_id = gene_id.replace("Fus2|", "")
+        if strain_id in gene_id:
+            gene_id = gene_id.replace(strain_id, "")
             # FoC_orthogroup_dict[gene_id] = [orthogroup_id]
 
             if all(x in line for x in all_isolates):
@@ -356,9 +402,50 @@ for line in FoC_orthogroup_lines:
                 FoC_orthogroup_dict[gene_id].extend([orthogroup_id, "non_path_isolates_all", content_str, expansion_status])
             elif any(x in line for x in all_isolates):
                 FoC_orthogroup_dict[gene_id].extend([orthogroup_id, "some_isolates", content_str, expansion_status])
+
             # if all(x in line for x in non_path_isolates):
 
             # print gene_id
+
+
+
+#-----------------------------------------------------
+# Step 12
+# Build a dictionary of interproscan annotations
+# Annotations first need to be filtered to remove
+# redundancy. This is done by first loading anntoations
+# into a set.
+#-----------------------------------------------------
+
+interpro_set =  Set([])
+interpro_dict = defaultdict(list)
+
+for line in InterPro_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    # print split_line
+    # useful_columns = (split_line[col] for col in [0, 4, 6, 12, 13] if split_line[col])
+    # useful_columns = (split_line[col], col in 0, 4, 6, 12, 13 if len(split_lin) >= col)
+    # useful_columns.extend() (x in line for x in 0, 4, 6, 12, 13)
+    interpro_columns = []
+    index_list = [0, 4, 5, 11, 12]
+    for x in index_list:
+        # print x
+        if len(split_line) > x:
+            interpro_columns.append(split_line[x])
+            # print split_line[x]
+
+
+    # useful_columns = itemgetter(0, 4, 6, 12, 13)(split_line)
+    set_line = ";".join(interpro_columns)
+    if set_line not in interpro_set:
+        gene_id = interpro_columns[0]
+        interpro_feat = ";".join(interpro_columns[1:])
+        interpro_dict[gene_id].append(interpro_feat)
+    interpro_set.add(set_line)
+
+
+
 
 
 #-----------------------------------------------------
@@ -367,7 +454,7 @@ for line in FoC_orthogroup_lines:
 # results and genes intersecting blast results
 #-----------------------------------------------------
 
-print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "orthogroup", "representation", "genes_per_isolate", "expansion_status"]))
+print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "2kb_flank", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "orthogroup", "representation", "genes_per_isolate", "expansion_status"]))
 # print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "cufflinks_id","FPKM", "cov", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID", "FoL_gene_description"]))
 
 # for blast_id in blast_id_set:
@@ -397,6 +484,12 @@ for gene_id in gene_id_set:
     if FoC_orthogroup_dict[gene_id]:
         useful_columns.extend(FoC_orthogroup_dict[gene_id])
     else:
-        useful_columns.extend(["", "", "", ""])
+        useful_columns.extend(["", "singleton", "", ""])
+
+    if interpro_dict[gene_id]:
+        interpro_col = "|".join(interpro_dict[gene_id])
+        useful_columns.append(interpro_col)
+    else:
+        useful_columns.append("")
 
     print ("\t".join(useful_columns))

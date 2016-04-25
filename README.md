@@ -918,7 +918,7 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'fo47'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'FOP1'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -985,7 +985,7 @@ machine.
 Cufflinks was run to compare the predicted genes to assembled transcripts:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/Fus2/*/*_contigs_softmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/FOP1/*/*_contigs_softmasked.fa); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
@@ -1015,7 +1015,7 @@ Cufflinks was run to compare the predicted genes to assembled transcripts:
 		alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
 		alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
 		alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-		cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+	cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
 	done
 ```
 
@@ -1041,7 +1041,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e '55' | grep -e 'fo47'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e '55' | grep -e 'FOP1'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1204,14 +1204,14 @@ commands:
 		Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
 		echo $Strain
-		InterProRaw=gene_pred/interproscan/F.oxysporum/fo47/raw
+		InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
 		$ProgDir/append_interpro.sh $Proteins $InterProRaw
 	done
 ```
 
 
 ## B) SwissProt
-
+<!--
 ```bash
   screen -a
   qlogin
@@ -1231,11 +1231,50 @@ commands:
     -num_threads 16 \
     -num_alignments 10
   done
+``` -->
+
+
+```bash
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		OutDir=gene_pred/swissprot/$Organism/$Strain
+		SwissDbDir=../../uniprot/swissprot
+		SwissDbName=uniprot_sprot
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
+		qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
+	done
+```
+
+```bash
+	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl); do
+	# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
+		Strain=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $SwissTable | rev | cut -f4 -d '/' | rev)
+		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
+		$ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
+	done
 ```
 
 
-
 #Genomic analysis
+
+## Comparison to FoL 4287
+
+BLast searches were used to identify which genes had homologs on which
+chromosomes of the Fusarium lycopersici genome.
+
+```bash
+	FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		OutDir=analysis/blast_homology/$Organism/$Strain
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		qsub $ProgDir/blast_pipe.sh $Proteome protein $FoLGenomeFa
+	done
+```
 
 ## RxLR genes
 
@@ -1535,11 +1574,12 @@ annotations:
 
 ## 5.2 Identifying PHIbase homologs
 
-The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
+The PHIbase database was searched against the assembled genomes using tBLASTx.
 
 ```bash
 	for Assembly in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
-		qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh analysis/blast_homology/PHIbase/PHI_36_accessions.fa protein $Assembly
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		qsub $ProgDir/blast_pipe.sh analysis/blast_homology/PHIbase/PHI_36_accessions.fa protein $Assembly
 	done
 ```
 
@@ -1718,9 +1758,35 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
+	# samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
+	for AcceptedHits in $(ls alignment/*/*/concatenated/concatenated.bam | grep -v -e 'Fus2_edited_v2'); do
+		Strain=$(echo $AcceptedHits | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $AcceptedHits | rev | cut -f4 -d '/' | rev)
+		OutDir=$(dirname $AcceptedHits)
+		echo "$Organism - $Strain"
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+		qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+	done
+```
+
+```bash
+	for Transcripts in $(ls alignment/F.*/*/concatenated/transcripts.gtf); do
+		Strain=$(echo $Transcripts | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Transcripts | rev | cut -f4 -d '/' | rev)
+		echo "$Organism - $Strain"
+		GeneGff=gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3
+		ExpressedGenes=alignment/$Organism/$Strain/concatenated/expressed_genes.bed
+		bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
+	done
+```
+
+
+<!--
+```bash
 	Organism=F.oxysporum_fsp_cepae
 	Strain=Fus2
 	samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
+
 	cufflinks -o timecourse/2016_genes/Fus2/72hrs/cufflinks -p 16 --max-intron-length 4000 alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam
 
 	Transcripts=timecourse/2016_genes/Fus2/72hrs/cufflinks/transcripts.gtf
@@ -1728,8 +1794,9 @@ therefore features can not be restricted by strand when they are intersected.
 	ExpressedGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
 	bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
 ```
-<- not run below here for latest alignment
+-->
 
+<!--
 It was noted that not all the top expressed transcripts had gene models. The
 transcripts without gene models were identified:
 
@@ -1771,9 +1838,10 @@ therefore when features are intersected, they can not be restricted by strand.
 	CUFF.12530 - g4720
 	CUFF.6539 - g10346
 ```
+-->
 
 
-
+<!--
 ```bash
 	TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
 	cat $ExpressedGenes | sort -r -n -t'"' -k6 | grep -w 'gene' | head -n 20 | cut -f18 > $TopGenes
@@ -1795,5 +1863,12 @@ therefore when features are intersected, they can not be restricted by strand.
 	MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
   cat $MimpGenesTxt | grep -w -f $TopGenes
 	# Intersecting SIX genes
+
+``` -->
+
+
+## 6. Summarising the Fusarium Proteome
+
+```bash
 
 ```

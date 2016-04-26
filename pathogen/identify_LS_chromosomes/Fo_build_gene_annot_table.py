@@ -41,6 +41,7 @@ ap.add_argument('--OrthoMCL_all',required=True,type=str,nargs='+',help='The iden
 ap.add_argument('--OrthoMCL_path',required=True,type=str,nargs='+',help='The identifiers of pathogenic strains used in the orthology analysis')
 ap.add_argument('--OrthoMCL_nonpath',required=True,type=str,nargs='+',help='The identifiers of non-pathogenic strains used in the orthology analysis')
 ap.add_argument('--InterPro',required=True,type=str,help='The Interproscan functional annotation .tsv file')
+ap.add_argument('--Swissprot',required=True,type=str,help='A parsed table of BLAST results against the Swissprot database. Note - must have been parsed with swissprot_parser.py')
 
 conf = ap.parse_args()
 
@@ -79,6 +80,9 @@ with open(conf.FoC_orthogroup) as f:
 
 with open(conf.InterPro) as f:
     InterPro_lines = f.readlines()
+
+with open(conf.Swissprot) as f:
+    swissprot_lines = f.readlines()
 
 column_list=[]
 
@@ -445,7 +449,20 @@ for line in InterPro_lines:
     interpro_set.add(set_line)
 
 
+#-----------------------------------------------------
+# Step 13
+# Build a dictionary of Swissprot annotations
+#-----------------------------------------------------
 
+swissprot_dict = defaultdict(list)
+
+for line in swissprot_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    gene_id = split_line[0]
+    swissprot_columns = itemgetter(14, 12, 13)(split_line)
+
+    swissprot_dict[gene_id].extend(swissprot_columns)
 
 
 #-----------------------------------------------------
@@ -454,7 +471,18 @@ for line in InterPro_lines:
 # results and genes intersecting blast results
 #-----------------------------------------------------
 
-print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "2kb_flank", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "orthogroup", "representation", "genes_per_isolate", "expansion_status"]))
+print ("\t".join([
+"query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand",
+"2kb_flank",
+"SigP", "P-value", "cleavage_site",
+"TransMem_protein", "No._helices",
+"Secreted",
+"MIMP_in_2Kb",
+"effectorP", "P-value",
+"orthogroup", "representation", "genes_per_isolate", "expansion_status",
+"Swissprot_organism", "Swissprot_hit", "Swissprot_function",
+"Interpro_annotations"
+]))
 # print ("\t".join(["query_id", "FoC_contig", "FoC_gene_start", "FoC_gene_end", "FoC_gene_strand", "cufflinks_id","FPKM", "cov", "SigP", "P-value", "cleavage_site", "TransMem_protein", "No._helices", "Secreted", "MIMP_in_2Kb", "effectorP", "P-value", "hit_FoL_contig", "hit_start", "hit_end", "hit_strand", "reblast_hit", "reblast match", "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID", "FoL_gene_description"]))
 
 # for blast_id in blast_id_set:
@@ -481,15 +509,23 @@ for gene_id in gene_id_set:
     #     useful_columns.extend(intersect_dict[blast_id])
     # else:
     #     useful_columns.extend(["", "", "", ""])
+
     if FoC_orthogroup_dict[gene_id]:
         useful_columns.extend(FoC_orthogroup_dict[gene_id])
     else:
         useful_columns.extend(["", "singleton", "", ""])
+
+
+    if swissprot_dict[gene_id]:
+        useful_columns.extend(swissprot_dict[gene_id])
+    else:
+        useful_columns.extend(["","",""])
 
     if interpro_dict[gene_id]:
         interpro_col = "|".join(interpro_dict[gene_id])
         useful_columns.append(interpro_col)
     else:
         useful_columns.append("")
+
 
     print ("\t".join(useful_columns))

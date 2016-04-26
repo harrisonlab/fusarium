@@ -2,7 +2,7 @@
 
 ```bash
   for Strain in 125 A23 Fus2_edited_v2 55 A1-2 CB3 HB6 A13 A28 D2 PG fo47 4287; do
-    for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3 | grep -v -e "fo47" -e "4287" | grep 'Fus2_edited_v2'); do
+    for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3 | grep -v -e "fo47" -e "4287"); do
       Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
       Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
       Genome=$(ls repeat_masked/$Organism/$Strain/filtered_contigs_repmask/*_contigs_unmasked.fa)
@@ -13,6 +13,8 @@
       EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
       # OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt)
       OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
+      InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
+      SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl)
 
       OrthoMCL_id="$Strain"
       OrthoMCL_id_list="125 A23 Fus2 55 A1_2 CB3 HB6 A13 A28 D2 PG fo47 4287"
@@ -40,6 +42,8 @@
       --OrthoMCL_all $OrthoMCL_id_list \
       --OrthoMCL_path $OrthoMCL_path_ids \
       --OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
+      --InterPro $InterProTsv \
+      --Swissprot $SwissprotTab \
       > $OutTable
     done
   done

@@ -25,8 +25,8 @@ from collections import defaultdict
 from operator import itemgetter
 
 ap = argparse.ArgumentParser()
-# ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh results file')
-# ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
+ap.add_argument('--blast_csv',required=True,type=str,help='The blast_pipe.sh results file')
+ap.add_argument('--FoL_intersected_genes',required=True,type=str,help='A bed file of FoL genes intersecting Blast hits')
 ap.add_argument('--genome',required=True,type=str,help='A fasta file of the assembled contigs')
 ap.add_argument('--FoC_genes_gff',required=True,type=str,help='A gff file of the genes from the FoC')
 # ap.add_argument('--FoC_interescted_reblast',required=True,type=str,help='A bed file of FoC genes intersecting the location of reciprocal blast hits')
@@ -42,15 +42,21 @@ ap.add_argument('--OrthoMCL_path',required=True,type=str,nargs='+',help='The ide
 ap.add_argument('--OrthoMCL_nonpath',required=True,type=str,nargs='+',help='The identifiers of non-pathogenic strains used in the orthology analysis')
 ap.add_argument('--InterPro',required=True,type=str,help='The Interproscan functional annotation .tsv file')
 ap.add_argument('--Swissprot',required=True,type=str,help='A parsed table of BLAST results against the Swissprot database. Note - must have been parsed with swissprot_parser.py')
+ap.add_argument('--DEG_Orthogroups',required=True,type=str,help='')
+
+
+# ap.add_argument('--FoL_LS_genes',required=True,type=str,help='A list of FoL LS genes and the chromosomes they are present on.')
+
 
 conf = ap.parse_args()
 
-#
-# with open(conf.blast_csv) as f:
-#     blast_csv_lines = f.readlines()
-#
-# with open(conf.FoL_intersected_genes) as f:
-#     FoL_intersect_lines = f.readlines()
+
+with open(conf.blast_csv) as f:
+    blast_csv_lines = f.readlines()
+
+with open(conf.FoL_intersected_genes) as f:
+    FoL_intersect_lines = f.readlines()
+
 with open(conf.genome) as f:
     contig_lines = f.readlines()
 
@@ -83,6 +89,9 @@ with open(conf.InterPro) as f:
 
 with open(conf.Swissprot) as f:
     swissprot_lines = f.readlines()
+
+with open(conf.DEG_Orthogroups) as f:
+    diff_ortho_lines = f.readlines()
 
 column_list=[]
 
@@ -128,30 +137,30 @@ for line in contig_lines:
 # blast hit is present.
 
 
-# blast_id_set = Set([])
-# i=0
-# blast_dict = defaultdict(list)
-# for line in blast_csv_lines:
-#     line = line.rstrip()
-#     split_line = line.split("\t")
-#     if "ID" in split_line[0]:
-#         for column in split_line:
-#             if "Grp" in column:
-#                 i+=1
-#         hit_contig=i+4
-#         hit_stand=i+9
-#         hit_start=i+10
-#         hit_end=i+11
-#         # extract_list=itemgetter(hit_contig, hit_start, hit_end)(split_line)
-#         continue
-#     blast_id=split_line[0]
-#     blast_id_set.add(blast_id)
-#     # column_list = ["no hit", ".", ".", "."]
-#     column_list = ["", "", "", ""]
-#     if len(split_line) > hit_contig:
-#         column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
-#     for column in column_list:
-#         blast_dict[blast_id].append(column)
+blast_id_set = Set([])
+i=0
+blast_dict = defaultdict(list)
+for line in blast_csv_lines:
+    line = line.rstrip()
+    split_line = line.split("\t")
+    if "ID" in split_line[0]:
+        for column in split_line:
+            if "Grp" in column:
+                i+=1
+        hit_contig=i+4
+        hit_stand=i+9
+        hit_start=i+10
+        hit_end=i+11
+        # extract_list=itemgetter(hit_contig, hit_start, hit_end)(split_line)
+        continue
+    blast_id=split_line[0]
+    blast_id_set.add(blast_id)
+    # column_list = ["no hit", ".", ".", "."]
+    column_list = ["", "", "", ""]
+    if len(split_line) > hit_contig:
+        column_list=itemgetter(hit_contig, hit_start, hit_end, hit_stand)(split_line)
+    for column in column_list:
+        blast_dict[blast_id].append(column)
 
 #-----------------------------------------------------
 # Step 3
@@ -160,26 +169,26 @@ for line in contig_lines:
 # gff annotation information was split into two columns
 #-----------------------------------------------------
 
-# intersect_dict = defaultdict(list)
-# for line in FoL_intersect_lines:
-#     line = line.rstrip()
-#     split_line = line.split("\t")
-#     if "gene" in split_line[11]:
-#         blast_id = split_line[8].strip('";')
-#         blast_id = blast_id.replace('ID=', '').replace('_BlastHit_1', '')
-#         column_list = itemgetter(12, 13, 15)(split_line)
-#         for column in column_list:
-#             intersect_dict[blast_id].append(column)
-#
-#         feature_info_list = "".join(split_line[17]).split(";")
-#         FoL_gene_ID = ""
-#         FoL_feature_desc = ""
-#         for feature in feature_info_list:
-#             if "gene_id=" in feature:
-#                 FoL_gene_ID = re.sub(r"^.*=", '', feature)
-#             if "description=" in feature:
-#                 FoL_feature_desc = re.sub(r"^.*=", '', feature)
-#         intersect_dict[blast_id].extend([FoL_gene_ID, FoL_feature_desc])
+intersect_dict = defaultdict(list)
+for line in FoL_intersect_lines:
+    line = line.rstrip()
+    split_line = line.split("\t")
+    if "gene" in split_line[11]:
+        blast_id = split_line[8].strip('";')
+        blast_id = blast_id.replace('ID=', '').replace('_BlastHit_1', '')
+        column_list = itemgetter(12, 13, 15)(split_line)
+        for column in column_list:
+            intersect_dict[blast_id].append(column)
+
+        feature_info_list = "".join(split_line[17]).split(";")
+        FoL_gene_ID = ""
+        FoL_feature_desc = ""
+        for feature in feature_info_list:
+            if "gene_id=" in feature:
+                FoL_gene_ID = re.sub(r"^.*=", '', feature)
+            if "description=" in feature:
+                FoL_feature_desc = re.sub(r"^.*=", '', feature)
+        intersect_dict[blast_id].extend([FoL_gene_ID, FoL_feature_desc])
 
 #-----------------------------------------------------
 # Step 4
@@ -466,6 +475,30 @@ for line in swissprot_lines:
 
 
 #-----------------------------------------------------
+# Step 13
+# Build a dictionary of differentially expressed
+# orthogroups according in comparison of Fus2 & Fo47
+# reads aligned to Fus2 genes.
+#-----------------------------------------------------
+
+diff_ortho_dict = defaultdict(list)
+
+for line in diff_ortho_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    if len(split_line) > 5:
+        orthogroup_id = split_line[5]
+        fus2_id = "Fus2|" + str(split_line[0])
+        base_mean = split_line[1]
+        fold_change = split_line[2]
+        significance = split_line[4]
+        expression_info = " ".join([fus2_id, base_mean,fold_change,significance])
+        diff_ortho_dict[orthogroup_id].append(expression_info)
+
+
+
+
+#-----------------------------------------------------
 # Step 12
 # Print final table of information on query, blast
 # results and genes intersecting blast results
@@ -480,6 +513,9 @@ print ("\t".join([
 "MIMP_in_2Kb",
 "effectorP", "P-value",
 "orthogroup", "representation", "genes_per_isolate", "expansion_status",
+"DEG_in_orthogroup", "Fus2_expression_info",
+"hit_FoL_contig", "hit_start", "hit_end", "hit_strand",
+"FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID", "FoL_gene_description",
 "Swissprot_organism", "Swissprot_hit", "Swissprot_function",
 "Interpro_annotations"
 ]))
@@ -490,8 +526,8 @@ for gene_id in gene_id_set:
     useful_columns=[gene_id]
     # useful_columns=[blast_id]
     useful_columns.extend(FoC_genes_dict[gene_id])
-    # if FoC_expression_dict[blast_id]:
-    #     useful_columns.extend(FoC_expression_dict[blast_id][0:3])
+    # if FoC_expression_dict[gene_id]:
+    #     useful_columns.extend(FoC_expression_dict[gene_id][0:3])
     # else:
     #     useful_columns.extend(["", "", ""])
     useful_columns.extend(FoC_secreted_dict[gene_id])
@@ -500,20 +536,39 @@ for gene_id in gene_id_set:
         mimp_col="Yes"
     useful_columns.append(mimp_col)
     useful_columns.extend(FoC_effectorP_dict[gene_id])
-    # useful_columns.extend(blast_dict[blast_id])
+
+    if FoC_orthogroup_dict[gene_id]:
+        useful_columns.extend(FoC_orthogroup_dict[gene_id])
+        orthogroup_id = FoC_orthogroup_dict[gene_id][0]
+        # diff_expr_ortho_info = [orthogroup_id]
+        diff_expr_ortho_info = []
+        # print orthogroup_id
+        # print diff_ortho_dict[orthogroup_id]
+        diff_expr_ortho_info.append(";".join(diff_ortho_dict[orthogroup_id]))
+        if any("P<0.05" in x for x in diff_expr_ortho_info):
+            significance = "P<0.05"
+            # print "yes"
+        else:
+            significance = ""
+            # print "no"
+        useful_columns.append(significance)
+        # print diff_expr_ortho_info
+        useful_columns.extend(diff_expr_ortho_info)
+
+    else:
+        useful_columns.extend(["", "singleton", "", ""])
+        useful_columns.extend(["", ""])
+
+    useful_columns.extend(blast_dict[gene_id])
     # if FoC_reblast_dict[blast_id]:
     #     useful_columns.extend(FoC_reblast_dict[blast_id])
     # else:
     #     useful_columns.extend(["", ""])
-    # if intersect_dict[blast_id]:
-    #     useful_columns.extend(intersect_dict[blast_id])
-    # else:
-    #     useful_columns.extend(["", "", "", ""])
-
-    if FoC_orthogroup_dict[gene_id]:
-        useful_columns.extend(FoC_orthogroup_dict[gene_id])
+    if intersect_dict[gene_id]:
+        useful_columns.extend(intersect_dict[gene_id])
     else:
-        useful_columns.extend(["", "singleton", "", ""])
+        useful_columns.extend(["", "", "", "", ""])
+
 
 
     if swissprot_dict[gene_id]:

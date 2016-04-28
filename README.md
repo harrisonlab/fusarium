@@ -888,12 +888,12 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/FOP1/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'FOP1'); do
 	# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
-		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
+		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -e '_rep'); do
 			Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 			echo "$Timepoint"
 			FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -1015,7 +1015,9 @@ Cufflinks was run to compare the predicted genes to assembled transcripts:
 		alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
 		alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
 		alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-	cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+		qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir/cuflfinks
+	# cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
 	done
 ```
 
@@ -1056,7 +1058,7 @@ therefore features can not be restricted by strand when they are intersected.
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'fo47'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'FOP1'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1118,13 +1120,13 @@ models:
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -e 'Fus2_edited_v2' -e '55' -e 'fo47'); do
-echo $DirPath;
-cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
-cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
-cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
-echo "";
-done
+	for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -e 'Fus2_edited_v2' -e '55' -e 'fo47'); do
+		echo $DirPath;
+		cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+		cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+		cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+		echo "";
+	done
 ```
 <!--
 ## Suplimenting gene models with known genes
@@ -1248,9 +1250,10 @@ commands:
 
 ```bash
 	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl); do
-	# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
-		Strain=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $SwissTable | rev | cut -f4 -d '/' | rev)
+		# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
+		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
 		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
 		$ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
@@ -1268,11 +1271,42 @@ chromosomes of the Fusarium lycopersici genome.
 ```bash
 	FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
 	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	# for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		echo "$Organism - $Strain"
 		OutDir=analysis/blast_homology/$Organism/$Strain
 		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		qsub $ProgDir/blast_pipe.sh $Proteome protein $FoLGenomeFa
+		qsub $ProgDir/run_blast2csv.sh $Proteome protein $FoLGenomeFa $OutDir
+	done
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv); do
+		Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+		echo "$Organism - $Strain"
+		HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+		Column2="$Strain"_gene_homolog
+		NumHits=1
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+	done
+```
+
+#### 2.6.3) Intersecting blast hits with genes from FoL
+
+```bash
+	for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff); do
+		Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
+		echo "$Organism - $Strain"
+		HitsDir=$(dirname $HitsGff)
+		FoLGenes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
+		FoLIntersect=$HitsDir/4287_chromosomal_final_genes_combined_intersect.bed
+		bedtools intersect -wo -a $HitsGff -b $FoLGenes > $FoLIntersect
 	done
 ```
 

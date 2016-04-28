@@ -5,7 +5,10 @@
     for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3 | grep -v -e "fo47" -e "4287"); do
       Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
       Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
+      echo "$Organism - $Strain"
       Genome=$(ls repeat_masked/$Organism/$Strain/filtered_contigs_repmask/*_contigs_unmasked.fa)
+      BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
+      FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
       GeneGff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
       SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
       TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
@@ -15,6 +18,7 @@
       OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
       InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
       SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl)
+      DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/04_16/Fus2_path_vs_non_path_orthogroups.tab)
 
       OrthoMCL_id="$Strain"
       OrthoMCL_id_list="125 A23 Fus2 55 A1_2 CB3 HB6 A13 A28 D2 PG fo47 4287"
@@ -31,6 +35,8 @@
 
       ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
       $ProgDir/Fo_build_gene_annot_table.py \
+      --blast_csv $BlastCsv \
+      --FoL_intersected_genes $FolIntersect \
       --genome $Genome \
       --FoC_genes_gff $GeneGff \
       --FoC_SigP $SigpTab \
@@ -44,6 +50,7 @@
       --OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
       --InterPro $InterProTsv \
       --Swissprot $SwissprotTab \
+      --DEG_Orthogroups $DEG_Orthogroups \
       > $OutTable
     done
   done

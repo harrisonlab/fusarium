@@ -899,9 +899,9 @@ genes.
   mkdir -p $WorkDir/badProteins  
 ```
 
-## Format fasta files
+## 3.1 Format fasta files
 
-### Pathogenic isolates:
+### 3.1.a Pathogenic isolates:
 
 ### for FoC 125
 ```bash
@@ -930,7 +930,7 @@ genes.
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### Intermediate isolates:
+### 3.1.b Intermediate isolates:
 
 ### for FoC 55
 ```bash
@@ -979,7 +979,7 @@ HB17 was identified as a contaminated sequence.
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### Non-pathogenic isolates:
+### 3.1.c Non-pathogenic isolates:
 
 ### for FoC A13
 ```bash
@@ -1028,7 +1028,7 @@ HB17 was identified as a contaminated sequence.
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### Non-FoC isolates:
+### 3.1.d Non-FoC isolates:
 <!--
 ### for FoN N139
 ```bash
@@ -1089,7 +1089,7 @@ HB17 was identified as a contaminated sequence.
 ```
 
 
-## Filter proteins into good and poor sets.
+## 3.2 Filter proteins into good and poor sets.
 
 ```bash
   Input_dir=$WorkDir/formatted
@@ -1100,7 +1100,7 @@ HB17 was identified as a contaminated sequence.
   orthomclFilterFasta $Input_dir $Min_length $Max_percent_stops $Good_proteins_file $Poor_proteins_file
 ```
 
-## Perform an all-vs-all blast of the proteins
+## 3.3.a Perform an all-vs-all blast of the proteins
 
 ```bash
   BlastDB=$WorkDir/blastall/$IsolateAbrv.db
@@ -1127,7 +1127,7 @@ HB17 was identified as a contaminated sequence.
   done
 ```
 
-## Merge the all-vs-all blast results  
+## 3.3.b Merge the all-vs-all blast results  
 ```bash  
   MergeHits="$IsolateAbrv"_blast.tab
   printf "" > $MergeHits
@@ -1137,7 +1137,7 @@ HB17 was identified as a contaminated sequence.
   done > $MergeHits
 ```
 
-## Perform ortholog identification
+## 3.4 Perform ortholog identification
 
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
@@ -1146,7 +1146,7 @@ HB17 was identified as a contaminated sequence.
   qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts 5
 ```
 
-## Manual identification of numbers of orthologous and unique genes
+## 3.5.a Manual identification of numbers of orthologous and unique genes
 
 
 ```bash
@@ -1168,7 +1168,7 @@ HB17 was identified as a contaminated sequence.
 ```
 
 
-## Plot venn diagrams:
+## 3.5.b Plot venn diagrams:
 
 ```bash
 ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
@@ -1212,4 +1212,15 @@ number of unique groups of inparalogs
   [1] "The total number of orthogroups and singleton genes in this isolate:  12555"
   [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1078"
   [1] "The total number of singleton genes not in the venn diagram:  60"
+```
+
+
+#### 3.6.a Extracting fasta files orthogroups
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
+  OrthogroupTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt
+  GoodProt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL//goodProteins/goodProteins.fasta
+  OutDir=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/fasta/all_orthogroups
+  mkdir -p $OutDir
+  $ProgDir/orthoMCLgroups2fasta.py --orthogroups $OrthogroupTxt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
 ```

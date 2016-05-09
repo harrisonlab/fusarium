@@ -1249,7 +1249,7 @@ commands:
 ```
 
 ```bash
-	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl); do
+	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -e '4287' -e 'fo47'); do
 		# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
@@ -1272,6 +1272,7 @@ chromosomes of the Fusarium lycopersici genome.
 	FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
 	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
 	# for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
+	# for Proteome in $(ls gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		echo "$Organism - $Strain"
@@ -1284,7 +1285,7 @@ chromosomes of the Fusarium lycopersici genome.
 Convert top blast hits into gff annotations
 
 ```bash
-	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv); do
+	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -w -e '4287' -e 'fo47'); do
 		Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
 		echo "$Organism - $Strain"

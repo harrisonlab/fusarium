@@ -204,6 +204,8 @@ FoC_genes_dict = defaultdict(list)
 for line in FoC_genes_lines:
     if "gff-version" in line:
         continue
+    if line.startswith('#'):
+        continue
     line = line.rstrip()
     split_line = line.split("\t")
     if 'mRNA' in split_line[2]:
@@ -565,7 +567,8 @@ for gene_id in gene_id_set:
     # else:
     #     useful_columns.extend(["", ""])
     if intersect_dict[gene_id]:
-        useful_columns.extend(intersect_dict[gene_id])
+        intersect_cols = intersect_dict[gene_id][0:5]
+        useful_columns.extend(intersect_cols)
     else:
         useful_columns.extend(["", "", "", "", ""])
 

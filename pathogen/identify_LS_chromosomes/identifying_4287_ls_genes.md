@@ -1,5 +1,6 @@
 
 
+
 ```bash
   Fo_Fo47_assembly=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta
   Fo_Fo47_genes=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta
@@ -8,30 +9,34 @@
   FoL_4287_assembly=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
   FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
   FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
+```
 
+FoL 4287 genes that were on contigs 3, 6, 14 and 15 were extracted.
+
+```bash
   FoL_LS_gene_headers=
 
   OutDir=analysis/FoL_ls_genes
   mkdir -p $OutDir
 
-for Chr in 3 6 14 15; do
-echo "Extracting genes on FoL chromosome: $Chr"
-cat $FoL_4287_gff | grep -P -w "^$Chr" | grep -w -P '\tgene\t' | cut -f9 | cut -f1 -d ';' | cut -f2 -d ':' > $OutDir/chr_"$Chr"_gene_headers.txt
-rm -f $OutDir/chr_"$Chr"_gene_orthogroups.txt
-echo "The following number of genes were on this chromosome:"
-cat $OutDir/chr_"$Chr"_gene_headers.txt | wc -l
-echo ""
-for gene in $(cat $OutDir/chr_"$Chr"_gene_headers.txt); do
-# echo "$gene"
-Orthogroup=$(cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep "$gene" | cut -f1 -d ':')
-echo "$Orthogroup" >> $OutDir/chr_"$Chr"_gene_orthogroups.txt
-done
-paste $OutDir/chr_"$Chr"_gene_headers.txt $OutDir/chr_"$Chr"_gene_orthogroups.txt > $OutDir/chr_"$Chr"_ls_genes.tab
-# cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep -f $OutDir/chr_"$Chr"_gene_headers.txt > $OutDir/chr_"$Chr"_gene_orthogroups.txt
-sed -r "s/FOXG/$Chr\tFOXG/g" -i $OutDir/chr_"$Chr"_ls_genes.tab
-done
-cat $OutDir/chr_*_ls_genes.tab | sort -n > $OutDir/chr_LS_genes.tab
-cat $OutDir/chr_LS_genes.tab | cut -f1,3 | sort | uniq -c | sort -n -r > $OutDir/chr_LS_orthogroup_abundance.tab
+  for Chr in 3 6 14 15; do
+    echo "Extracting genes on FoL chromosome: $Chr"
+    cat $FoL_4287_gff | grep -P -w "^$Chr" | grep -w -P '\tgene\t' | cut -f9 | cut -f1 -d ';' | cut -f2 -d ':' > $OutDir/chr_"$Chr"_gene_headers.txt
+    rm -f $OutDir/chr_"$Chr"_gene_orthogroups.txt
+    echo "The following number of genes were on this chromosome:"
+    cat $OutDir/chr_"$Chr"_gene_headers.txt | wc -l
+    echo ""
+    for gene in $(cat $OutDir/chr_"$Chr"_gene_headers.txt); do
+      # echo "$gene"
+      Orthogroup=$(cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep "$gene" | cut -f1 -d ':')
+      echo "$Orthogroup" >> $OutDir/chr_"$Chr"_gene_orthogroups.txt
+    done
+    paste $OutDir/chr_"$Chr"_gene_headers.txt $OutDir/chr_"$Chr"_gene_orthogroups.txt > $OutDir/chr_"$Chr"_ls_genes.tab
+    # cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep -f $OutDir/chr_"$Chr"_gene_headers.txt > $OutDir/chr_"$Chr"_gene_orthogroups.txt
+    sed -r "s/FOXG/$Chr\tFOXG/g" -i $OutDir/chr_"$Chr"_ls_genes.tab
+  done
+  cat $OutDir/chr_*_ls_genes.tab | sort -n > $OutDir/chr_LS_genes.tab
+  cat $OutDir/chr_LS_genes.tab | cut -f1,3 | sort | uniq -c | sort -n -r > $OutDir/chr_LS_orthogroup_abundance.tab
 ```
 
 ```
@@ -51,6 +56,20 @@ cat $OutDir/chr_LS_genes.tab | cut -f1,3 | sort | uniq -c | sort -n -r > $OutDir
   The following number of genes were on this chromosome:
   451
 ```
+
+Fo47 genes in orthogroups containing these FoL LS genes were identified:
+```bash
+  for gene in $(cat $OutDir/chr_*_gene_headers.txt); do
+    Orthogroup=$(cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep "$gene")
+    echo "$Orthogroup"
+  done | less -S
+
+cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep -f $OutDir/chr_*_gene_headers.txt | less -S
+
+```
+
+
+
 
 ```r
 mydata <- read.table("analysis/FoL_ls_genes/chr_LS_orthogroup_abundance.csv", header=TRUE, sep=',')

@@ -86,6 +86,19 @@ FoL assembly and protein sequences were parsed
   FoL_4287_gff_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31_parsed.gff3
   cat $FoL_4287_gff | sed -r "s/\ttranscript\t/\tmRNA\t/g" | sed -r "s/=.\w*:/=/g" | grep 'Broad' | sed 's/T.;/;/g' > $FoL_4287_gff_parsed
 ```
+
+Additional FoL contigs have been assembled that are not included in the 4287
+chromosomal scaffolds. These were included in the assembly.
+
+```bash
+  AdditionalContigs=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna_sm.nonchromosomal.fa
+  AdditionalContigsParsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna_sm.nonchromosomal_parsed.fa
+  FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
+  CompleteAssembly=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa
+  cat $AdditionalContigs | cut -f1 -d ' ' > $AdditionalContigsParsed
+  cat $FoL_4287_assembly_parsed $AdditionalContigsParsed > $CompleteAssembly
+```
+
 Fo Fo47 assembly and protein sequences were parsed
 
 ```bash

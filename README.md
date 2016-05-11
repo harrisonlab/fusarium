@@ -1043,7 +1043,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -w -e 'Fus2' -e '55' | grep -e 'FOP1'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e 'FOP1'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1074,7 +1074,7 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-	for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -v -e 'fo47'); do
+	for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -e 'FOP1'); do
 		Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g')
 		Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1108,7 +1108,6 @@ models:
 		cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
 		cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
 
-
 		GffBraker=$FinalDir/final_genes_CodingQuary.gff3
 		GffQuary=$FinalDir/final_genes_Braker.gff3
 		GffAppended=$FinalDir/final_genes_appended.gff3
@@ -1120,7 +1119,7 @@ models:
 
 The final number of genes per isolate was observed using:
 ```bash
-	for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -e 'Fus2_edited_v2' -e '55' -e 'fo47'); do
+	for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final); do
 		echo $DirPath;
 		cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 		cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1190,7 +1189,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Genes in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -e 'FOP1'); do
 		echo $Genes
 		$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1237,7 +1236,7 @@ commands:
 
 
 ```bash
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -e 'FOP1'); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -1249,7 +1248,7 @@ commands:
 ```
 
 ```bash
-	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -e '4287' -e 'fo47'); do
+	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -e 'FOP1'); do
 		# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
@@ -1270,7 +1269,7 @@ chromosomes of the Fusarium lycopersici genome.
 
 ```bash
 	FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -e 'FOP1'); do
 	# for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
 	# for Proteome in $(ls gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
@@ -1285,7 +1284,7 @@ chromosomes of the Fusarium lycopersici genome.
 Convert top blast hits into gff annotations
 
 ```bash
-	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -w -e '4287' -e 'fo47'); do
+	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -e 'FOP1'); do
 		Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
 		echo "$Organism - $Strain"
@@ -1311,10 +1310,10 @@ Convert top blast hits into gff annotations
 	done
 ```
 
-## RxLR genes
+## Effector genes
 
-Putative RxLR genes were identified within Augustus gene models using a number
-of approaches:
+Putative pathogenicity and effector related genes were identified within Braker
+gene models using a number of approaches:
 
  * A) From Augustus gene models - Identifying secreted proteins
  * B) From Augustus gene models - Effector identification using EffectorP
@@ -1336,7 +1335,7 @@ the following commands:
 	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 	CurPath=$PWD
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -e 'FOP1'); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -1389,7 +1388,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -e 'FOP1'); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -1404,7 +1403,7 @@ Required programs:
  * EffectorP.py
 
 ```bash
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -e 'FOP1'); do
 		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 		BaseName="$Organism"_"$Strain"_EffectorP
@@ -1418,7 +1417,7 @@ Required programs:
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -e 'FOP1'); do
 		Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 		Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 		BrakerGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)

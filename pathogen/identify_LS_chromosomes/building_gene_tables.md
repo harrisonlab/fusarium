@@ -122,3 +122,60 @@ Gene tables were made for Fo fo47 and FoL 4287
     > $OutTable
   done
 ```
+
+
+
+
+Gene tables were analysed, identifying the number of secreted proteins, expanded
+gene families and genes within 2kb of a mimp.
+
+Note - the fo47 annotation table is still a little buggy and as a result may be
+producing spurious results. Data for this table should be extracted manually
+from excel.
+
+```bash
+# Number of secreted proteins
+  for File in $(ls gene_pred/annotations/FOP1/*/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12 | grep -i 'Yes' | wc -l;
+  done
+  # Number of secreted proteins that are effectorP +ve
+  for File in $(ls gene_pred/annotations/F*/*/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12,14 | grep -i "Yes.*Yes" | wc -l;
+  done
+  # Number of secreted proteins within 2kb of a mimp
+  for File in $(ls gene_pred/annotations/F*/*/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12,13 | grep -i "Yes.*Yes" | wc -l;
+  done
+  # Secreted genes in expanded gene families in pathogens
+  for File in $(ls gene_pred/annotations/F*/A23/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12,16,18,19,34 | grep -i "Yes" | grep -P "\tpathogen_expanded" | less -S;
+  done
+  # Secreted genes in expanded gene families in non-pathogens
+  for File in $(ls gene_pred/annotations/F*/PG/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12,16,18,19,34 | grep -i "Yes" | grep -w 'non-pathogen_expanded' | less -S;
+  done
+  # Number of secreted proteins within 2kb of a mimp and in expanded orthogroups
+  for File in $(ls gene_pred/annotations/F*/*/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12,13,19,34 | grep -i "Yes.*Yes" | grep 'expanded' | wc -l;
+  done
+  for File in $(ls gene_pred/annotations/F*/125/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f1,12,13,16,18,19,20,34 | grep -i "Yes.*Yes" | grep 'expanded';
+    echo ""
+  done > tmp4/annot.tab
+
+```
+
+
+The number of pathogen expanded orthogroups was identified:
+
+```bash
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,18,19 | grep -P "\tpathogen_expanded" | cut -f1 | sort | uniq | wc -l
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,17,18,19,34 | grep -P "\tpathogen_expanded" | grep 'path_isolates_all' | cut -f1 | sort | uniq | wc -l
+```

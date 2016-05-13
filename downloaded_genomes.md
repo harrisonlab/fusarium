@@ -116,6 +116,89 @@ Fo Fo47 assembly and protein sequences were parsed
 ```
 
 
+Quast
+
+Quast was run to collect assembly statistics
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
+  FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa  CompleteAssembly=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa
+  for Assembly in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed $CompleteAssembly); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    OutDir=$(dirname $Assembly)
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+
+## Repeatmasking
+
+
+Repeat masking was performed and used the following programs:
+	Repeatmasker
+	Repeatmodeler
+
+The best assemblies were used to perform repeatmasking
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+  for BestAss in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa); do
+    qsub $ProgDir/rep_modeling.sh $BestAss
+    qsub $ProgDir/transposonPSI.sh $BestAss
+  done
+```
+
+The number of bases masked by transposonPSI and Repeatmasker were summarised
+using the following commands:
+
+```bash
+  for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'fo47' -e '4287'); do
+    Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
+    RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+    TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+    printf "$Organism\t$Strain\n"
+    printf "The number of bases masked by RepeatMasker:\t"
+    sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+    printf "The number of bases masked by TransposonPSI:\t"
+    sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+    printf "The total number of masked bases are:\t"
+    cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+    echo
+  done
+```
+
+# Assessing gene space in assemblies:
+
+- Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified.
+
+
+```bash
+  Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
+  CompleteAssembly=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa
+  ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
+  cd /home/groups/harrisonlab/project_files/fusarium
+  for Genome in $(ls $Fo_Fo47_assembly_parsed $CompleteAssembly); do
+    echo $Genome;
+    qsub $ProgDir/sub_cegma.sh $Genome dna;
+  done
+```
+
+Outputs were summarised using the commands:
+```bash
+	for File in $(ls gene_pred/cegma/F*/FOP1/*_dna_cegma.completeness_report); do
+		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
+		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
+		printf "$Species\t$Strain\n";
+		cat $File | head -n18 | tail -n+4;printf "\n";
+	done > gene_pred/cegma/cegma_results_dna_summary.txt
+
+	less gene_pred/cegma/cegma_results_dna_summary.txt
+```
+
+
 ### A) From Augustus gene models - Identifying secreted proteins
 
 Required programs:

@@ -56,6 +56,10 @@ Assembly of remaining reads
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/R
 	mkdir -p $ProjectDir/raw_dna/paired/F.avenaceum/PG8/F
 	mkdir -p $ProjectDir/raw_dna/paired/F.avenaceum/PG8/R
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160401_M004465_0007-AGKF2
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/R
 ```
 Sequence data was moved into the appropriate directories
 
@@ -92,6 +96,10 @@ Sequence data was moved into the appropriate directories
 	cp $RawDatDir/HB6_S5_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/HB6/R/.
 	cp $RawDatDir/PG8_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.avenaceum/PG8/F/.
 	cp $RawDatDir/PG8_S4_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.avenaceum/PG8/R/.
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160401_M004465_0007-AGKF2
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	cp $RawDatDir/FOP2_S1_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/F/.
+	cp $RawDatDir/FOP2_S1_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/R/.
 ```
 
 This process was repeated for RNAseq data:
@@ -200,7 +208,7 @@ Trimming was then performed for strains with multiple runs of data
 
 Data quality was visualised once again following trimming:
 ```bash
-	for RawData in $(ls qc_dna/paired/*/*/*/*.fq.gz); do
+	for RawData in $(ls qc_dna/paired/*/*/*/*.fq.gz | grep 'FOP2'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		echo $RawData;
 		qsub $ProgDir/run_fastqc.sh $RawData
@@ -213,7 +221,7 @@ This allowed estimation of sequencing depth and total genome size
 This was performed for strains with single runs of data
 
 ```bash
-	for TrimPath in $(ls -d raw_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
+	for TrimPath in $(ls -d raw_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6' | grep 'FOP2'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		TrimF=$(ls $TrimPath/F/*.fastq*)
 		TrimR=$(ls $TrimPath/R/*.fastq*)
@@ -315,7 +323,7 @@ Assembly was performed with:
 
 
 ```bash
-	for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
+	for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6' | grep 'FOP2'); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
 		Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
 		Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
@@ -397,7 +405,8 @@ Quast
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep 'FOP2'); do
+	# for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep 'Fus2_edited_v2'); do
   # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
@@ -467,7 +476,7 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	for BestAss in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta); do
+	for BestAss in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep 'FOP2'); do
 	# for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		qsub $ProgDir/rep_modeling.sh $BestAss
 		qsub $ProgDir/transposonPSI.sh $BestAss
@@ -498,7 +507,7 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/FOP1/*); do
+for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'fo47' -e '4287'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -1119,13 +1128,13 @@ models:
 
 The final number of genes per isolate was observed using:
 ```bash
-	for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final); do
-		echo $DirPath;
-		cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
-		cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
-		cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
-		echo "";
-	done
+for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final); do
+echo $DirPath;
+cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+echo "";
+done
 ```
 <!--
 ## Suplimenting gene models with known genes
@@ -1360,7 +1369,7 @@ the following commands:
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-	for SplitDir in $(ls -d gene_pred/final_genes_split/*/*); do
+	for SplitDir in $(ls -d gene_pred/final_genes_split/*/FOP1); do
 		Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
 		Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
 		InStringAA=''

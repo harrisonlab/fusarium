@@ -1151,22 +1151,29 @@ HB17 was identified as a contaminated sequence.
 
 ```bash
   echo "The number of ortholog groups unique to pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|'| grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'Fo47' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
   echo "The number of ortholog groups unique to non-pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' |  wc -l
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' -e 'A13|' -e 'fo47|' | grep 'A28|' | grep 'D2|' | grep 'PG|' |  wc -l
   echo "The number of ortholog groups common to all F. oxysporum isolates are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | wc -l
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'A1_2|' | grep 'CB3|' | grep 'HB6|' | grep 'A13|' | grep 'fo47|' | grep '4287' |wc -l
 ```
 
 ```
   The number of ortholog groups unique to pathogens are:
-  202
+  270
   The number of ortholog groups unique to non-pathogens are:
-  72
+  22
   The number of ortholog groups common to all F. oxysporum isolates are:
-  11275
+  10323
 ```
 
+The number of ortholog groups shared between FoC and FoL was identified:
+
+```bash
+  echo "The number of ortholog groups common to FoC and FoL are:"
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' | wc -l
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'Fo47' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' |  wc -l
+```
 
 ## 3.5.b Plot venn diagrams:
 

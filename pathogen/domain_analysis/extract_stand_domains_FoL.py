@@ -259,6 +259,7 @@ for FoL_contig in sorted(contig_dict):
     total_genes = gene_count_dict[FoL_contig]
     # print(FoL_contig)
     # print(contig_length_dict[FoL_contig])
+    contig_lgth = int(contig_length_dict[FoL_contig][0])
     gene_density = int(contig_length_dict[FoL_contig][2])
     gene_density_adj = int(contig_length_dict[FoL_contig][3])
     print("\n\nFoL contig " + str(FoL_contig) + " (" + str(len(genes_in_contig)) + "/ " + str(total_genes) +" genes; with a density of " + str(gene_density) + " genes.Mb-1 or " + str(gene_density_adj) + " adjusted)")
@@ -285,20 +286,23 @@ for FoL_contig in sorted(contig_dict):
     for keys in ["PKinase", "HET", "Peptidase S8", "PND UDP", "Helo-like", "Helo", "C2", "Patatin", "Goodbye", "PFD", "RelA Spot", 'SesA', 'sesB-like']:
         num_genes = len(N_terminal_dict[keys])
         frac_genes = numpy.divide(float(num_genes), float(total_genes)) * 100
+        genes_per_Mb = numpy.divide(float(num_genes), float(contig_lgth)) * 1000000
         frac_density_adj = numpy.divide(float(num_genes), float(gene_density_adj))
-        file_N_term_out.write("\t" + FoL_contig + "\t" + str(keys) + "\t" + str(num_genes) + "\t" + str(frac_genes) + "\t" + str(frac_density_adj) + "\n")
+        file_N_term_out.write("\t" + "\t".join([FoL_contig, str(keys), str(num_genes), str(frac_genes), str(frac_density_adj), str(genes_per_Mb)]) + "\n")
     # extracting NBD domains
     for keys in ['P-loop NTPase', 'NACHT', 'NB-ARC', 'AAA']:
         num_genes = len(NBD_dict[keys])
         frac_genes = numpy.divide(float(num_genes), float(total_genes)) * 100
+        genes_per_Mb = numpy.divide(float(num_genes), float(contig_lgth)) * 1000000
         frac_density_adj = numpy.divide(float(num_genes), float(gene_density_adj))
-        file_NBD_out.write("\t" + FoL_contig + "\t" + str(keys) + "\t" + str(num_genes) + "\t" + str(frac_genes) + "\t" + str(frac_density_adj) + "\n")
+        file_NBD_out.write("\t" + "\t".join([FoL_contig, str(keys), str(num_genes), str(frac_genes), str(frac_density_adj), str(genes_per_Mb)]) + "\n")
     # extracting C-terminal domains
     for keys in ['Ankyrin', 'TPR', 'WD40', 'WD40-like', 'half TPR']:
         num_genes = len(C_terminal_dict[keys])
         frac_genes = numpy.divide(float(num_genes), float(total_genes)) * 100
+        genes_per_Mb = numpy.divide(float(num_genes), float(contig_lgth)) * 1000000
         frac_density_adj = numpy.divide(float(num_genes), float(gene_density_adj))
-        file_C_term_out.write("\t" + FoL_contig + "\t" + str(keys) + "\t" + str(num_genes) + "\t" + str(frac_genes) + "\t" + str(frac_density_adj) + "\n")
+        file_C_term_out.write("\t" + "\t".join([FoL_contig, str(keys), str(num_genes), str(frac_genes), str(frac_density_adj), str(genes_per_Mb)]) + "\n")
 
     del N_terminal_dict
     del NBD

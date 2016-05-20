@@ -1193,32 +1193,32 @@ number of unique groups of inparalogs
 
 
 ```
-[1] 11347 <- non-pathogen orthogroups
-[1] 11477 <- pathogen orthogroups
-  [[1] "A28"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  12573"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1226"
-  [1] "The total number of singleton genes not in the venn diagram:  237"
-  [1] "D2"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  12243"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  896"
-  [1] "The total number of singleton genes not in the venn diagram:  141"
-  [1] "PG"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  12305"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  958"
-  [1] "The total number of singleton genes not in the venn diagram:  203"
-  [1] "Fus2"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  12583"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1106"
-  [1] "The total number of singleton genes not in the venn diagram:  75"
-  [1] "125"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  12535"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1058"
-  [1] "The total number of singleton genes not in the venn diagram:  65"
-  [1] "A23"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  12555"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1078"
-  [1] "The total number of singleton genes not in the venn diagram:  60"
+[1] 12284 <- non-pathogen orthogroups
+[1] 12089 <- pathogen orthogroups
+[1] "A28"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13681"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1397"
+[1] "The total number of singleton genes not in the venn diagram:  369"
+[1] "D2"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13222"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  938"
+[1] "The total number of singleton genes not in the venn diagram:  234"
+[1] "PG"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13549"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1265"
+[1] "The total number of singleton genes not in the venn diagram:  438"
+[1] "Fus2"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13945"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1856"
+[1] "The total number of singleton genes not in the venn diagram:  349"
+[1] "125"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13952"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1863"
+[1] "The total number of singleton genes not in the venn diagram:  319"
+[1] "A23"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13576"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1487"
+[1] "The total number of singleton genes not in the venn diagram:  242"
 ```
 
 

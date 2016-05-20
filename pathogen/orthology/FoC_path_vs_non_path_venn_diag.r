@@ -29,9 +29,9 @@ df1 <- t(orthotabs)
 summary(df1)
 
 
-nonpath=subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0)
-path=subset(df1, df1[,"A28"] == 0 & df1[,"D2"] == 0 & df1[,"PG"] == 0 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1)
-orthologs=subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1)
+nonpath=subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0)
+path=subset(df1, df1[,"A28"] == 0 & df1[,"D2"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1)
+orthologs=subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1)
 
 area1=(nrow(nonpath) + nrow(orthologs))
 area2=(nrow(path) + nrow(orthologs))
@@ -48,7 +48,7 @@ label1 <- paste("", sep="" )
 label2 <- paste("", sep="" )
 
 
-n12=nrow(subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1))
+n12=nrow(subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1))
 summary(n12)
 pdf(o)
 draw.pairwise.venn(area1, area2,

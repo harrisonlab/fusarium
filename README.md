@@ -1209,7 +1209,7 @@ commands:
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
+	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep 'FOP1'); do
 		Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1531,7 +1531,7 @@ assemlies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'FOP2'); do
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly

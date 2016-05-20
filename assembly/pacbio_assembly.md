@@ -8,10 +8,14 @@
   cd raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2
   tar -zxvf Richard_Harrison_EMR.RH.ENQ-933.01rev01_S1R2_Fus2.tar.gz
   cd /home/groups/harrisonlab/project_files/fusarium
-  H5_File=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/C08_1/Analysis_Results/m160507_013300_42165_c101001892550000001823234409161641_s1_p0.bas.h5
+
   OutDir=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted
   mkdir -p $OutDir
-  bash5tools.py $H5_File --outFile $OutDir/Fus2_pacbio --outType fastq --readType unrolled --minLength 100
+  # for H5_File in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/*/Analysis_Results/*.bas.h5); do
+  #   ReadSet=$(echo $H5_File | rev | cut -f3 -d '/' | rev)
+  #   bash5tools.py $H5_File --outFile $OutDir/Fus2_pacbio_$ReadSet --outType fastq --readType unrolled --minLength 100
+  # done
+  cat raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/*/Analysis_Results/*.subreads.fastq > $OutDir/concatenated_pacbio.fastq
 ```
 
 ## Assembly
@@ -34,7 +38,7 @@ qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
 ### Spades Assembly
 
 ```bash
-for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/Fus2_pacbio.fastq); do
+for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq); do
 Organism=$(echo $PacBioDat | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $PacBioDat | rev | cut -f3 -d '/' | rev)
 IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)

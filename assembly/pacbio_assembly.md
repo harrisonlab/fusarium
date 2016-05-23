@@ -34,6 +34,40 @@ ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/canu
 qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
 ```
 
+Assembly stats were collected using quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+Contigs were renamed in accordance with ncbi recomendations
+
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_canu_contigs_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
+
+Assemblies were polished using Pilon
+
+```bash
+ProgDir=
+java -jar /home/armita/prog/pilon/pilon --
+
+```
+
 
 ### Spades Assembly
 
@@ -52,13 +86,61 @@ echo $TrimR1_Read
 echo $TrimF2_Read
 echo $TrimR2_Read
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades/multiple_libraries
-qsub $ProgDir/subSpades_2lib_pacbio.sh $PacBioDat $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $OutDir 50
+qsub $ProgDir/subSpades_2lib_pacbio.sh $PacBioDat $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $OutDir 20
 done
 ```
 
+Contigs shorter thaan 500bp were renomed from the assembly
+
+```bash
+  for Contigs in $(ls assembly/spades_pacbio/*/*/contigs.fasta); do
+    AssemblyDir=$(dirname $Contigs)
+    mkdir $AssemblyDir/filtered_contigs
+    FilterDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/abyss
+    $FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
+  done
+```
+
+Assembly stats were collected using quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/spades_pacbio/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    OutDir=assembly/spades_pacbio/$Organism/$Strain/filtered_contigs
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+Contigs were renamed in accordance with ncbi recomendations
+
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_canu_contigs_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
 
 
+Contigs were renamed in accordance with ncbi recomendations.
 
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+  for Assembly in $(ls assembly/spades_pacbio/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    OutDir=assembly/spades_pacbio/$Organism/$Strain/filtered_contigs
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
 
 # Analysis of preliminary assemblies
 

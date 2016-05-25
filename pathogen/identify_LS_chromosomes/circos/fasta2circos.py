@@ -20,26 +20,27 @@ from collections import defaultdict
 from operator import itemgetter
 
 ap = argparse.ArgumentParser()
-ap.add_argument('--FoL_genome',required=True,type=str,help='The genome assembly of FoL 4287')
+ap.add_argument('--genome',required=True,type=str,help='The genome assembly')
+ap.add_argument('--contig_prefix',required=True,type=str,help='The prexix for contigs names')
 
 conf = ap.parse_args()
-
-
 
 #-----------------------------------------------------
 # Step 2
 # Identify the length and gene density of FoL chromosomes
 #-----------------------------------------------------
 
-FoL_Chr1_LS_start = int(5963944)
-FoL_Chr2_LS_start = int(4903160)
+# FoL_Chr1_LS_start = int(5963944)
+# FoL_Chr2_LS_start = int(4903160)
+prefix = conf.contig_prefix
 i = 0
 
 contig_length_dict = defaultdict(list)
 
-genome_file = open(conf.FoL_genome, 'r')
+genome_file = open(conf.genome, 'r')
 for cur_record in SeqIO.parse(genome_file,"fasta"):
     seq_id = cur_record.id
+
 
     # if str(1) == Fol_contig:
     #     if (int(gene_end) <= FoL_Chr1_LS_start):
@@ -68,5 +69,5 @@ for cur_record in SeqIO.parse(genome_file,"fasta"):
     #     outline = " ".join(["chr", "-", str(seq_id), "FoL" + str(seq_id), "0", str(seq_len)], "chr" + str(i))
     i += 1
     seq_len = len(cur_record.seq)
-    outline = " ".join(["chr", "-", str(seq_id), "FoL" + str(seq_id), "0", str(seq_len), "chr" + str(i)])
+    outline = " ".join(["chr", "-", str(seq_id), str(prefix) + str(i), "0", str(seq_len), "chr" + str(i)])
     print(outline)

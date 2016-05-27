@@ -898,13 +898,13 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'FUS2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2'); do
 	# for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
 	# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
-		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -e '_rep'); do
+		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v -e '_rep'); do
 			Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 			echo "$Timepoint"
 			FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -929,40 +929,47 @@ Then Rnaseq data was aligned to each genome assembly:
 #### Braker prediction
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'FOP1'); do
-		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		mkdir -p alignment/$Organism/$Strain/concatenated
-		samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-			alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-		OutDir=gene_pred/braker/$Organism/"$Strain"_braker_new
-		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
-		GeneModelName="$Organism"_"$Strain"_braker_new
-		rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_new
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-		qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e 'Fus2'); do
+	Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+	while [ $Jobs -gt 1 ]; do
+	sleep 10
+	printf "."
+	Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+	done
+	printf "\n"
+	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+	echo "$Organism - $Strain"
+	mkdir -p alignment/$Organism/$Strain/concatenated
+	samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+	alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+	alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+	alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+	alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+	OutDir=gene_pred/braker/$Organism/"$Strain"_braker_pacbio
+	AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+	GeneModelName="$Organism"_"$Strain"_braker_new
+	rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_new
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+	qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 	done
 ```
 
@@ -996,7 +1003,13 @@ machine.
 Cufflinks was run to compare the predicted genes to assembled transcripts:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/FOP1/*/*_contigs_softmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e 'Fus2'); do
+		Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+		while [ $Jobs -gt 1 ]; do
+		sleep 10
+		printf "."
+		Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+		done
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
@@ -1054,7 +1067,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e 'FOP2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"

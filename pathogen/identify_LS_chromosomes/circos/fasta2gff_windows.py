@@ -34,7 +34,7 @@ for cur_record in SeqIO.parse(genome_file,"fasta"):
     seq_len = len(cur_record.seq)
     i = 1
     interval_start = 1
-    interval_stop = 100001
+    interval_stop = 100000
     while interval_stop <= seq_len:
         outline = "\t".join([str(seq_id), "window", "100kb_window", str(interval_start), str(interval_stop), ".", "+", ".", "ID=" + str(seq_id) + "_" + str(i) + ";"])
         print(outline)

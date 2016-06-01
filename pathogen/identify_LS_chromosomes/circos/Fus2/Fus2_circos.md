@@ -27,12 +27,15 @@
 ```bash
 # Extract RNAseq reads aligning in 100kb windows
 ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-Fus2_genome=assembly/canu_spades_hybrid/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta
+Fus2_genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_unmasked.fa
 ReadsBam=alignment/F.oxysporum_fsp_cepae/Fus2/Fus2_72hrs_rep3/accepted_hits.bam
 $ProgDir/fasta2gff_windows.py --genome $Fus2_genome > tmp5/Fus2_100kb_windows.gff
 bedtools coverage -abam $ReadsBam -b tmp5/Fus2_100kb_windows.gff > tmp5/tmp.bed
 # Convert coverage bed files into circos format
 $ProgDir/coverage_bed2circos.py --bed tmp5/tmp.bed > tmp5/Fus2_coverage_scatterplot.txt
+# Identify GC content in 100kb windows
+$ProgDir/gc_content2circos.py --genome $Fus2_genome --gff tmp5/Fus2_100kb_windows.gff > tmp5/Fus2_GC_scatterplot.txt
+
 # Convert the Fus2 genome into circos format
 ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
 Fus2_genome=assembly/canu_spades_hybrid/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta

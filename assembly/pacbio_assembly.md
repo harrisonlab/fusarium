@@ -378,6 +378,29 @@ Convert top blast hits into gff annotations
   done
 ```
 
+Copying data
+
+```bash
+  cp repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_unmasked.fa pacbio_assembly/.
+  cp repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_hardmasked.gff pacbio_assembly/.
+  cp repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_unmasked.fa.TPSI.allHits.chains.gff pacbio_assembly/.
+  cp repeat_masked/F.oxysporum_fsp_cepae/Fus2/filtered_contigs_repmask/Fus2_contigs_unmasked.fa.TPSI.allHits.chains.gff3 pacbio_assembly/.
+  cp gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_combined.* pacbio_assembly/.
+  cp gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_appended.gff3 pacbio_assembly/.
+  cp gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv pacbio_assembly/.
+  cp analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_mimps.gff pacbio_assembly/.
+  cp analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.gff pacbio_assembly/.
+  cp analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_Fo_path_genes_CRX.fa_homologs.csv pacbio_assembly/.
+  cp analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/Fus2_Fo_path_genes_CRX.fa_homologs.gff pacbio_assembly/.
+  mkdir pacbio_assembly/orthology
+  cp analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt pacbio_assembly/orthology/.
+  cp -r analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/Fus2_genes pacbio_assembly/orthology/.
+  cp -r analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/fasta pacbio_assembly/orthology/.
+```
+
+
+
+
 
 <!--
 # Analysis of preliminary assemblies

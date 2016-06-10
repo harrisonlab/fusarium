@@ -1225,7 +1225,7 @@ commands:
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep 'FOP1'); do
+	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w 'Fus2'); do
 		Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1273,8 +1273,8 @@ commands:
 ```
 
 ```bash
-	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -e 'FOP1'); do
-		# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
+	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -w -e 'Fus2'); do
+	# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
 		echo "$Organism - $Strain"
@@ -1309,7 +1309,7 @@ chromosomes of the Fusarium lycopersici genome.
 Convert top blast hits into gff annotations
 
 ```bash
-	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -e 'FOP1'); do
+	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -w -e 'Fus2'); do
 		Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
 		echo "$Organism - $Strain"
@@ -1321,10 +1321,10 @@ Convert top blast hits into gff annotations
 	done
 ```
 
-#### 2.6.3) Intersecting blast hits with genes from FoL
+#### Intersecting blast hits with genes from FoL
 
 ```bash
-	for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff); do
+	for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff | grep -w -e 'Fus2'); do
 		Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
 		echo "$Organism - $Strain"
@@ -1554,7 +1554,7 @@ assemlies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'FOP2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2'); do
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
@@ -1565,7 +1565,7 @@ Once blast searches had completed, the BLAST hits were converted to GFF
 annotations:
 
 ```bash
-	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv); do
+	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -w 'Fus2'); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
@@ -1582,13 +1582,14 @@ annotations:
 
 ```bash
 	OutFile=analysis/blast_homology/Fo_path_genes_CRX_summary.tab
-	cat analysis/blast_homology/F.proliferatum/A8/A8_Fo_path_genes_CRX.fa_homologs.csv | cut -f1 > tmp2.tab
+	echo "Organism" > tmp2.tab
+	cat analysis/blast_homology/F.proliferatum/A8/A8_Fo_path_genes_CRX.fa_homologs.csv | cut -f1 >> tmp2.tab
 	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 		echo "$Organism" > tmp.tab
 		echo "$Strain" >> tmp.tab
-		cat $BlastHits | cut -f10 >> tmp.tab
+		cat $BlastHits | cut -f10  | tail -n +2 >> tmp.tab
 		paste tmp2.tab tmp.tab > $OutFile
 		cp $OutFile tmp2.tab
 	done
@@ -1597,17 +1598,19 @@ annotations:
 ```
 
 ```bash
-	for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity'); do
+	for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity' | grep -w 'Fus2'); do
 		Strain=$(echo $HitsGff | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
 		echo "$Organism - $Strain"
-		GffBraker=gene_pred/codingquary/$Organism/$Strain/final/final_genes_Braker.gff3
-		GffQuary=gene_pred/codingquary/$Organism/$Strain/final/final_genes_CodingQuary.gff3
+		# GffBraker=gene_pred/codingquary/$Organism/$Strain/final/final_genes_Braker.gff3
+		# GffQuary=gene_pred/codingquary/$Organism/$Strain/final/final_genes_CodingQuary.gff3
+		GffAppended=gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3
 		OutDir=$(dirname $HitsGff)
 		SixIntersect=$OutDir/"$Strain"_Fo_path_genes_CRX.fa_hit_genes.bed
-		bedtools intersect -wo -a $HitsGff -b $GffBraker > $SixIntersect
-		bedtools intersect -wo -a $HitsGff -b $GffQuary >> $SixIntersect
-		cat $SixIntersect | grep -w 'gene' | cut -f9,18
+		# bedtools intersect -wo -a $HitsGff -b $GffBraker > $SixIntersect
+		# bedtools intersect -wo -a $HitsGff -b $GffQuary >> $SixIntersect
+		bedtools intersect -wao -a $HitsGff -b $GffAppended > $SixIntersect
+		bedtools intersect -wao -a $HitsGff -b $GffAppended | cut -f9,18 | grep -v 'Parent'
 		echo ""
 	done > analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX_hit_genes_summary.tab
 ```

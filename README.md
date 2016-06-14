@@ -507,7 +507,7 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'fo47' -e '4287'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -v 'edited' | grep -e 'Fus2'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -656,7 +656,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 
 Outputs were summarised using the commands:
 ```bash
-	for File in $(ls gene_pred/cegma/F*/FUS2/*_dna_cegma.completeness_report); do
+	for File in $(ls gene_pred/cegma/F*/Fus2/*_dna_cegma.completeness_report); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
 		printf "$Species\t$Strain\n";
@@ -1545,12 +1545,12 @@ The Commands used to run this analysis are shown in
 pathogen/orthology/F.oxysporum_fsp.cepae_isolates.md -->
 
 
-## 5. BLAST Searches
+## 5.  Searches
 
 ## 5.1.A) Identifying SIX genes
 
 Protein sequence of previously characterised SIX genes used to BLAST against
-assemlies.
+assemblies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast

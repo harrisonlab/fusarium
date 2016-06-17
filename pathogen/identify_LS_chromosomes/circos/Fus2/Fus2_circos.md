@@ -61,7 +61,7 @@
     $ProgDir/gff2circos_scatterplot.py --gff $GffFile --feature Chr"$Chr"_gene_homolog > tmp5/FoL_chr"$Chr"_genes.txt
   done
 
-  # Plot location of Fus2 genes in pathgen-shared orthogroups as scatterplot
+  # Plot location of Fus2 genes in pathogen-shared orthogroups as scatterplot
   GffFile=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/Fus2_genes/Fus2_path_shared_genes.gff
   $ProgDir/gff2circos_scatterplot.py --gff $GffFile --feature gene --value '1' > tmp5/Fus2_path_shared_genes_plot.txt
   # Plot location of Fus2 genes in pathogen & isolate 55-shared orthogroups as scatterplot

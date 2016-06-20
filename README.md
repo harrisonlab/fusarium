@@ -1623,8 +1623,8 @@ Fusarium genomes.
 
 ```bash
 	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'cepae' | grep -v -e '_edited_v2' -e 'HB17'); do
-		Organism=$(echo $BlastHits | rev | cut -f4 -d '/' | rev)
-		Strain=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
 		OutDir=analysis/FTF/$Organism/$Strain
@@ -1637,7 +1637,7 @@ Fusarium genomes.
 BLAST hits were converted to Gff annotations and intersected with gene models:
 
 ```bash
-	for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_homologs.csv); do
+	for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
@@ -1646,7 +1646,7 @@ BLAST hits were converted to Gff annotations and intersected with gene models:
 		NumHits=1
 		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 
-		GffAppended=gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3
+		GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
 		bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits_intersected.bed
 	done
 ```

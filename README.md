@@ -1618,17 +1618,26 @@ annotations:
 
 ## 5.1.B) Identifying FTF genes
 
+Previously published FTF genes from Sanchez et al 2016 were blasted against
+Fusarium genomes.
+
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/Fus2*/*/*_contigs_unmasked.fa); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'cepae' | grep -v -e '_edited_v2' -e 'HB17'); do
+		Organism=$(echo $BlastHits | rev | cut -f4 -d '/' | rev)
+		Strain=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
-		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+		OutDir=analysis/FTF/$Organism/$Strain
+		mkdir -p $OutDir
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		qsub $ProgDir/run_blast2csv.sh $Query dna $Assembly $OutDir
 	done
 ```
 
+BLAST hits were converted to Gff annotations and intersected with gene models:
+
 ```bash
-	for BlastHits in $(ls analysis/blast_homology/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_homologs.csv); do
+	for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_homologs.csv); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
@@ -1636,6 +1645,9 @@ annotations:
 		Column2=FTF_homolog
 		NumHits=1
 		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+
+		GffAppended=gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3
+		bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits_intersected.bed
 	done
 ```
 

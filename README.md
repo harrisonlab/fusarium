@@ -647,7 +647,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 	cd /home/groups/harrisonlab/project_files/fusarium
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2'); do
+	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'fo47'); do
 	#for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w 'fo47'); do
 		echo $Genome;
 		qsub $ProgDir/sub_cegma.sh $Genome dna;

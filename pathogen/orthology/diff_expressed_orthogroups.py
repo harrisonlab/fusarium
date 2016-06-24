@@ -62,7 +62,7 @@ for line in RNAseq_lines:
         gene_id=gene_id.replace('.', '_')
         gene_id_set.add(gene_id)
         column_list=[]
-        column_list=itemgetter(0,1,2,5)(split_line)
+        column_list=itemgetter(0,1,2,6)(split_line)
         RNAseq_dict[gene_id].extend(column_list)
         if column_list[3] == 'NA':
             RNAseq_dict[gene_id].append("")

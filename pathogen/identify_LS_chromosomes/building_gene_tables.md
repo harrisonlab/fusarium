@@ -1,7 +1,27 @@
 
 
 ```bash
-  for Strain in 125 A23 Fus2_edited_v2 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
+WarwickCSV=analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/path_vs_non_p0.001.csv
+WarwickTSV=analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/path_vs_non_p0.001.tab
+cat $WarwickCSV | sed 's/,/\t/g' | tr -d '"' > $WarwickTSV
+
+OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
+DEG_Orthogroups=analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab
+
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
+$ProgDir/diff_expressed_orthogroups.py \
+  --RNAseq_tab $WarwickTSV \
+  --FoC_orthogroup $OrthogroupsTxt \
+  --OrthoMCL_id Fus2 \
+  --OrthoMCL_all Fus2 125 A23 A28 D2 PG A13 fo47 55 A1_2 CB3 HB6 4287 \
+  --OrthoMCL_path Fus2 125 A23 --OrthoMCL_nonpath A28 D2 PG A13 fo47 \
+  > $DEG_Orthogroups
+```
+
+
+```bash
+  # for Strain in 125 A23 Fus2_edited_v2 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
+  for Strain in 125 A23 Fus2 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
     for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3); do
       Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
       Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
@@ -18,14 +38,13 @@
       OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
       InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
       SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl)
-      DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/04_16/Fus2_path_vs_non_path_orthogroups.tab)
+      DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
 
       OrthoMCL_id="$Strain"
       OrthoMCL_id_list="125 A23 Fus2 55 A1_2 CB3 HB6 A13 A28 D2 PG fo47 4287"
       OrthoMCL_path_ids="125 A23 Fus2"
       OrthoMCL_nonpath_ids="A13 A28 D2 PG fo47"
 
-      if [ "$Strain" == 'Fus2_edited_v2' ]; then OrthoMCL_id="Fus2"; fi
       if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
 
       OutDir=gene_pred/annotations/$Organism/$Strain
@@ -86,7 +105,7 @@ Gene tables were made for Fo fo47 and FoL 4287
     OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
     InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
     SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl)
-    DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/04_16/Fus2_path_vs_non_path_orthogroups.tab)
+    DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
 
     OrthoMCL_id="$Strain"
     OrthoMCL_id_list="125 A23 Fus2 55 A1_2 CB3 HB6 A13 A28 D2 PG fo47 4287"

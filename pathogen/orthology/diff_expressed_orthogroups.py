@@ -51,11 +51,9 @@ RNAseq_dict = defaultdict(list)
 
 first = True
 for line in RNAseq_lines:
-    # print "hello"
     if first == True:
         first = False
     else:
-        # print "hello"
         line = line.rstrip()
         split_line = line.split("\t")
         gene_id=split_line[0]
@@ -85,9 +83,6 @@ strain_id = strain_id + "|"
 
 FoC_orthogroup_dict = defaultdict(list)
 orthogroup_content_dict = defaultdict(list)
-# path_isolates = ["Fus2", "125", "A23"]
-# non_path_isolates = ["A28", "D2", "PG"]
-# all_isolates = path_isolates + non_path_isolates
 
 for line in FoC_orthogroup_lines:
     line = line.rstrip("\n")

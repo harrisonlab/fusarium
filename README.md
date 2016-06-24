@@ -1640,10 +1640,11 @@ BLAST hits were converted to Gff annotations and intersected with gene models:
 	for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		OutDir=analysis/FTF/$Organism/$Strain
 		HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
 		Column2=FTF_homolog
 		NumHits=1
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
 		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 
 		GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)

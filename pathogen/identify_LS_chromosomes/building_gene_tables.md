@@ -188,13 +188,24 @@ from excel.
     cat $File | cut -f1,12,13,16,18,19,20,34 | grep -i "Yes.*Yes" | grep 'expanded';
     echo ""
   done > tmp4/annot.tab
-
 ```
 
 
 The number of pathogen expanded orthogroups was identified:
 
 ```bash
-cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,18,19 | grep -P "\tpathogen_expanded" | cut -f1 | sort | uniq | wc -l
-cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,17,18,19,34 | grep -P "\tpathogen_expanded" | grep 'path_isolates_all' | cut -f1 | sort | uniq | wc -l
+  cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,18,19 | grep -P "\tpathogen_expanded" | cut -f1 | sort | uniq | wc -l
+  cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,17,18,19,34 | grep -P "\tpathogen_expanded" | grep 'path_isolates_all' | cut -f1 | sort | uniq | wc -l
+```
+
+
+## Identification of transcription factors
+
+```bash
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2/Fus2_gene_annotations.tab | grep -w -e 'contig_11' -e 'contig_14' -e 'contig_15' -e 'contig_17' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | sort -k16 | less -S
+echo "The number of transcription factors on LS contigs 11, 14, 15, 17, 20 & 21 is:"
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2/Fus2_gene_annotations.tab | grep -w -e 'contig_11' -e 'contig_14' -e 'contig_15' -e 'contig_17' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | sort -k16 | wc -l
+echo "These are present in the following number of orthogroups:"
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2/Fus2_gene_annotations.tab | grep -w -e 'contig_11' -e 'contig_14' -e 'contig_15' -e 'contig_17' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | cut -f16 | sort | uniq -c | sort -r -n | wc -l
+
 ```

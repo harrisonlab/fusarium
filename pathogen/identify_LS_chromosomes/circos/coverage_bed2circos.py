@@ -15,8 +15,10 @@ import numpy as np
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--bed',required=True,type=str,help='A bed file output from bedtools coverage')
+ap.add_argument('--per_X_bp',required=False, default=1000, type=float, help='The number of bp over which you want to report the number of features eg. reads per 1000bp')
 
 conf = ap.parse_args()
+multiplier = conf.per_X_bp
 
 with open(conf.bed) as f:
     bed_lines = f.readlines()
@@ -38,7 +40,7 @@ for line in bed_lines:
     # print (str(reads) + "\t" + str(lgth))
     reads_per_bp = np.divide(reads, lgth)
     # print(reads_per_bp)
-    reads_per_kb = np.multiply(reads_per_bp, 1000)
+    reads_per_kb = np.multiply(reads_per_bp, multiplier)
     reads_per_kb = int(np.round_(reads_per_kb, decimals=0,out=None))
     feature = "\t".join([str(contig), str(start), str(stop), str(reads_per_kb)])
     print(feature)

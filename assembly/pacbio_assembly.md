@@ -219,13 +219,13 @@ These low coverage regions were visually inspected using IGV.
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
 
-  AlignedBam=$OutDir/Fus2_contigs_renamed.fasta_aligned_sorted.bam.gz
-  CoverageTxt=$OutDir/Fus2_bp_genome_cov.txt
-  bedtools genomecov -max 5 -bga -d -ibam $AlignedBam -g $Assembly > $CoverageTxt
-
-  Threshold=5
-  FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
-  $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
+  # AlignedBam=$OutDir/Fus2_contigs_renamed.fasta_aligned_sorted.bam.gz
+  # CoverageTxt=$OutDir/Fus2_bp_genome_cov.txt
+  # bedtools genomecov -max 5 -bga -d -ibam $AlignedBam -g $Assembly > $CoverageTxt
+  #
+  # Threshold=5
+  # FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
+  # $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
 ```
 <!--
 The same analysis was performed on the pacbio only assembly to see if errors

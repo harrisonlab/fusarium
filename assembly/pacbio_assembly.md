@@ -204,6 +204,52 @@ Fus2 was temporarily renamed for preliminary analysis
 
 # Preliminary analysis
 
+## Checking PacBio coverage against Fus2 contigs
+
+The accuracy of PacBio assembly pipelines is currently unknown. To help identify
+regions that may have been missassembled the pacbio reads were aligned back to
+the assembled genome. Coverage was determined using bedtools genomecov and
+regions with low coverage flagged using a python script flag_low_coverage.py.
+These low coverage regions were visually inspected using IGV.
+
+```bash
+  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta
+  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
+  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2
+  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
+
+  AlignedBam=$OutDir/Fus2_contigs_renamed.fasta_aligned_sorted.bam.gz
+  CoverageTxt=$OutDir/Fus2_bp_genome_cov.txt
+  bedtools genomecov -max 5 -bga -d -ibam $AlignedBam -g $Assembly > $CoverageTxt
+
+  Threshold=5
+  FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
+  $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
+```
+<!--
+The same analysis was performed on the pacbio only assembly to see if errors
+occurred at the merging step:
+
+```bash
+  Assembly=assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta
+  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
+  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_canu_only
+  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
+
+  AlignedBam=$OutDir/Fus2_contigs_renamed.fasta_aligned_sorted.bam.gz
+  CoverageTxt=$OutDir/Fus2_bp_genome_cov.txt
+  bedtools genomecov -max 5 -bga -d -ibam $AlignedBam -g $Assembly > $CoverageTxt
+
+  Threshold=5
+  FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
+  $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
+
+```
+-->
+
+
 ## Blast searches of LS region genes vs FoC
 
 Some preliminary commands were used to analyse Pacbio assemblies Richard had generated

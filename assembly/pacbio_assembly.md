@@ -216,6 +216,7 @@ These low coverage regions were visually inspected using IGV.
   Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta
   Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
   OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
 
   AlignedBam=$OutDir/Fus2_contigs_renamed.fasta_aligned_sorted.bam.gz
@@ -224,7 +225,6 @@ These low coverage regions were visually inspected using IGV.
 
   Threshold=5
   FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
 ```
 <!--
@@ -235,6 +235,7 @@ occurred at the merging step:
   Assembly=assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta
   Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
   OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_canu_only
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
 
   AlignedBam=$OutDir/Fus2_contigs_renamed.fasta_aligned_sorted.bam.gz
@@ -243,7 +244,6 @@ occurred at the merging step:
 
   Threshold=5
   FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
 
 ```

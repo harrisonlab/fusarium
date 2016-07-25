@@ -1458,7 +1458,7 @@ Required programs:
 		bedtools intersect -u -a $QuaryGff -b $OutDir/"$Strain"_mimps_exp.gff >> $OutDir/"$Strain"_genes_in_2kb_mimp.gff
 		echo "The following transcripts intersect mimps:"
 		MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-		cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' > $MimpGenesTxt
+		cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpGenesTxt
 		cat $MimpGenesTxt | wc -l
 		echo ""
 	done

@@ -327,9 +327,9 @@ Required programs:
     echo "The following transcripts intersect mimps:"
     MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
     if [ $Strain == 'fo47' ]; then
-      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' > $MimpGenesTxt
+      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpGenesTxt
     elif [ $Strain == '4287_chromosomal' ]; then
-      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 | cut -f1 -d';' | cut -f2 -d':' > $MimpGenesTxt
+      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 | cut -f1 -d';' | cut -f2 -d':' | sort | uniq | grep -v 'P' > $MimpGenesTxt
     fi
     cat $MimpGenesTxt | wc -l
     echo ""

@@ -90,7 +90,41 @@ ls gene_pred/codingquary/F*/*/final/final_genes_appended.gff3  | grep -e 'F.oxys
 ```
 
 
+downloaded genomes fo47 (non-pathogen) and 4287 (FoL pathogen) were also
+included in the following analyses. Downloaded data for these isolates can be
+found:
+
+fo47:
+
+```
+  assembly/external_group/F.oxysporum/fo47/broad/
+```
+
+with the following proteins being used in the orthology analysis:
+
+```
+  assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta
+```
+
+4287:
+
+```
+  assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1
+```
+
+with the following proteins being used in the orthology analysis:
+
+```
+  assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
+```
+
+## Orthology results
+
+
 Othology analysis was performed on these isolates.
+The commands were documented in the following files under Methology 3:
+
+https://github.com/harrisonlab/fusarium/blob/master/pathogen/orthology/F.oxysporum_fsp.cepae_pathogen_vs_non-pathogen_orthology.md
 
 The total set of proteins used in the analysis can be found at:
 - note from this point onwards each gene name is preceeded by an isolate identifier in the fasta files.

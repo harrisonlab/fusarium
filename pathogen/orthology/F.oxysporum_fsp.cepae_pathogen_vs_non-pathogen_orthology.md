@@ -1244,6 +1244,12 @@ number of unique groups of inparalogs
 [1] "The total number of singleton genes not in the venn diagram:  240"
 ```
 
+Generating a Venn diagram for Pathogens, Nonpathogens and FoL
+
+```bash
+  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
+  $ProgDir/FoC_path_vs_non_path_FoL_venn_diag.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups_APS.pdf
+```
 
 #### 3.6.a Extracting fasta files orthogroups
 ```bash
@@ -1272,19 +1278,26 @@ Genes in orthogroups unique to all pathogens were extracted:
 ```bash
   cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -v -e '55|' -e 'A1_2|' -e 'CB3|' -e 'HB6|' > $WorkDir/Fus2_genes/Fus2_path_shared_orthgroups.txt
   cat $WorkDir/Fus2_genes/Fus2_path_shared_orthgroups.txt | grep -o "Fus2|\w*\.t." | sed 's/Fus2|//g' | cut -f1 -d '.' > $WorkDir/Fus2_genes/Fus2_path_shared_genes.txt
-  cat $Fus2Gff | grep -w 'gene' | grep -f $WorkDir/Fus2_genes/Fus2_path_shared_genes.txt > $WorkDir/Fus2_genes/Fus2_path_shared_genes.gff
+  cat $Fus2Gff | grep -w 'gene' | grep -w -f $WorkDir/Fus2_genes/Fus2_path_shared_genes.txt > $WorkDir/Fus2_genes/Fus2_path_shared_genes.gff
 ```
 
 Genes in orthogroups shared between all pathogens and intermediate isolate 55, and absent from non-pathogens were extracted:
 ```bash
   cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '55|' > $WorkDir/Fus2_genes/Fus2_path_55_shared_orthgroups.txt
   cat $WorkDir/Fus2_genes/Fus2_path_55_shared_orthgroups.txt | grep -o "Fus2|\w*\.t." | sed 's/Fus2|//g' | cut -f1 -d '.' > $WorkDir/Fus2_genes/Fus2_path_55_shared_genes.txt
-  cat $Fus2Gff | grep -w 'gene' | grep -f $WorkDir/Fus2_genes/Fus2_path_55_shared_genes.txt > $WorkDir/Fus2_genes/Fus2_path_55_shared_genes.gff
+  cat $Fus2Gff | grep -w 'gene' | grep -w -f $WorkDir/Fus2_genes/Fus2_path_55_shared_genes.txt > $WorkDir/Fus2_genes/Fus2_path_55_shared_genes.gff
 ```
 
 Genes in orthogroups shared between all pathogens and at least one intermediate, excluding 55, and absent from non-pathogens were extracted:
 ```bash
   cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e 'A1_2|' -e 'CB3|' -e 'HB6|' > $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_orthgroups.txt
   cat $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_orthgroups.txt | grep -o "Fus2|\w*\.t." | sed 's/Fus2|//g' | cut -f1 -d '.' > $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_genes.txt
-  cat $Fus2Gff | grep -w 'gene' | grep -f $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_genes.txt > $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_genes.gff
+  cat $Fus2Gff | grep -w 'gene' | grep -w -f $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_genes.txt > $WorkDir/Fus2_genes/Fus2_path_inter_no_55_shared_genes.gff
+```
+
+Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
+```bash
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' > $WorkDir/Fus2_genes/Fus2_path_not_non-path_orthgroups.txt
+  cat $WorkDir/Fus2_genes/Fus2_path_not_non-path_orthgroups.txt| grep -o "Fus2|\w*\.t." | sed 's/Fus2|//g' | cut -f1 -d '.' > $WorkDir/Fus2_genes/Fus2_path_not_non-path_genes.txt
+  cat $Fus2Gff | grep -w 'gene' | grep -w -f $WorkDir/Fus2_genes/Fus2_path_not_non-path_genes.txt > $WorkDir/Fus2_genes/Fus2_path_not_non-path_genes.gff
 ```

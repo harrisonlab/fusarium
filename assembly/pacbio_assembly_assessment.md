@@ -24,7 +24,7 @@ Contigs were renamed in accordance with ncbi recomendations
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-  printf "contig_17\tsplit\t780978\t780971\tcanu:missassembly\n"
+  printf "contig_17\t\tsplit\t780978\t780971\tcanu:missassembly\n" > tmp.csv
   for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta | grep -w 'Fus2'); do
     Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
     Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
@@ -77,7 +77,7 @@ Assemblies were polished using Pilon
       Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
       Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev)
       echo "$Organism - $Strain - $Chr"
-      OutDir=analysis/blast_homology/$Organism/$Strain
+      OutDir=analysis/blast_homology/$Organism/"$Strain"_canu_only
       ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
       qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
     done
@@ -87,7 +87,7 @@ Assemblies were polished using Pilon
 Convert top blast hits into gff annotations
 
 ```bash
-  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2/*_chr_*_gene_single_copy.aa_hits.csv); do
+  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_canu_only/*_chr_*_gene_single_copy.aa_hits.csv); do
     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
     echo "$Organism - $Strain"
@@ -100,7 +100,7 @@ Convert top blast hits into gff annotations
   done
 ```
 
-# 2. Assessment of the manually edited assemmbly
+# 2. Assessment of the manually edited assembly
 
 
 ```bash
@@ -499,6 +499,161 @@ Convert top blast hits into gff annotations
   done
 ```
 
+
+## 3.5 Quickmerge with 5X parameters and large min alignment length
+
+
+AnchorOverlapCuttoff=25.0
+ExtensionOverlapCuttoff=7.5
+AnchorContigLength=20000
+MinAlignmentLength=10000
+
+```bash
+  for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta); do
+    Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
+    HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
+    QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
+    AnchorLength=20000
+    OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_quickmerge5
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+    qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
+  done
+```
+
+```bash
+  touch tmp.csv
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge5/merged.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    OutDir=$(dirname $Assembly)
+    mkdir -p $OutDir
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+  rm tmp.csv
+```
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge5/Fus2_quickmerge5_contigs_renamed.fasta); do
+    echo $Assembly
+    Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+```bash
+  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge5/Fus2_quickmerge5_contigs_renamed.fasta)
+  for Genome in $(ls $Fus2_pacbio_merged); do
+    for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
+      Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
+      Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
+      Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
+      echo "$Organism - $Strain - $Chr"
+      OutDir=analysis/blast_homology/$Organism/$Strain
+      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
+    done
+  done
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_quickmerge5/*_chr_*_gene_single_copy.aa_hits.csv); do
+    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+    Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+    Column2=Chr"$Chr"_gene_homolog
+    NumHits=1
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+  done
+```
+
+
+## 3.6 Quickmerge with recomended Anchor length
+
+
+AnchorOverlapCuttoff=5.0
+ExtensionOverlapCuttoff=1.5
+AnchorContigLength=500000
+MinAlignmentLength=5000
+
+```bash
+  for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta); do
+    Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
+    HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/edited_contigs/pilon.fasta)
+    QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
+    AnchorLength=500000
+    OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_quickmerge6
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+    qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
+  done
+```
+
+```bash
+  touch tmp.csv
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge3/merged.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    OutDir=$(dirname $Assembly)
+    mkdir -p $OutDir
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+  rm tmp.csv
+```
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge6/Fus2_quickmerge6_contigs_renamed.fasta); do
+    echo $Assembly
+    Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+```bash
+  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge6/Fus2_quickmerge6_contigs_renamed.fasta)
+  for Genome in $(ls $Fus2_pacbio_merged); do
+    for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
+      Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
+      Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
+      Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
+      echo "$Organism - $Strain - $Chr"
+      OutDir=analysis/blast_homology/$Organism/$Strain
+      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
+    done
+  done
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_quickmerge6/*_chr_*_gene_single_copy.aa_hits.csv); do
+    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+    Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+    Column2=Chr"$Chr"_gene_homolog
+    NumHits=1
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+  done
+```
+
+
 # 4.0 Quickmerge of split contigs
 
 # 4.1 Submission with low stringency
@@ -646,6 +801,206 @@ Convert top blast hits into gff annotations
 
 ```bash
   for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge2/*_chr_*_gene_single_copy.aa_hits.csv); do
+    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+    Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+    Column2=Chr"$Chr"_gene_homolog
+    NumHits=1
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+  done
+```
+
+
+## 4.4 Quickmerge with recomended Anchor length, split pacbio and split, pilon edited hybrid assembly
+
+
+Contigs were renamed in accordance with ncbi recomendations
+
+```bash
+  touch tmp.csv
+  printf "NODE_6_length_1868837_cov_72.353_ID_1107516_pilon\t\tsplit\t1703381\t1717033\tspades:missassembly\n" > tmp.csv
+  for Assembly in $(ls assembly/spades_pacbio/*/*/edited_contigs/pilon.fasta | grep -w 'Fus2'); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    OutDir=$(dirname $Assembly)
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_canu_contigs_edited_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
+
+
+AnchorOverlapCuttoff=5.0
+ExtensionOverlapCuttoff=1.5
+AnchorContigLength=500000
+MinAlignmentLength=5000
+
+```bash
+  for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2/edited_contigs/pilon.fasta); do
+    Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
+    HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/edited_contigs/"$Strain"_canu_contigs_edited_renamed.fasta)
+    QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
+    AnchorLength=500000
+    OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_edited_quickmerge3
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+    qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
+  done
+```
+
+```bash
+  touch tmp.csv
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge3/merged.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    OutDir=$(dirname $Assembly)
+    mkdir -p $OutDir
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+  rm tmp.csv
+```
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/Fus2_edited_quickmerge3_contigs_renamed.fasta); do
+    echo $Assembly
+    Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+```bash
+  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/Fus2_edited_quickmerge3_contigs_renamed.fasta)
+  for Genome in $(ls $Fus2_pacbio_merged); do
+    for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
+      Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
+      Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
+      Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
+      echo "$Organism - $Strain - $Chr"
+      OutDir=analysis/blast_homology/$Organism/$Strain
+      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
+    done
+  done
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/*_chr_*_gene_single_copy.aa_hits.csv); do
+    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+    Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+    Column2=Chr"$Chr"_gene_homolog
+    NumHits=1
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+  done
+```
+
+
+
+# 5.0 Quickmerge of manually merged contigs
+
+```bash
+  for Assembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_edited3/Fus2_canu_manual_edits.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    IlluminaDir=$(ls -d qc_dna/paired/$Organism/Fus2)
+    TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
+    TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
+    OutDir=assembly/canu/$Organism/$Strain/edited_contigs
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
+    qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+  done
+```
+
+Assembly stats were collected using quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_edited3/edited_contigs/pilon.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    OutDir=assembly/canu/$Organism/$Strain/pilon
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+# 5.1 Submission with low stringency
+
+AnchorOverlapCuttoff=5.0
+ExtensionOverlapCuttoff=1.5
+AnchorContigLength=0
+MinAlignmentLength=0
+
+
+```bash
+  for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_edited3/edited_contigs/pilon.fasta); do
+    Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
+    # Strain=Fus2
+    HybridAssembly=$(ls assembly/spades_pacbio/$Organism/Fus2/contigs.fasta)
+    # QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
+    AnchorLength=0
+    OutDir=assembly/merged_canu_spades/$Organism/Fus2_manual_edit_1
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+    qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
+  done
+```
+
+```bash
+  touch tmp.csv
+  for Assembly in $(ls assembly/merged_canu_spades/*/Fus2_manual_edit_1/merged.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    OutDir=$(dirname $Assembly)
+    mkdir -p $OutDir
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+  rm tmp.csv
+```
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_manual_edit_1/Fus2_manual_edit_1_contigs_renamed.fasta); do
+    echo $Assembly
+    Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+
+```bash
+  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_manual_edit_1/Fus2_manual_edit_1_contigs_renamed.fasta)
+  for Genome in $(ls $Fus2_pacbio_merged); do
+    for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
+      Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
+      Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
+      Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
+      echo "$Organism - $Strain - $Chr"
+      OutDir=analysis/blast_homology/$Organism/$Strain
+      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
+    done
+  done
+```
+
+Convert top blast hits into gff annotations
+
+```bash
+  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_manual_edit_1/*_chr_*_gene_single_copy.aa_hits.csv); do
     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
     echo "$Organism - $Strain"

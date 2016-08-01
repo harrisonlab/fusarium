@@ -60,6 +60,13 @@ Assembly of remaining reads
 	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160401_M004465_0007-AGKF2
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/F
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/R
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160725_M04465_0020-AP1N0
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/AF064/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/AF064/R
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CH5-2/F
+	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CH5-2/R
+
 ```
 Sequence data was moved into the appropriate directories
 
@@ -100,6 +107,12 @@ Sequence data was moved into the appropriate directories
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	cp $RawDatDir/FOP2_S1_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/F/.
 	cp $RawDatDir/FOP2_S1_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP2/R/.
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/raw_reads/160725_M04465_0020-AP1N0
+	cp $RawDatDir/AF064_S3_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/AF064/F/.
+	cp $RawDatDir/AF064_S3_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/AF064/R/.
+	cp $RawDatDir/CH5-2_S2_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CH5-2/F/.
+	cp $RawDatDir/CH5-2_S2_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CH5-2/R/.
 ```
 
 This process was repeated for RNAseq data:
@@ -501,6 +514,18 @@ This disrupted downstream programs.
 for File in $(ls repeat_masked/F.oxysporum/fo47/*/fo47_contigs_*masked.fa); do
 sed -i 's/ of Fusarium oxysporum Fo47//g' $File
 done
+```
+
+```bash
+	for File in $(ls repeat_masked/*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+		OutDir=$(dirname $File)
+		TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+		OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+		bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+		echo "$OutFile"
+		echo "Number of masked bases:"
+		cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+	done
 ```
 
 The number of bases masked by transposonPSI and Repeatmasker were summarised
@@ -927,6 +952,15 @@ Then Rnaseq data was aligned to each genome assembly:
 
 
 #### Braker prediction
+
+Before braker predictiction was performed, I double checked that I had the
+genemark key in my user area and copied it over from the genemark install
+directory:
+
+```bash
+	ls ~/.gm_key
+	cp /home/armita/prog/genemark/gm_key_64 ~/.gm_key
+```
 
 ```bash
 	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e 'Fus2'); do

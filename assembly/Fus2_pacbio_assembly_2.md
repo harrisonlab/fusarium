@@ -55,22 +55,21 @@ Assembly stats were collected using quast
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta | grep -w 'Fus2'); do
+  for Assembly in $(ls assembly/canu-1.3/*/*/*_canu.contigs.fasta); do
     Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-    OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
+    OutDir=assembly/canu-1.3/$Organism/$Strain/filtered_contigs
     qsub $ProgDir/sub_quast.sh $Assembly $OutDir
   done
 ```
 
-<!--
+
 Contigs were renamed in accordance with ncbi recomendations
 
 ```bash
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
   touch tmp.csv
-  printf "contig_17\tsplit\t780978\t780971\tcanu:missassembly\n"
-  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta | grep -w 'Fus2'); do
+  for Assembly in $(ls assembly/canu-1.3/*/*/*_canu.contigs.fasta); do
     Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
     Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
     OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
@@ -78,32 +77,33 @@ Contigs were renamed in accordance with ncbi recomendations
   done
   rm tmp.csv
 ```
--->
+
 
 Assemblies were polished using Pilon
 
 ```bash
-  for Assembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta); do
+  for Assembly in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/filtered_contigs/Fus2_canu_contigs_renamed.fasta); do
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+    IlluminaDir=$(ls -d qc_dna/paired/$Organism/Fus2)
     TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
     TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
-    OutDir=assembly/canu/$Organism/$Strain/pilon
+    OutDir=assembly/canu-1.3/$Organism/$Strain/pilon
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
     qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
   done
 ```
 
 ```bash
-  # Assembly=assembly/canu/F.oxysporum_fsp_cepae/Fus2/pilon/pilon.fasta
-  Assembly=assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta
+  Assembly=assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta
   Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
   OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
 ```
 
+After investigation, it was found that contigs didnt need to be split.
+<!--
 After investigation it was found that contig_17 should be split.
 
 ```bash
@@ -119,6 +119,60 @@ After investigation it was found that contig_17 should be split.
   done
   rm tmp.csv
 ```
+ -->
+
+ Preliminary analysis of these contigs allowed the quality of this assembly to be assessed:
+
+ ```bash
+   ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+   for Assembly in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta); do
+     echo $Assembly
+     Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+     qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+   done
+ ```
+
+ ```bash
+   for Genome in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta); do
+     for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
+       Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
+       Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
+       Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
+       echo "$Organism - $Strain - $Chr"
+       OutDir=analysis/blast_homology/$Organism/$Strain
+       ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+       qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
+     done
+   done
+ ```
+
+
+ Convert top blast hits into gff annotations
+
+ ```bash
+   for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_canu/*_chr_*_gene_single_copy.aa_hits.csv); do
+     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+     echo "$Organism - $Strain"
+     HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+     Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+     Column2=Chr"$Chr"_gene_homolog
+     NumHits=1
+     ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+     $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+   done
+   for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_canu/Fus2_canu_Fo_path_genes_CRX.fa_homologs.csv); do
+     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+     echo "$Organism - $Strain"
+     HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+     Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+     Column2=Fo_path_gene_homolog
+     NumHits=12
+     ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+     $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+   done
+ ```
 
 
 
@@ -161,28 +215,33 @@ Assemblies were polished using Pilon
 ```
 
 ```bash
-  # Assembly=assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/pilon/pilon.fasta
-  Assembly=assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/scaffolds.fasta
+  Assembly=assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/pilon/pilon.fasta
+  # Assembly=assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/scaffolds.fasta
   Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
   OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_spades_pacbio_3
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
 ```
 
-A region of NODE_6 showed low coverage and was manually split.
+Inspection of flagged regions didn't identify any contigs that needed to be broken.
+
+<!-- A region of NODE_6 showed low coverage and was manually split.
 
 ```bash
   touch tmp.csv
   printf "NODE_7_length_1868836_cov_72.3536_ID_1093330_pilon\t\tsplit\t1703352\t1717240\tspades:missassembly\n" > tmp.csv
-  for Assembly in $(ls assembly/spades_pacbio/*/*/edited_contigs/pilon.fasta | grep -w 'Fus2'); do
-    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+  for Assembly in $(ls assembly/spades_pacbio/*/*/pilon/pilon.fasta | grep -w 'Fus2'); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     OutDir=$(dirname $Assembly)
     ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
     $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_canu_contigs_edited_renamed.fasta --coord_file tmp.csv
   done
   rm tmp.csv
-```
+``` -->
+
+
+
 <!--
 
 #### Hybrid assembly: DBG2OLC assembly
@@ -227,23 +286,21 @@ done
 ## Merging pacbio and hybrid assemblies
 
 ```bash
-  for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2/edited_contigs/pilon.fasta); do
+  for PacBioAssembly in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta); do
     Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
     Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
-    HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/edited_contigs/"$Strain"_canu_contigs_edited_renamed.fasta)
+    HybridAssembly=$(ls assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/scaffolds.fasta)
     AnchorLength=500000
-    # OutDir=assembly/merged_canu_spades/$Organism/$Strain
-    OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_edited3
+    OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_new
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
     qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
   done
 ```
-<!--
+
 This merged assembly was polished using Pilon
 
 ```bash
-
-  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/merged.fasta); do
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/merged.fasta); do
     Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
     IlluminaDir=$(ls -d qc_dna/paired/$Organism/Fus2)
@@ -253,13 +310,13 @@ This merged assembly was polished using Pilon
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
     qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
   done
-``` -->
+```
 
 ```bash
   touch tmp.csv
-  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/merged.fasta); do
-    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/pilon.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     OutDir=$(dirname $Assembly)
     mkdir -p $OutDir
     ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
@@ -272,7 +329,7 @@ This merged assembly was polished using Pilon
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/Fus2_edited3_contigs_renamed.fasta); do
+for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta); do
 echo $Assembly
 Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
@@ -281,7 +338,7 @@ done
 
 
 ```bash
-  for Genome in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/Fus2_edited3_contigs_renamed.fasta); do
+  for Genome in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta); do
     for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
       Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
       Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
@@ -310,26 +367,10 @@ Convert top blast hits into gff annotations
   done
 ```
 
-This merged assembly was polished using Pilon
-
 ```bash
-
-  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/merged.fasta); do
-    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-    IlluminaDir=$(ls -d qc_dna/paired/$Organism/Fus2)
-    TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
-    TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
-    OutDir=assembly/merged_canu_spades/$Organism/$Strain/polished
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
-    qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
-  done
-```
-
-```bash
-  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/polished/pilon.fasta
+  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta
   Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_edited3
+  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_canu_new
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
   qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
 ```
@@ -338,13 +379,28 @@ This merged assembly was polished using Pilon
 # Repeatmasking assemblies
 
 ```bash
-  # Fus2_pacbio_canu=$(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_pacbio_test_canu/filtered_contigs/Fus2_canu_contigs_renamed.fasta)
-  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta)
-  # for Assembly in $(ls $Fus2_pacbio_merged $Fus2_pacbio_canu); do
-  for Assembly in $(ls $Fus2_pacbio_merged); do
+  Fus2_pacbio_canu=$(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta)
+  for Assembly in $(echo $Fus2_pacbio_canu); do
+    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu/filtered_contigs_repmask
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
     qsub $ProgDir/rep_modeling.sh $Assembly
     qsub $ProgDir/transposonPSI.sh $Assembly
+  done
+  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta)
+  for Assembly in $(echo $Fus2_pacbio_merged); do
+    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_merged/filtered_contigs_repmask
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+    qsub $ProgDir/rep_modeling.sh $Assembly
+    qsub $ProgDir/transposonPSI.sh $Assembly
+  done
+```
+
+```bash
+  for File in $(ls repeat_masked/*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+    OutDir=$(dirname $File)
+    TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+    OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+    bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
   done
 ```
 

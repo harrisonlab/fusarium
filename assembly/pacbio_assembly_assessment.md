@@ -853,7 +853,7 @@ MinAlignmentLength=5000
 
 ```bash
   touch tmp.csv
-  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_quickmerge3/merged.fasta); do
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/merged.fasta); do
     Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
     Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
     OutDir=$(dirname $Assembly)
@@ -876,8 +876,7 @@ MinAlignmentLength=5000
 ```
 
 ```bash
-  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/Fus2_edited_quickmerge3_contigs_renamed.fasta)
-  for Genome in $(ls $Fus2_pacbio_merged); do
+  for Genome in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/Fus2_edited_quickmerge3_contigs_renamed.fasta); do
     for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
       Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
       Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
@@ -906,6 +905,13 @@ Convert top blast hits into gff annotations
   done
 ```
 
+```bash
+  Assembly=aassembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited_quickmerge3/Fus2_edited_quickmerge3_contigs_renamed.fasta
+  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
+  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_edited_quickmerge3
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
+  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
+```
 
 
 # 5.0 Quickmerge of manually merged contigs

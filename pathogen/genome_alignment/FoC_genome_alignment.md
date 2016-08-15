@@ -155,7 +155,7 @@ Sequence data for isolates with a data from two sequencing runs was aligned
 against the Fus2 genome
 
 ```bash
-  Reference=$(lls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new')
+  Reference=$(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new')
   for StrainPath in $(ls -d qc_dna/paired/F.*/* | grep -e 'HB6' -e 'Fus2'); do
     echo $StrainPath
     Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
@@ -169,7 +169,8 @@ against the Fus2 genome
     echo $R1_Read
     echo $F2_Read
     echo $R2_Read
-    OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Fus2
+    OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Fus2_unmasked
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment
     qsub $ProgDir/bowtie/sub_bowtie_2lib.sh $Reference $F1_Read $R1_Read $F2_Read $R2_Read $OutDir $Strain
   done
 ```

@@ -209,30 +209,30 @@ Proteins that were predicted to contain signal peptides were identified using
 the following commands:
 
 ```bash
-  SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-  CurPath=$PWD
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-    Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-    Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-    SplitDir=gene_pred/final_genes_split/$Organism/$Strain
-    mkdir -p $SplitDir
-    BaseName="$Organism""_$Strain"_final_preds
-    $SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-    for File in $(ls $SplitDir/*_final_preds_*); do
-      Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-      while [ $Jobs -gt 1 ]; do
-        sleep 10
-        printf "."
-        Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-      done
-      printf "\n"
-      echo $File
-      qsub $ProgDir/pred_sigP.sh $File signalp-4.1
-    done
-  done
+SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+CurPath=$PWD
+FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+SplitDir=gene_pred/final_genes_split/$Organism/$Strain
+mkdir -p $SplitDir
+BaseName="$Organism""_$Strain"_final_preds
+$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+for File in $(ls $SplitDir/*_final_preds_*); do
+Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+while [ $Jobs -gt 20 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+done
+printf "\n"
+echo $File
+qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+done
+done
 ```
 
 The batch files of predicted secreted proteins needed to be combined into a
@@ -266,14 +266,14 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
-		qsub $ProgDir/submit_TMHMM.sh $Proteome
-	done
+FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
+qsub $ProgDir/submit_TMHMM.sh $Proteome
+done
 ```
 
 
@@ -284,56 +284,56 @@ Required programs:
  * EffectorP.py
 
 ```bash
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		BaseName="$Organism"_"$Strain"_EffectorP
-		OutDir=analysis/effectorP/$Organism/$Strain
-		ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
-		qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
-	done
+FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+BaseName="$Organism"_"$Strain"_EffectorP
+OutDir=analysis/effectorP/$Organism/$Strain
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+done
 
 ```
 
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-  Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
-  Fo_Fo47_genes=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta
-  Fo_Fo47_gff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf
+Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
+Fo_Fo47_genes=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta
+Fo_Fo47_gff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf
 
-  FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
-  FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
-  FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3
-  for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed); do
-    Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
-    Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
-    if [ $Strain == 'fo47' ]; then
-      BrakerGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
-    elif [ $Strain == '4287_chromosomal' ]; then
-      BrakerGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3)
-    fi
-    OutDir=analysis/mimps/$Organism/$Strain
-    mkdir -p "$OutDir"
-    echo "$Organism - $Strain"
-    ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
-    $ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
-    $ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
-    echo "The number of mimps identified:"
-    cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
-    bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
-    echo "The following transcripts intersect mimps:"
-    MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-    if [ $Strain == 'fo47' ]; then
-      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpGenesTxt
-    elif [ $Strain == '4287_chromosomal' ]; then
-      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 | cut -f1 -d';' | cut -f2 -d':' | sort | uniq | grep -v 'P' > $MimpGenesTxt
-    fi
-    cat $MimpGenesTxt | wc -l
-    echo ""
-  done
+FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
+FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
+FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3
+for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed); do
+Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
+Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
+if [ $Strain == 'fo47' ]; then
+BrakerGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
+elif [ $Strain == '4287_chromosomal' ]; then
+BrakerGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3)
+fi
+OutDir=analysis/mimps/$Organism/$Strain
+mkdir -p "$OutDir"
+echo "$Organism - $Strain"
+ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
+$ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
+$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
+echo "The number of mimps identified:"
+cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
+bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+echo "The following transcripts intersect mimps:"
+MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
+if [ $Strain == 'fo47' ]; then
+cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpGenesTxt
+elif [ $Strain == '4287_chromosomal' ]; then
+cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 | cut -f1 -d';' | cut -f2 -d':' | sort | uniq | grep -v 'P' > $MimpGenesTxt
+fi
+cat $MimpGenesTxt | wc -l
+echo ""
+done
 ```
 
 
@@ -350,60 +350,60 @@ Screen ouput detailing the progress of submission of interporscan jobs
 was redirected to a temporary output file named interproscan_submission.log .
 
 ```bash
-  screen -a
-  cd /home/groups/harrisonlab/project_files/fusarium
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Genes in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-    echo $Genes
-    $ProgDir/sub_interproscan.sh $Genes
-  done 2>&1 | tee -a interproscan_submisison.log
+screen -a
+cd /home/groups/harrisonlab/project_files/fusarium
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Genes in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  echo $Genes
+  $ProgDir/sub_interproscan.sh $Genes
+done 2>&1 | tee -a interproscan_submisison.log
 ```
 
 Following interproscan annotation split files were combined using the following
 commands:
 
 ```bash
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-    Strain=$(echo $Proteome | rev | cut -d '/' -f3 | rev)
-    Organism=$(echo $Proteome | rev | cut -d '/' -f4 | rev)
-    echo "$Organism - $Strain"
-    echo $Strain
-    InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
-    $ProgDir/append_interpro.sh $Proteome $InterProRaw
-  done
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Strain=$(echo $Proteome | rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Proteome | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+echo $Strain
+InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
+$ProgDir/append_interpro.sh $Proteome $InterProRaw
+done
 ```
 
 
 ## B) SwissProt
 ```bash
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-    Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-    Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-    OutDir=gene_pred/swissprot/$Organism/$Strain
-    SwissDbDir=../../uniprot/swissprot
-    SwissDbName=uniprot_sprot
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
-    qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
-  done
+FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+OutDir=gene_pred/swissprot/$Organism/$Strain
+SwissDbDir=../../uniprot/swissprot
+SwissDbName=uniprot_sprot
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
+qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
+done
 ```
 
 ```bash
-	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl); do
-		# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
-		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
-		echo "$Organism - $Strain"
-		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
-		$ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
-	done
+for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl); do
+# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
+Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
+$ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
+done
 ```
 
 
@@ -415,45 +415,43 @@ BLast searches were used to identify which genes had homologs on which
 chromosomes of the Fusarium lycopersici genome.
 
 ```bash
-	FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta); do
-	# for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
-	# for Proteome in $(ls gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		echo "$Organism - $Strain"
-		OutDir=analysis/blast_homology/$Organism/$Strain
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		qsub $ProgDir/run_blast2csv.sh $Proteome protein $FoLGenomeFa $OutDir
-	done
+FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome.fa
+for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/blast_homology/$Organism/$Strain
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Proteome protein $FoLGenomeFa $OutDir
+done
 ```
 
 Convert top blast hits into gff annotations
 
 
 ```bash
-  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_fusarium_oxysporum_fo47_1_proteins.fasta_hits.csv analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_Fusox1_GeneCatalog_proteins_20110522_parsed.fa_hits.csv); do
-    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
-    Column2="$Strain"_gene_homolog
-    NumHits=1
-    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
-  done
+for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_fusarium_oxysporum_fo47_1_proteins.fasta_hits.csv analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_Fusox1_GeneCatalog_proteins_20110522_parsed.fa_hits.csv); do
+Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+echo "$Organism - $Strain"
+HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+Column2="$Strain"_gene_homolog
+NumHits=1
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+done
 ```
 
 #### 2.6.3) Intersecting blast hits with genes from FoL
 
 ```bash
-  for HitsGff in $(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_fusarium_oxysporum_fo47_1_proteins.fasta_hits.gff analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_Fusox1_GeneCatalog_proteins_20110522_parsed.fa_hits.gff ); do
-    Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-    HitsDir=$(dirname $HitsGff)
-    FoLGenes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
-    FoLIntersect=$HitsDir/4287_chromosomal_final_genes_combined_intersect.bed
-    bedtools intersect -wo -a $HitsGff -b $FoLGenes > $FoLIntersect
-  done
+for HitsGff in $(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_fusarium_oxysporum_fo47_1_proteins.fasta_hits.gff analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_Fusox1_GeneCatalog_proteins_20110522_parsed.fa_hits.gff ); do
+Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
+echo "$Organism - $Strain"
+HitsDir=$(dirname $HitsGff)
+FoLGenes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
+FoLIntersect=$HitsDir/4287_chromosomal_final_genes_combined_intersect.bed
+bedtools intersect -wo -a $HitsGff -b $FoLGenes > $FoLIntersect
+done
 ```

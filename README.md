@@ -1460,12 +1460,30 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
-qsub $ProgDir/submit_TMHMM.sh $Proteome
-done
+	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
+		qsub $ProgDir/submit_TMHMM.sh $Proteome
+	done
+```
+
+Those proteins with transmembrane domains were removed from lists of Signal
+peptide containing proteins
+
+```bash
+	for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'Fus2_canu_new'); do
+		Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		TmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
+		cat $File | cut -f1 > $TmHeaders
+		SigP=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.aa)
+		OutDir=$(dirname $SigP)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+		$ProgDir/extract_from_fasta.py --fasta $SigP --headers $TmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
+		cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l
+	done
 ```
 
 
@@ -1482,6 +1500,28 @@ BaseName="$Organism"_"$Strain"_EffectorP
 OutDir=analysis/effectorP/$Organism/$Strain
 ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
 qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+done
+```
+
+Those genes that were predicted as secreted and tested positive by effectorP
+were identified:
+
+```bash
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w -v -e 'Fus2' -e 'Fus2_canu_new'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+cat $File | grep 'Effector' | cut -f1 > $Headers
+Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+cat $OutFile | grep '>' | wc -l
+Gff=$(ls gene_pred/codingquary/$Organism/$Strain/*/final_genes_appended.gff3)
+EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $Headers $Gff effectorP ID > $EffectorP_Gff
 done
 ```
 

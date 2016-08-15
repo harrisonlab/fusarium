@@ -516,11 +516,23 @@ sed -i 's/ of Fusarium oxysporum Fo47//g' $File
 done
 ```
 
+The TransposonPSI masked bases were used to mask additional bases from the
+repeatmasker / repeatmodeller softmasked and harmasked files.
+
 ```bash
-	for File in $(ls repeat_masked/*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w 'Fus2_canu_new'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "$OutFile"
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+	for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa); do
 		OutDir=$(dirname $File)
 		TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-		OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+		OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
 		bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
 		echo "$OutFile"
 		echo "Number of masked bases:"
@@ -532,7 +544,7 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -v 'edited' | grep -e 'Fus2'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'Fus2_canu' -e 'Fus2_merged'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -670,18 +682,18 @@ Gene prediction followed three steps:
 
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
-	cd /home/groups/harrisonlab/project_files/fusarium
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2' -e 'fo47'); do
-	#for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w 'fo47'); do
-		echo $Genome;
-		qsub $ProgDir/sub_cegma.sh $Genome dna;
-	done
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
+cd /home/groups/harrisonlab/project_files/fusarium
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2_canu_new'); do
+#for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w 'fo47'); do
+echo $Genome;
+qsub $ProgDir/sub_cegma.sh $Genome dna;
+done
 ```
 
 Outputs were summarised using the commands:
 ```bash
-	for File in $(ls gene_pred/cegma/F*/Fus2/*_dna_cegma.completeness_report); do
+	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report | grep -e 'Fus2_canu' -e 'Fus2_merged'); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
 		printf "$Species\t$Strain\n";
@@ -867,7 +879,7 @@ Alignments were concatenated prior to running cufflinks:
 Cufflinks was run to produce the fragment length and stdev statistics:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/Fo47/*/*_contigs_softmasked.fa | grep 'FOP2'); do
+	for Assembly in $(ls repeat_masked/*/Fo47/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'FOP2'); do
 		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
@@ -923,31 +935,31 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2'); do
-	# for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
-	# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
-		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v -e '_rep'); do
-			Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
-			echo "$Timepoint"
-			FileF=$(ls $RNADir/F/*_trim.fq.gz)
-			FileR=$(ls $RNADir/R/*_trim.fq.gz)
-			OutDir=alignment/$Organism/$Strain/$Timepoint
-			InsertGap='-20'
-			InsertStdDev='78'
-			Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
-			while [ $Jobs -gt 1 ]; do
-				sleep 10
-				printf "."
-				Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
-			done
-			printf "\n"
-			ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-			qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
-		done
-	done
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e 'Fus2_canu' -e 'Fus2_merged' | grep -w 'Fus2_canu_new'); do
+# for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
+# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
+Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=alignment/$Organism/$Strain/$Timepoint
+InsertGap='-20'
+InsertStdDev='78'
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+done
+printf "\n"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
+done
+done
 ```
 
 
@@ -963,7 +975,9 @@ directory:
 ```
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e 'Fus2'); do
+	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep 'Fus2' | grep -e 'Fus2_canu_new' -e 'Fus2_merged' | grep 'cepae' | grep 'Fus2_merged'); do
+	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'proliferatum'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'narcissi'); do
 	Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 	while [ $Jobs -gt 1 ]; do
 	sleep 10
@@ -975,29 +989,29 @@ directory:
 	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 	echo "$Organism - $Strain"
 	mkdir -p alignment/$Organism/$Strain/concatenated
-	samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-	alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
-	alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
-	alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
-	alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
-	alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
-	alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-	alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+	# samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+	# alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+	# alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+	# alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+	# alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+	# alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+	# alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+	# alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
 	OutDir=gene_pred/braker/$Organism/"$Strain"_braker_pacbio
 	AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
 	GeneModelName="$Organism"_"$Strain"_braker_new
@@ -1010,7 +1024,7 @@ directory:
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff); do
+	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff | grep -e 'Fus2_canu_new' -e 'Fus2_merged'); do
 		getAnnoFasta.pl $File
 		OutDir=$(dirname $File)
 		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
@@ -1033,11 +1047,11 @@ machine.
 	samtools index $SortBam.bam
 ```
 
-
+<!--
 Cufflinks was run to compare the predicted genes to assembled transcripts:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e 'Fus2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e 'Fus2_canu_new' -e 'Fus2_merged'); do
 		Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 		while [ $Jobs -gt 1 ]; do
 		sleep 10
@@ -1078,6 +1092,7 @@ Cufflinks was run to compare the predicted genes to assembled transcripts:
 	# cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
 	done
 ```
+ -->
 
 <!--
 The number of Fo47 genes was determined for comparison to number predicted by Braker (16269):
@@ -1101,30 +1116,32 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2'); do
-		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
-		mkdir -p $OutDir
-		AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-		qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
-	done
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
+mkdir -p $OutDir
+AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+done
 ```
 
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e 'Fus2'); do
-		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		OutDir=gene_pred/codingquary/$Organism/$Strain
-		CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
-		qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
-	done
+
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/codingquary/$Organism/$Strain
+CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+done
 ```
 
 Then, additional transcripts were added to Braker gene models, when CodingQuary
@@ -1133,52 +1150,48 @@ models:
 
 ```bash
 	# for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -w -e 'Fus2'); do
-	for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_pacbio/*/augustus.gff3 | grep -e 'Fus2'); do
-		Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g' | sed 's/_braker_pacbio//g')
-		Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
-		echo "$Organism - $Strain"
-		# BrakerGff=gene_pred/braker/$Organism/$Strain/F.oxysporum_fsp_cepae_Fus2_braker/augustus_extracted.gff
-		Assembly=$(ls repeat_masked/$Organism/$Strain/*/"$Strain"_contigs_softmasked.fa)
-		CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
-		PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
-		AddDir=gene_pred/codingquary/$Organism/$Strain/additional
-		FinalDir=gene_pred/codingquary/$Organism/$Strain/final
-		AddGenesList=$AddDir/additional_genes.txt
-		AddGenesGff=$AddDir/additional_genes.gff
-		FinalGff=$AddDir/combined_genes.gff
-		mkdir -p $AddDir
-		mkdir -p $FinalDir
+for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_pacbio/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g' | sed 's/_braker_pacbio//g')
+Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
+PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
+AddDir=gene_pred/codingquary/$Organism/$Strain/additional
+FinalDir=gene_pred/codingquary/$Organism/$Strain/final
+AddGenesList=$AddDir/additional_genes.txt
+AddGenesGff=$AddDir/additional_genes.gff
+FinalGff=$AddDir/combined_genes.gff
+mkdir -p $AddDir
+mkdir -p $FinalDir
 
-		bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
-		bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-		$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
-		$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
-		# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/additional/additional_genes.gff
-		# GffFile=gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/out/PredictedPass.gff3
+bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 
-		$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
-		$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
-		cp $BrakerGff $FinalDir/final_genes_Braker.gff3
-		$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
-		cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
-		cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
-		cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
-		cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
+$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
 
-		GffBraker=$FinalDir/final_genes_CodingQuary.gff3
-		GffQuary=$FinalDir/final_genes_Braker.gff3
-		GffAppended=$FinalDir/final_genes_appended.gff3
-		cat $GffBraker $GffQuary > $GffAppended
+GffBraker=$FinalDir/final_genes_CodingQuary.gff3
+GffQuary=$FinalDir/final_genes_Braker.gff3
+GffAppended=$FinalDir/final_genes_appended.gff3
+cat $GffBraker $GffQuary > $GffAppended
 
-		# cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
-	done
+done
 ```
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -w -e'Fus2'); do
+for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
 echo $DirPath;
 cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1248,7 +1261,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Fus2'); do
+	for Genes in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1259,7 +1272,7 @@ commands:
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w 'Fus2'); do
+	for Proteins in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
 		Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 		Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 		echo "$Organism - $Strain"
@@ -1295,24 +1308,24 @@ commands:
 
 
 ```bash
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Fus2'); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		OutDir=gene_pred/swissprot/$Organism/$Strain
-		SwissDbDir=../../uniprot/swissprot
-		SwissDbName=uniprot_sprot
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
-		qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
-	done
+for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -v 'Fus2_edited_v2'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+OutDir=gene_pred/swissprot/$Organism/$Strain
+SwissDbDir=../../uniprot/swissprot
+SwissDbName=uniprot_sprot
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
+qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
+done
 ```
 
 ```bash
-	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -w -e 'Fus2'); do
+	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
 	# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
 		echo "$Organism - $Strain"
-		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl
+		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_v2016_tophit_parsed.tbl
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
 		$ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
 	done
@@ -1327,46 +1340,46 @@ BLast searches were used to identify which genes had homologs on which
 chromosomes of the Fusarium lycopersici genome.
 
 ```bash
-	FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Fus2'); do
-	# for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
-	# for Proteome in $(ls gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		echo "$Organism - $Strain"
-		OutDir=analysis/blast_homology/$Organism/$Strain
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		qsub $ProgDir/run_blast2csv.sh $Proteome protein $FoLGenomeFa $OutDir
-	done
+FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa
+for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+# for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
+# for Proteome in $(ls gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/blast_homology/$Organism/$Strain
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Proteome protein $FoLGenomeFa $OutDir
+done
 ```
 
 Convert top blast hits into gff annotations
 
 ```bash
-	for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -w -e 'Fus2'); do
-		Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
-		Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
-		echo "$Organism - $Strain"
-		HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
-		Column2="$Strain"_gene_homolog
-		NumHits=1
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
-	done
+for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+echo "$Organism - $Strain"
+HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+Column2="$Strain"_gene_homolog
+NumHits=1
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+done
 ```
 
 #### Intersecting blast hits with genes from FoL
 
 ```bash
-	for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff | grep -w -e 'Fus2'); do
-		Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
-		Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
-		echo "$Organism - $Strain"
-		HitsDir=$(dirname $HitsGff)
-		FoLGenes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
-		FoLIntersect=$HitsDir/4287_chromosomal_final_genes_combined_intersect.bed
-		bedtools intersect -wo -a $HitsGff -b $FoLGenes > $FoLIntersect
-	done
+for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
+echo "$Organism - $Strain"
+HitsDir=$(dirname $HitsGff)
+FoLGenes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.chr.gff3
+FoLIntersect=$HitsDir/4287_chromosomal_final_genes_combined_intersect.bed
+bedtools intersect -wo -a $HitsGff -b $FoLGenes > $FoLIntersect
+done
 ```
 
 ## Effector genes
@@ -1391,53 +1404,53 @@ Proteins that were predicted to contain signal peptides were identified using
 the following commands:
 
 ```bash
-	SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-	CurPath=$PWD
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Fus2'); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		SplitDir=gene_pred/final_genes_split/$Organism/$Strain
-		mkdir -p $SplitDir
-		BaseName="$Organism""_$Strain"_final_preds
-		$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-		for File in $(ls $SplitDir/*_final_preds_*); do
-			Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-			while [ $Jobs -gt 1 ]; do
-				sleep 10
-				printf "."
-				Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-			done
-			printf "\n"
-			echo $File
-			qsub $ProgDir/pred_sigP.sh $File signalp-4.1
-		done
-	done
+SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+CurPath=$PWD
+for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+SplitDir=gene_pred/final_genes_split/$Organism/$Strain
+mkdir -p $SplitDir
+BaseName="$Organism""_$Strain"_final_preds
+$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+for File in $(ls $SplitDir/*_final_preds_*); do
+Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+while [ $Jobs -gt 20 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+done
+printf "\n"
+echo $File
+qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+done
+done
 ```
 
 
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-	for SplitDir in $(ls -d gene_pred/final_genes_split/*/Fus2); do
-		Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
-		Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
-		InStringAA=''
-		InStringNeg=''
-		InStringTab=''
-		InStringTxt=''
-		SigpDir=final_genes_signalp-4.1
-		for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-			InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
-			InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
-			InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
-			InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
-		done
-		cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
-		cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
-		tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
-		cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
-	done
+for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
+Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=final_genes_signalp-4.1
+for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
+InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
+InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
+InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
+done
 ```
 
 Some proteins that are incorporated into the cell membrane require secretion.
@@ -1447,12 +1460,12 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Fus2'); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
-		qsub $ProgDir/submit_TMHMM.sh $Proteome
-	done
+for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
+qsub $ProgDir/submit_TMHMM.sh $Proteome
+done
 ```
 
 
@@ -1462,40 +1475,40 @@ Required programs:
  * EffectorP.py
 
 ```bash
-	for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Fus2'); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		BaseName="$Organism"_"$Strain"_EffectorP
-		OutDir=analysis/effectorP/$Organism/$Strain
-		ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
-		qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
-	done
+for Proteome in $(ls gene_pred/codingquary/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+BaseName="$Organism"_"$Strain"_EffectorP
+OutDir=analysis/effectorP/$Organism/$Strain
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+done
 ```
 
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-	for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2'); do
-		Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
-		Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
-		BrakerGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
-		QuaryGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_Braker.gff3)
-		OutDir=analysis/mimps/$Organism/$Strain
-		mkdir -p "$OutDir"
-		echo "$Organism - $Strain"
-		ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
-		$ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
-		$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
-		echo "The number of mimps identified:"
-		cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
-		bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
-		bedtools intersect -u -a $QuaryGff -b $OutDir/"$Strain"_mimps_exp.gff >> $OutDir/"$Strain"_genes_in_2kb_mimp.gff
-		echo "The following transcripts intersect mimps:"
-		MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-		cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpGenesTxt
-		cat $MimpGenesTxt | wc -l
-		echo ""
-	done
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
+Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
+BrakerGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
+QuaryGff=$(ls gene_pred/codingquary/$Organism/"$Strain"/final/final_genes_Braker.gff3)
+OutDir=analysis/mimps/$Organism/$Strain
+mkdir -p "$OutDir"
+echo "$Organism - $Strain"
+ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
+$ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
+$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
+echo "The number of mimps identified:"
+cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
+bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+bedtools intersect -u -a $QuaryGff -b $OutDir/"$Strain"_mimps_exp.gff >> $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+echo "The following transcripts intersect mimps:"
+MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
+cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpGenesTxt
+cat $MimpGenesTxt | wc -l
+echo ""
+done
 ```
 
 ```
@@ -1656,7 +1669,7 @@ Previously published FTF genes from Sanchez et al 2016 were blasted against
 Fusarium genomes.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'cepae' | grep -v -e '_edited_v2' -e 'HB17'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'cepae' | grep -v -e 'HB17' | grep -e '_edited_v2'); do
 		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		echo $Assembly
@@ -1671,21 +1684,31 @@ Fusarium genomes.
 BLAST hits were converted to Gff annotations and intersected with gene models:
 
 ```bash
-	for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv); do
-		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
-		OutDir=analysis/FTF/$Organism/$Strain
-		HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
-		Column2=FTF_homolog
-		NumHits=1
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -e '_edited_v2'); do
+Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+OutDir=analysis/FTF/$Organism/$Strain
+HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
+Column2=FTF_homolog
+NumHits=1
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 
-		GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
-		bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits_intersected.bed
-	done
+GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
+bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits_intersected.bed
+done
 ```
 
+Fus2 genes g2419 and g16404 were identified as FTF1 and FTF2 homologs.
+
+The orthogorups that these genes belonged to was identified:
+
+```bash
+	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep -e 'Fus2|g2419.t' -e 'Fus2|g16404.t'
+	ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/fasta/all_orthogroups/*.fa | grep -e 'orthogroup10152.fa' -e 'orthogroup7.fa'
+```
+
+This identified orthogroup10152 as FTF1 and orthogroup7 as FTF2.
 
 
 ## 5.2 Identifying PHIbase homologs

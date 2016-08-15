@@ -132,6 +132,9 @@ Once the lastz part 1 jobs had finished part 2 could be submitted:
 
 # 2. Alignment of raw reads vs the Fus2 genome
 
+Sequence data for isolates with a data from a single sequencing run was aligned
+against the Fus2 genome
+
 ```bash
   Reference=$(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new')
   for StrainPath in $(ls -d qc_dna/paired/F.oxysporum_fsp_cepae/* | grep -v 'HB6' | grep -v 'HB17' | grep -v 'Fus2'); do
@@ -147,6 +150,9 @@ Once the lastz part 1 jobs had finished part 2 could be submitted:
     qsub $ProgDir/bowtie/sub_bowtie.sh $Reference $F_Read $R_Read $OutDir $Strain
   done
 ```
+
+Sequence data for isolates with a data from two sequencing runs was aligned
+against the Fus2 genome
 
 ```bash
   Reference=$(lls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new')

@@ -40,5 +40,5 @@ for cur_record in SeqIO.parse(genome_file,"fasta"):
     seq_id = cur_record.id
     i += 1
     seq_len = len(cur_record.seq)
-    outline = " ".join(["chr", "-", str(seq_id), str(prefix) + str(i), "0", str(seq_len), "chr" + str(i)])
+    outline = " ".join(["chr", "-", str(prefix) + str(seq_id), str(i), "0", str(seq_len), "chr" + str(i)])
     print(outline)

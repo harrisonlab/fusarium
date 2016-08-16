@@ -265,39 +265,42 @@ HB17 was identified as a contaminated sequence.
 ## 3.5.a Manual identification of numbers of orthologous and unique genes
 
 
+
 ```bash
-  echo "The number of ortholog groups found in pathogen but absent in non-pathogens is:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
-  echo "The number of ortholog groups unique to pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -v -e '55|' -e 'A1_2|' -e 'CB3|' -e 'HB6|' | wc -l
-  echo "The number of genes shared between pathogens and an intermediate isolate:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e '55|' -e 'A1_2|' -e 'CB3|' -e 'HB6|'| wc -l
-  echo "The number of genes shared between pathogens and the intermediate 55:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '55|' | wc -l
-  echo "Excluding 55, the other intermediate isolates contribute the" \
-    "following number of orthogroups to the shared pathogen/intermediate pool:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e 'A1_2|' -e 'CB3|' -e 'HB6|'| wc -l
-  echo "The number of ortholog groups unique to non-pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' -e 'A13|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'fo47|' | wc -l
-  echo "The number of ortholog groups common to all F. oxysporum isolates are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep '55|' | grep 'A1_2|' | grep 'CB3|' | grep 'HB6|' | grep '4287|' |wc -l
+for num in 1; do
+echo "The number of ortholog groups found in pathogen but absent in non-pathogens is:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
+echo "The number of ortholog groups unique to pathogens are:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -v -e '55|' -e 'A1_2|' -e 'HB6|' | wc -l
+echo "The number of genes shared between pathogens and an intermediate isolate:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e '55|' -e 'A1_2|' -e 'HB6|'| wc -l
+echo "The number of genes shared between pathogens and the intermediate 55:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '55|' | wc -l
+echo "Excluding 55, the other intermediate isolates contribute the" \
+"following number of orthogroups to the shared pathogen/intermediate pool:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|'| grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e 'A1_2|' -e 'HB6|'| wc -l
+echo "The number of ortholog groups unique to non-pathogens are:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' | wc -l
+echo "The number of ortholog groups common to all F. oxysporum isolates are:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '55|' | grep 'A1_2|' | grep 'HB6|' | grep '4287|' |wc -l
+done
 ```
 
 ```
-  The number of ortholog groups found in pathogen but absent in non-pathogens is::
-  236
+  The number of ortholog groups found in pathogen but absent in non-pathogens is:
+  142
   The number of ortholog groups unique to pathogens are:
-  26
+  12
   The number of genes shared between pathogens and an intermediate isolate:
-  210
+  130
   The number of genes shared between pathogens and the intermediate 55:
-  209
+  130
   Excluding 55, the other intermediate isolates contribute the following number of orthogroups to the shared pathogen/intermediate pool:
-  30
+  5
   The number of ortholog groups unique to non-pathogens are:
-  21
+  46
   The number of ortholog groups common to all F. oxysporum isolates are:
-  10306
+  10115
 ```
 
 The number of ortholog groups shared between FoC and FoL was identified:
@@ -309,9 +312,9 @@ The number of ortholog groups shared between FoC and FoL was identified:
 ```
 
 ```
-  The number of ortholog groups common to all F. oxysporum isolates are:
-  10866
-  39
+The number of ortholog groups common to FoC and FoL are:
+10629
+33
 ```
 
 ## 3.5.b Plot venn diagrams:
@@ -433,7 +436,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
   mkdir -p $WorkDir/badProteins  
 ```
 
-## 3.1 Format fasta files
+## 4.1 Format fasta files
 
 ### 3.1.a Pathogenic isolates:
 
@@ -585,38 +588,27 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 
 
 ```bash
-  echo "The number of ortholog groups found in pathogen but absent in non-pathogens is:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
-  echo "The number of ortholog groups unique to pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -v -e '55|' -e 'A1_2|' -e 'CB3|' -e 'HB6|' | wc -l
-  echo "The number of genes shared between pathogens and an intermediate isolate:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e '55|' -e 'A1_2|' -e 'CB3|' -e 'HB6|'| wc -l
-  echo "The number of genes shared between pathogens and the intermediate 55:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '55|' | wc -l
-  echo "Excluding 55, the other intermediate isolates contribute the" \
-    "following number of orthogroups to the shared pathogen/intermediate pool:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -e 'A1_2|' -e 'CB3|' -e 'HB6|'| wc -l
-  echo "The number of ortholog groups unique to non-pathogens are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' -e 'A13|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'fo47|' | wc -l
-  echo "The number of ortholog groups common to all F. oxysporum isolates are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'D2|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep '55|' | grep 'A1_2|' | grep 'CB3|' | grep 'HB6|' | grep '4287|' |wc -l
+  for num in 1; do
+    echo "The number of ortholog groups found in pathogen but absent in non-pathogens is:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
+    echo "The number of ortholog groups unique to pathogens are:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | wc -l
+    echo "The number of ortholog groups unique to non-pathogens are:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' | wc -l
+    echo "The number of ortholog groups common to all F. oxysporum isolates are:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' |wc -l
+  done
 ```
 
 ```
-  The number of ortholog groups found in pathogen but absent in non-pathogens is::
-  236
+  The number of ortholog groups found in pathogen but absent in non-pathogens is:
+  277
   The number of ortholog groups unique to pathogens are:
-  26
-  The number of genes shared between pathogens and an intermediate isolate:
-  210
-  The number of genes shared between pathogens and the intermediate 55:
-  209
-  Excluding 55, the other intermediate isolates contribute the following number of orthogroups to the shared pathogen/intermediate pool:
-  30
+  277
   The number of ortholog groups unique to non-pathogens are:
-  21
+  64
   The number of ortholog groups common to all F. oxysporum isolates are:
-  10306
+  10396
 ```
 
 The number of ortholog groups shared between FoC and FoL was identified:
@@ -624,13 +616,13 @@ The number of ortholog groups shared between FoC and FoL was identified:
 ```bash
   echo "The number of ortholog groups common to FoC and FoL are:"
   cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' | wc -l
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'D2|' -e 'PG|' -e 'A13|' -e 'fo47|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' |  wc -l
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' |  wc -l
 ```
 
 ```
-  The number of ortholog groups common to all F. oxysporum isolates are:
-  10866
-  39
+  The number of ortholog groups common to FoC and FoL are:
+  10629
+  37
 ```
 
 ## 3.5.b Plot venn diagrams:
@@ -651,37 +643,61 @@ number of unique groups of inparalogs
 
 
 ```
-[1] 11878 <- non-pathogen orthogroups (3 non-pathogens)
-[1] 11681 <- pathogen orthogroups (3 pathogens)
+[1] 11655 <- non-pathogen orthogroups (5 non-pathogens)
+[1] 11442 <- pathogen orthogroups (3 pathogens)
 [1] "A28"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13664"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1786"
-[1] "The total number of singleton genes not in the venn diagram:  369"
-[1] "D2"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13206"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1328"
-[1] "The total number of singleton genes not in the venn diagram:  235"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13739"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2084"
+[1] "The total number of singleton genes not in the venn diagram:  389"
+[1] "CB3"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13615"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1960"
+[1] "The total number of singleton genes not in the venn diagram:  372"
 [1] "PG"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13530"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1652"
-[1] "The total number of singleton genes not in the venn diagram:  436"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13583"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1928"
+[1] "The total number of singleton genes not in the venn diagram:  474"
 [1] "Fus2"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13735"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2054"
-[1] "The total number of singleton genes not in the venn diagram:  281"
+[1] "The total number of orthogroups and singleton genes in this isolate:  14008"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2566"
+[1] "The total number of singleton genes not in the venn diagram:  369"
 [1] "125"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13930"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2249"
-[1] "The total number of singleton genes not in the venn diagram:  327"
+[1] "The total number of orthogroups and singleton genes in this isolate:  14002"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2560"
+[1] "The total number of singleton genes not in the venn diagram:  331"
 [1] "A23"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13556"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1875"
-[1] "The total number of singleton genes not in the venn diagram:  240"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13640"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2198"
+[1] "The total number of singleton genes not in the venn diagram:  258"
+[1] "A13"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13355"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1700"
+[1] "The total number of singleton genes not in the venn diagram:  644"
+[1] "fo47"
+[1] "The total number of orthogroups and singleton genes in this isolate:  14288"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2633"
+[1] "The total number of singleton genes not in the venn diagram:  1362"
+NULL
 ```
 
-Generating a Venn diagram for Pathogens, Nonpathogens and FoL
+
+#### 6.3) Extracting fasta files for all orthogroups
 
 ```bash
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
-  $ProgDir/FoC_path_vs_non_path_FoL_venn_diag.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups_APS.pdf
+IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
+WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
+GoodProt=$WorkDir/goodProteins/goodProteins.fasta
+OutDir=$WorkDir/orthogroups_fasta
+mkdir -p $OutDir
+$ProgDir/orthoMCLgroups2fasta.py --orthogroups $WorkDir/"$IsolateAbrv"_orthogroups.txt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
+for File in $(ls -v $OutDir/orthogroup*.fa); do
+cat $File | grep '>' | tr -d '> '
+done > $OutDir/orthogroup_genes.txt
+cat $GoodProt | grep '>' | tr -d '> ' | grep -v -f $OutDir/orthogroup_genes.txt > $OutDir/singleton_genes.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $GoodProt --headers $OutDir/singleton_genes.txt > $OutDir/singleton_genes.fa
+echo "The numbe of singleton genes extracted is:"
+cat $OutDir/singleton_genes.fa | grep '>' | wc -l
+
 ```

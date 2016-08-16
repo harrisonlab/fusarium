@@ -1507,22 +1507,24 @@ Those genes that were predicted as secreted and tested positive by effectorP
 were identified:
 
 ```bash
-for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w -v -e 'Fus2' -e 'Fus2_canu_new'); do
-Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-echo "$Organism - $Strain"
-Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
-cat $File | grep 'Effector' | cut -f1 > $Headers
-Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
-OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
-cat $OutFile | grep '>' | wc -l
-Gff=$(ls gene_pred/codingquary/$Organism/$Strain/*/final_genes_appended.gff3)
-EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_gff_for_sigP_hits.pl $Headers $Gff effectorP ID > $EffectorP_Gff
-done
+	for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w -v -e 'Fus2' -e 'Fus2_canu_new'); do
+		Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+		cat $File | grep 'Effector' | cut -f1 > $Headers
+		Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+		OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+		$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+		OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+		cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
+		cat $OutFileHeaders | wc -l
+		Gff=$(ls gene_pred/codingquary/$Organism/$Strain/*/final_genes_appended.gff3)
+		EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+		$ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+	done
 ```
 
 ### C) Identification of MIMP-flanking genes
@@ -1641,7 +1643,7 @@ assemblies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new'); do
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
@@ -1652,13 +1654,13 @@ Once blast searches had completed, the BLAST hits were converted to GFF
 annotations:
 
 ```bash
-	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -w 'Fus2'); do
+	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -w 'Fus2_canu_new'); do
 		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
 		HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
 		Column2=SIX_homolog
-		NumHits=1
+		NumHits=12
 		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 	done
 ```
@@ -1668,48 +1670,74 @@ annotations:
 	presented for each blast hit.
 
 ```bash
-	OutFile=analysis/blast_homology/Fo_path_genes_CRX_summary.tab
-	echo "Organism" > tmp2.tab
-	cat analysis/blast_homology/F.proliferatum/A8/A8_Fo_path_genes_CRX.fa_homologs.csv | cut -f1 >> tmp2.tab
-	for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv); do
-		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
-		echo "$Organism" > tmp.tab
-		echo "$Strain" >> tmp.tab
-		cat $BlastHits | cut -f10  | tail -n +2 >> tmp.tab
-		paste tmp2.tab tmp.tab > $OutFile
-		cp $OutFile tmp2.tab
-	done
-	rm tmp.tab
-	rm tmp2.tab
+OutFile=analysis/blast_homology/Fo_path_genes_CRX_summary.tab
+echo "Organism" > tmp2.tab
+cat analysis/blast_homology/F.proliferatum/A8/A8_Fo_path_genes_CRX.fa_homologs.csv | cut -f1 >> tmp2.tab
+for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep 'Fus2_canu_new'); do
+Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+echo "$Organism" > tmp.tab
+echo "$Strain" >> tmp.tab
+cat $BlastHits | cut -f10,19 | tail -n +2 | sed -r "s/\t/,/g" >> tmp.tab
+paste tmp2.tab tmp.tab > $OutFile
+cp $OutFile tmp2.tab
+done
+rm tmp.tab
+rm tmp2.tab
 ```
 
 ```bash
-	for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity' | grep -w 'Fus2'); do
-		Strain=$(echo $HitsGff | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
-		echo "$Organism - $Strain"
-		# GffBraker=gene_pred/codingquary/$Organism/$Strain/final/final_genes_Braker.gff3
-		# GffQuary=gene_pred/codingquary/$Organism/$Strain/final/final_genes_CodingQuary.gff3
-		GffAppended=gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3
-		OutDir=$(dirname $HitsGff)
-		SixIntersect=$OutDir/"$Strain"_Fo_path_genes_CRX.fa_hit_genes.bed
-		# bedtools intersect -wo -a $HitsGff -b $GffBraker > $SixIntersect
-		# bedtools intersect -wo -a $HitsGff -b $GffQuary >> $SixIntersect
-		bedtools intersect -wao -a $HitsGff -b $GffAppended > $SixIntersect
-		bedtools intersect -wao -a $HitsGff -b $GffAppended | cut -f9,18 | grep -v 'Parent'
-		echo ""
-	done > analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX_hit_genes_summary.tab
+for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity' | grep -w 'Fus2_canu_new'); do
+Strain=$(echo $HitsGff | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+GffAppended=gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3
+OutDir=$(dirname $HitsGff)
+SixIntersect=$OutDir/"$Strain"_Fo_path_genes_CRX.fa_hit_genes.bed
+bedtools intersect -wao -a $HitsGff -b $GffAppended > $SixIntersect
+bedtools intersect -wao -a $HitsGff -b $GffAppended | cut -f9,18 | grep -v 'Parent'
+echo ""
+done | tr -d ';' | tr -d '"' | sed 's/ID=//g'> analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX_hit_genes_summary.tab
+```
+
+```
+	F.oxysporum_fsp_cepae - Fus2_canu_new
+	C5_Seq45_BlastHit_1	g13425
+	CRX1_Seq49_BlastHit_1	g15739
+	CRX1_Seq49_BlastHit_2	g11056
+	CRX1_Seq49_BlastHit_3	g59
+	CRX1_Seq49_BlastHit_4	g16971
+	CRX2_Seq50_BlastHit_1	g11056
+	CRX2_Seq50_BlastHit_2	g15739
+	CRX2_Seq50_BlastHit_3	g59
+	MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_1	g15724
+	MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_2	g17045
+	MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_3	CUFF_4289_1_31
+	MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_4	CUFF_327_1_65
+	MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_5	g12255
+	MIMP_g29_ex.19GJ26_H12-1.seq_BlastHit_1	g16905
+	MIMP_g16_ex.19GJ26_B07-1.seq_BlastHit_1	g16179
+	MIMP_g41_ex.45DG31-1.seq_BlastHit_1	g17144
+	MIMP_g41_ex.45DG31-1.seq_BlastHit_2	NS_02766
+	Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds_BlastHit_1	g16847
+	Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds_BlastHit_2	g16190
+	Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds_BlastHit_1	g16849
+	Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds_BlastHit_1	CUFF_4344_1_33
+	Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds_BlastHit_1	g16273
+	Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds_BlastHit_2	g13574
+	Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds_BlastHit_1	g17153
+	Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds_BlastHit_1	PGN_CUFF_4345_1_2
+	Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six14_(SIX14)_mRNA,_complete_cds_BlastHit_1	.
 ```
 
 
 ## 5.1.B) Identifying FTF genes
-
+<!--
 Previously published FTF genes from Sanchez et al 2016 were blasted against
 Fusarium genomes.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'cepae' | grep -v -e 'HB17' | grep -e '_edited_v2'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -e 'HB17' | grep -w 'Fus2_canu_new'); do
 		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		echo $Assembly
@@ -1724,7 +1752,7 @@ Fusarium genomes.
 BLAST hits were converted to Gff annotations and intersected with gene models:
 
 ```bash
-for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -e '_edited_v2'); do
+for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -w 'Fus2_canu_new'); do
 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 OutDir=analysis/FTF/$Organism/$Strain
@@ -1739,16 +1767,32 @@ bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits
 done
 ```
 
-Fus2 genes g2419 and g16404 were identified as FTF1 and FTF2 homologs.
+Fus2 genes g16859 and g10474 were identified as FTF1 and FTF2 homologs.
+
+```bash
+cat $OutDir/"$Strain"_FTF_hits_intersected.bed | grep -w 'gene' | cut -f18 | cut -f1 -d ';' | sort | uniq
+```
 
 The orthogorups that these genes belonged to was identified:
 
 ```bash
-	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep -e 'Fus2|g2419.t' -e 'Fus2|g16404.t'
-	ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/fasta/all_orthogroups/*.fa | grep -e 'orthogroup10152.fa' -e 'orthogroup7.fa'
+	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t'
 ```
 
-This identified orthogroup10152 as FTF1 and orthogroup7 as FTF2.
+```
+orthogroup927: Fus2|g13516.t1 4287|FOXG_13486 fo47|FOZG_04287T0 125|g9752.t1 D2|g6288.t1 fo47|FOZG_15238T1 fo47|FOZG_15238T0 A28|g6016.t1 D2|g13505.t1 A1_2|g15392.t1 55|g8174.t1 A28|g11257.t1 A28|g11257.t2 A13|g6622.t1 Fus2|g10474.t1 55|g11925.t1 A1_2|g8352.t1 HB6|g4769.t1 PG|g425.t1 A13|g13919.t1 CB3|g12242.t1 CB3|g7070.t1 A23|g2981.t1 A23|g15519.t1 HB6|g10759.t1 PG|g7313.t1 125|g11682.t1 A23|g14412.t1
+orthogroup3695: A13|g16771.t1 4287|FOXG_07056 4287|FOXG_14281 4287|FOXG_07107 A13|g16030.t1 55|g16047.t1 55|g16538.t1 A23|g16397.t1 Fus2|g16986.t1 Fus2|g16789.t1 Fus2|g16859.t1 125|g16723.t1 125|g16402.t1 Fus2|g17153.t1
+```
+
+This identified orthogroup3695 as FTF1 and orthogroup927 as FTF2.
+ -->
+
+FTF genes were identified by identifying orthogroups containing FoL FTF genes
+identified in Sanchez et al 2016.
+
+This led to orthogroups_652 being identified as the FTF  
+
+
 
 
 ## 5.2 Identifying PHIbase homologs

@@ -9,12 +9,13 @@
 
  # The script also requires the colorspace package. This can be downloaded by
  # opening R and running the following command:
- # install.packages(colorspace)
+ # options(download.file.method = "wget")
+ # install.packages("colorspace")
 
  #get config options
 library(optparse)
 library(colorspace)
-library(VennDiagram, lib.loc="/home/armita/R-packages/")
+library(VennDiagram)
 opt_list = list(
     make_option("--inp", type="character", help="tab seperated file containing matrix of presence of orthogroups"),
     make_option("--out", type="character", help="output venn diagram in pdf format")
@@ -29,10 +30,10 @@ df1 <- t(orthotabs)
 summary(df1)
 
 
-nonpath=subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0 & df1[,"4287"] == 0)
-path=subset(df1, df1[,"A28"] == 0 & df1[,"D2"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 0)
-tomato=subset(df1, df1[,"A28"] == 0 & df1[,"D2"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0 & df1[,"4287"] == 1)
-# orthologs=subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 1)
+nonpath=subset(df1, df1[,"A28"] == 1 & df1[,"CB3"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0 & df1[,"4287"] == 0)
+path=subset(df1, df1[,"A28"] == 0 & df1[,"CB3"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 0)
+tomato=subset(df1, df1[,"A28"] == 0 & df1[,"CB3"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0 & df1[,"4287"] == 1)
+# orthologs=subset(df1, df1[,"A28"] == 1 & df1[,"CB3"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 1)
 
 # area1=(nrow(nonpath) + nrow(orthologs))
 # area2=(nrow(path) + nrow(orthologs))
@@ -53,10 +54,10 @@ label1 <- paste("", sep="" )
 label2 <- paste("", sep="" )
 label3 <- paste("", sep="" )
 
-n123=nrow(subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 1))
-n12=n123 + nrow(subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 0))
-n13=n123 + nrow(subset(df1, df1[,"A28"] == 1 & df1[,"D2"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0 & df1[,"4287"] == 1))
-n23=n123 + nrow(subset(df1, df1[,"A28"] == 0 & df1[,"D2"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 1))
+n123=nrow(subset(df1, df1[,"A28"] == 1 & df1[,"CB3"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 1))
+n12=n123 + nrow(subset(df1, df1[,"A28"] == 1 & df1[,"CB3"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 0))
+n13=n123 + nrow(subset(df1, df1[,"A28"] == 1 & df1[,"CB3"] == 1 & df1[,"PG"] == 1 & df1[,"fo47"] == 1 & df1[,"A1_2"] == 1 & df1[,"Fus2"] == 0 & df1[,"125"] == 0 & df1[,"A23"] == 0 & df1[,"4287"] == 1))
+n23=n123 + nrow(subset(df1, df1[,"A28"] == 0 & df1[,"CB3"] == 0 & df1[,"PG"] == 0 & df1[,"fo47"] == 0 & df1[,"A1_2"] == 0 & df1[,"Fus2"] == 1 & df1[,"125"] == 1 & df1[,"A23"] == 1 & df1[,"4287"] == 1))
 summary(n12)
 summary(n13)
 summary(n23)
@@ -119,10 +120,10 @@ uniq_1=sum(singles[, "A28"])
 paste('The total number of orthogroups and singleton genes in this isolate: ', total_1)
 paste('The total number of orthogroups and singleton genes not in the venn diagram: ', missing_1)
 paste('The total number of singleton genes not in the venn diagram: ', uniq_1)
-print("D2")
-total_2 = nrow(subset (df1, df1[,"D2"] == 1))
+print("CB3")
+total_2 = nrow(subset (df1, df1[,"CB3"] == 1))
 missing_2 = (total_2 - area2)
-uniq_2=sum(singles[, "D2"])
+uniq_2=sum(singles[, "CB3"])
 paste('The total number of orthogroups and singleton genes in this isolate: ', total_2)
 paste('The total number of orthogroups and singleton genes not in the venn diagram: ', missing_2)
 paste('The total number of singleton genes not in the venn diagram: ', uniq_2)
@@ -162,7 +163,7 @@ paste('The total number of orthogroups and singleton genes in this isolate: ', t
 paste('The total number of orthogroups and singleton genes not in the venn diagram: ', missing_6)
 paste('The total number of singleton genes not in the venn diagram: ', uniq_6)
 
-#inpara_2 = sum(orthogroups[,"A28"] == 0 & orthogroups[,"D2"] == 1)
+#inpara_2 = sum(orthogroups[,"A28"] == 0 & orthogroups[,"CB3"] == 1)
 #label1
 #uniq_1
 #inpara_1

@@ -14,7 +14,7 @@ ProjectDirectory=/home/groups/harrisonlab/project_files/fusarium
 Genome assemblies can be found in:
 
 ```bash
-ls repeat_masked/F.*/*/filtered_contigs_repmask/*_contigs_unmasked.fa| grep -e 'F.oxysporum_fsp_cepae' | grep -w -v 'Fus2'
+ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa| grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
@@ -26,10 +26,10 @@ repeat_masked/F.oxysporum_fsp_cepae/A23/filtered_contigs_repmask/A23_contigs_unm
 repeat_masked/F.oxysporum_fsp_cepae/A28/filtered_contigs_repmask/A28_contigs_unmasked.fa
 repeat_masked/F.oxysporum_fsp_cepae/CB3/filtered_contigs_repmask/CB3_contigs_unmasked.fa
 repeat_masked/F.oxysporum_fsp_cepae/D2/filtered_contigs_repmask/D2_contigs_unmasked.fa
-repeat_masked/F.oxysporum_fsp_cepae/Fus2_edited_v2/filtered_contigs_repmask/Fus2_edited_v2_contigs_unmasked.fa
-repeat_masked/F.oxysporum_fsp_cepae/HB17/filtered_contigs_repmask/HB17_contigs_unmasked.fa
 repeat_masked/F.oxysporum_fsp_cepae/HB6/filtered_contigs_repmask/HB6_contigs_unmasked.fa
 repeat_masked/F.oxysporum_fsp_cepae/PG/filtered_contigs_repmask/PG_contigs_unmasked.fa
+repeat_masked/F.oxysporum_fsp_narcissi/N139/filtered_contigs_repmask/N139_contigs_unmasked.fa
+repeat_masked/F.proliferatum/A8/filtered_contigs_repmask/A8_contigs_unmasked.fa
 ```
 
 ## Gene models
@@ -37,7 +37,7 @@ repeat_masked/F.oxysporum_fsp_cepae/PG/filtered_contigs_repmask/PG_contigs_unmas
 Protein sequences for gene models can be found in:
 
 ```bash
-  ls gene_pred/codingquary/F*/*/final/final_genes_combined.pep.fasta | grep -e 'F.oxysporum_fsp_cepae' | grep -w -v 'Fus2'
+  ls gene_pred/codingquary/F*/*/final/final_genes_combined.pep.fasta | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
@@ -49,16 +49,18 @@ gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/final/final_genes_combined.pep.f
 gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/final/final_genes_combined.pep.fasta
 gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/final/final_genes_combined.pep.fasta
 gene_pred/codingquary/F.oxysporum_fsp_cepae/D2/final/final_genes_combined.pep.fasta
-gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/final/final_genes_combined.pep.fasta
-gene_pred/codingquary/F.oxysporum_fsp_cepae/HB17/final/final_genes_combined.pep.fasta
+gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_combined.pep.fasta
+gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_combined.pep.fasta
 gene_pred/codingquary/F.oxysporum_fsp_cepae/HB6/final/final_genes_combined.pep.fasta
 gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/final/final_genes_combined.pep.fasta
+gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/final/final_genes_combined.pep.fasta
+gene_pred/codingquary/F.proliferatum/A8/final/final_genes_combined.pep.fasta
 ```
 
 Nucleotide sequences for gene models can be foudn in:
 
 ```bash
-  ls gene_pred/codingquary/F*/*/final/final_genes_combined.gene.fasta | grep -e 'F.oxysporum_fsp_cepae' | grep -w -v 'Fus2'
+  ls gene_pred/codingquary/F*/*/final/final_genes_combined.gene.fasta | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
@@ -70,31 +72,35 @@ Nucleotide sequences for gene models can be foudn in:
   gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/final/final_genes_combined.gene.fasta
   gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/final/final_genes_combined.gene.fasta
   gene_pred/codingquary/F.oxysporum_fsp_cepae/D2/final/final_genes_combined.gene.fasta
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/final/final_genes_combined.gene.fasta
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/HB17/final/final_genes_combined.gene.fasta
+  gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_combined.gene.fasta
+  gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_combined.gene.fasta
   gene_pred/codingquary/F.oxysporum_fsp_cepae/HB6/final/final_genes_combined.gene.fasta
   gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/final/final_genes_combined.gene.fasta
+  gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/final/final_genes_combined.gene.fasta
+  gene_pred/codingquary/F.proliferatum/A8/final/final_genes_combined.gene.fasta
 ```
 
 gff annotations of gene models can be found at:
 
 ```bash
-ls gene_pred/codingquary/F*/*/final/final_genes_appended.gff3  | grep -e 'F.oxysporum_fsp_cepae' | grep -w -v 'Fus2'
+ls gene_pred/codingquary/F*/*/final/final_genes_appended.gff3  | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/125/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/55/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/A1-2/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/D2/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/HB17/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/HB6/final/final_genes_appended.gff3
-  gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/125/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/55/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A1-2/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/D2/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/HB6/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/final/final_genes_appended.gff3
+gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/final/final_genes_appended.gff3
+gene_pred/codingquary/F.proliferatum/A8/final/final_genes_appended.gff3
 ```
 
 ## Downloaded genomes
@@ -133,7 +139,7 @@ Searches for core Eukaryotic genes was performed with CEGMA. Output files can be
 found at:
 
 ```bash
-ls gene_pred/cegma/*/*/*_dna_cegma.cegma.gff | grep -w -e 'F.oxysporum_fsp_cepae'
+ls gene_pred/cegma/*/*/*_dna_cegma.cegma.gff | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
@@ -156,7 +162,7 @@ ls gene_pred/cegma/*/*/*_dna_cegma.cegma.gff | grep -w -e 'F.oxysporum_fsp_cepae
 Interproscan was used to annotate predicted proteins:
 
 ```bash
-  ls gene_pred/interproscan/F.*/*/*_interproscan.tsv  | grep -e 'F.oxysporum_fsp_cepae' -e 'fo47' -e '4287' | grep -w -v 'Fus2'
+  ls gene_pred/interproscan/F.*/*/*_interproscan.tsv  | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```

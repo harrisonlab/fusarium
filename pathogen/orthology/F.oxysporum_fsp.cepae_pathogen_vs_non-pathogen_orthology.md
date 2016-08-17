@@ -681,7 +681,19 @@ NULL
 ```
 
 
-#### 6.3) Extracting fasta files for all orthogroups
+#### 3.6.a Extracting fasta files orthogroups
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
+  OrthogroupTxt=analysis/orthology/orthomcl/$IsolateAbrv/"$IsolateAbrv"_orthogroups.txt
+  GoodProt=analysis/orthology/orthomcl/$IsolateAbrv/goodProteins/goodProteins.fasta
+  OutDir=analysis/orthology/orthomcl/$IsolateAbrv/fasta/all_orthogroups
+  mkdir -p $OutDir
+  $ProgDir/orthoMCLgroups2fasta.py --orthogroups $OrthogroupTxt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
+```
+
+
+
+<!-- #### 6.3) Extracting fasta files for all orthogroups
 
 ```bash
 IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
@@ -700,4 +712,4 @@ $ProgDir/extract_from_fasta.py --fasta $GoodProt --headers $OutDir/singleton_gen
 echo "The numbe of singleton genes extracted is:"
 cat $OutDir/singleton_genes.fa | grep '>' | wc -l
 
-```
+``` -->

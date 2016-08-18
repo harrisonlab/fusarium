@@ -1,5 +1,5 @@
 
-
+<!--
 ```bash
 WarwickCSV=analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/path_vs_non_p0.001.csv
 WarwickTSV=analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/path_vs_non_p0.001.tab
@@ -16,62 +16,63 @@ $ProgDir/diff_expressed_orthogroups.py \
   --OrthoMCL_all Fus2 125 A23 A28 D2 PG A13 fo47 55 A1_2 CB3 HB6 4287 \
   --OrthoMCL_path Fus2 125 A23 --OrthoMCL_nonpath A28 D2 PG A13 fo47 \
   > $DEG_Orthogroups
-```
+``` -->
 
 
 ```bash
-  # for Strain in 125 A23 Fus2_edited_v2 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
-  for Strain in 125 A23 Fus2 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
-    for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3); do
-      Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
-      Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
-      echo "$Organism - $Strain"
-      Genome=$(ls repeat_masked/$Organism/$Strain/filtered_contigs_repmask/*_contigs_unmasked.fa)
-      BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
-      FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
-      GeneGff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
-      SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
-      TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
-      MimpTxt=$(ls analysis/mimps/$Organism/$Strain/*_genes_in_2kb_mimp.txt)
-      EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
-      # OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt)
-      OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
-      InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
-      SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl)
-      DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
+  # for Strain in 125 A23 Fus2_canu_new 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
+for Strain in 125 A23 Fus2_canu_new CB3 A13 A28 PG; do
+  # for Strain in Fus2_canu_new; do
+  for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3); do
+  Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
+  Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
+  echo "$Organism - $Strain"
+  Genome=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_unmasked.fa)
+  BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
+  FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
+  GeneGff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
+  SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
+  TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
+  MimpTxt=$(ls analysis/mimps/$Organism/$Strain/*_genes_in_2kb_mimp.txt)
+  EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
+  OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt)
+  InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
+  SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl)
+  # DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
 
-      OrthoMCL_id="$Strain"
-      OrthoMCL_id_list="125 A23 Fus2 55 A1_2 CB3 HB6 A13 A28 D2 PG fo47 4287"
-      OrthoMCL_path_ids="125 A23 Fus2"
-      OrthoMCL_nonpath_ids="A13 A28 D2 PG fo47"
+  OrthoMCL_id="$Strain"
+  OrthoMCL_id_list="125 A23 Fus2 CB3 A13 A28 PG fo47 4287"
+  OrthoMCL_path_ids="125 A23 Fus2"
+  OrthoMCL_nonpath_ids="A13 A28 CB3 PG fo47"
 
-      if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
+  # if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
 
-      OutDir=gene_pred/annotations/$Organism/$Strain
-      OutTable=$OutDir/"$Strain"_gene_annotations.tab
+  OutDir=gene_pred/annotations/$Organism/$Strain
+  OutTable=$OutDir/"$Strain"_gene_annotations.tab
 
-      mkdir -p $OutDir
+  mkdir -p $OutDir
 
-      ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
-      $ProgDir/Fo_build_gene_annot_table.py \
-      --blast_csv $BlastCsv \
-      --FoL_intersected_genes $FolIntersect \
-      --genome $Genome \
-      --FoC_genes_gff $GeneGff \
-      --FoC_SigP $SigpTab \
-      --FoC_TM_list $TmhmmTxt \
-      --FoC_MIMP_list $MimpTxt \
-      --FoC_effectorP $EffectorpTxt \
-      --FoC_orthogroup $OrthogroupsTxt \
-      --OrthoMCL_id $OrthoMCL_id \
-      --OrthoMCL_all $OrthoMCL_id_list \
-      --OrthoMCL_path $OrthoMCL_path_ids \
-      --OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
-      --InterPro $InterProTsv \
-      --Swissprot $SwissprotTab \
-      --DEG_Orthogroups $DEG_Orthogroups \
-      > $OutTable
-    done
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+  $ProgDir/Fo_build_gene_annot_table.py \
+  --blast_csv $BlastCsv \
+  --FoL_intersected_genes $FolIntersect \
+  --genome $Genome \
+  --FoC_genes_gff $GeneGff \
+  --FoC_SigP $SigpTab \
+  --FoC_TM_list $TmhmmTxt \
+  --FoC_MIMP_list $MimpTxt \
+  --FoC_effectorP $EffectorpTxt \
+  --FoC_orthogroup $OrthogroupsTxt \
+  --OrthoMCL_id $OrthoMCL_id \
+  --OrthoMCL_all $OrthoMCL_id_list \
+  --OrthoMCL_path $OrthoMCL_path_ids \
+  --OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
+  --InterPro $InterProTsv \
+  --Swissprot $SwissprotTab \
+  > $OutTable
+  # --DEG_Orthogroups $DEG_Orthogroups \
+  # > $OutTable
+  done
   done
 ```
 

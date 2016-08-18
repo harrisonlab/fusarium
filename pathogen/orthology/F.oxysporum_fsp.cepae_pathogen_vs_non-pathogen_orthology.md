@@ -42,7 +42,7 @@
 ### for FoC Fus2
 ```bash
   Taxon_code=Fus2
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -461,7 +461,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC Fus2
 ```bash
   Taxon_code=Fus2
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_edited_v2/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -602,13 +602,13 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 
 ```
   The number of ortholog groups found in pathogen but absent in non-pathogens is:
-  277
+  254
   The number of ortholog groups unique to pathogens are:
-  277
+  254
   The number of ortholog groups unique to non-pathogens are:
-  64
+  61
   The number of ortholog groups common to all F. oxysporum isolates are:
-  10396
+  10391
 ```
 
 The number of ortholog groups shared between FoC and FoL was identified:
@@ -621,8 +621,8 @@ The number of ortholog groups shared between FoC and FoL was identified:
 
 ```
   The number of ortholog groups common to FoC and FoL are:
-  10629
-  37
+  10916
+  43
 ```
 
 ## 3.5.b Plot venn diagrams:
@@ -643,41 +643,29 @@ number of unique groups of inparalogs
 
 
 ```
-[1] 11655 <- non-pathogen orthogroups (5 non-pathogens)
-[1] 11442 <- pathogen orthogroups (3 pathogens)
-[1] "A28"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13739"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2084"
-[1] "The total number of singleton genes not in the venn diagram:  389"
-[1] "CB3"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13615"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1960"
-[1] "The total number of singleton genes not in the venn diagram:  372"
-[1] "PG"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13583"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1928"
-[1] "The total number of singleton genes not in the venn diagram:  474"
-[1] "Fus2"
-[1] "The total number of orthogroups and singleton genes in this isolate:  14008"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2566"
-[1] "The total number of singleton genes not in the venn diagram:  369"
-[1] "125"
-[1] "The total number of orthogroups and singleton genes in this isolate:  14002"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2560"
-[1] "The total number of singleton genes not in the venn diagram:  331"
-[1] "A23"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13640"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2198"
-[1] "The total number of singleton genes not in the venn diagram:  258"
-[1] "A13"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13355"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1700"
-[1] "The total number of singleton genes not in the venn diagram:  644"
-[1] "fo47"
-[1] "The total number of orthogroups and singleton genes in this isolate:  14288"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2633"
-[1] "The total number of singleton genes not in the venn diagram:  1362"
-NULL
+  [1]  <- non-pathogen orthogroups (5 non-pathogens)
+  [1]  <- pathogen orthogroups (3 pathogens)
+  [1] "Fus2"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  13845"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2411"
+  [1] "The total number of singleton genes not in the venn diagram:  293"
+  [1] "125"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  13975"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2541"
+  [1] "The total number of singleton genes not in the venn diagram:  343"
+  [1] "A23"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  13616"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2182"
+  [1] "The total number of singleton genes not in the venn diagram:  257"
+  [1] "A13"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  13333"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1706"
+  [1] "The total number of singleton genes not in the venn diagram:  647"
+  [1] "fo47"
+  [1] "The total number of orthogroups and singleton genes in this isolate:  14272"
+  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2645"
+  [1] "The total number of singleton genes not in the venn diagram:  1363"
+  NULL
 ```
 
 

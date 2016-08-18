@@ -106,7 +106,7 @@
   GoodProts=$WorkDir/goodProteins/goodProteins.fasta
   qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts 5
 ```
-
+<!--
 ## 3.5.a Manual identification of numbers of orthologous and unique genes
 
 
@@ -134,11 +134,11 @@
   10396
 ```
 
-The number of ortholog groups shared between FoC and FoL was identified:
+The number of ortholog groups shared between FoN and FoL was identified:
 
 ```bash
-  echo "The number of ortholog groups common to FoC and FoL are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' | wc -l
+  echo "The number of ortholog groups common to FoN and FoL are:"
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'N139|' | grep '4287|' | wc -l
   cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' |  wc -l
 ```
 
@@ -146,13 +146,13 @@ The number of ortholog groups shared between FoC and FoL was identified:
   The number of ortholog groups common to FoC and FoL are:
   10629
   37
-```
+``` -->
 
 ## 3.5.b Plot venn diagrams:
 
 ```bash
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
-  $ProgDir/FoC_path_vs_non_path_venn_diag.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
+  $ProgDir/venn_diag_3_way.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
 ```
 
 Output was a pdf file of the venn diagram.
@@ -166,61 +166,35 @@ number of unique groups of inparalogs
 
 
 ```
-[1] 11655 <- non-pathogen orthogroups (5 non-pathogens)
-[1] 11442 <- pathogen orthogroups (3 pathogens)
-[1] "A28"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13739"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2084"
-[1] "The total number of singleton genes not in the venn diagram:  389"
-[1] "CB3"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13615"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1960"
-[1] "The total number of singleton genes not in the venn diagram:  372"
-[1] "PG"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13583"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1928"
-[1] "The total number of singleton genes not in the venn diagram:  474"
-[1] "Fus2"
-[1] "The total number of orthogroups and singleton genes in this isolate:  14008"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2566"
-[1] "The total number of singleton genes not in the venn diagram:  369"
-[1] "125"
-[1] "The total number of orthogroups and singleton genes in this isolate:  14002"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2560"
-[1] "The total number of singleton genes not in the venn diagram:  331"
-[1] "A23"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13640"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2198"
-[1] "The total number of singleton genes not in the venn diagram:  258"
-[1] "A13"
-[1] "The total number of orthogroups and singleton genes in this isolate:  13355"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1700"
-[1] "The total number of singleton genes not in the venn diagram:  644"
-[1] "fo47"
-[1] "The total number of orthogroups and singleton genes in this isolate:  14288"
-[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2633"
-[1] "The total number of singleton genes not in the venn diagram:  1362"
-NULL
+[1] "4287 (12411)"
+[1] 910
+[1] 223
+[1] "N139 (16307)"
+[1] 3326
+[1] 342
+[1] "fo47 (14308)"
+[1] 1628
+[1] 136
 ```
 
 
 #### 6.3) Extracting fasta files for all orthogroups
 
 ```bash
-IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
+# IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
 WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
 ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
 GoodProt=$WorkDir/goodProteins/goodProteins.fasta
 OutDir=$WorkDir/orthogroups_fasta
 mkdir -p $OutDir
 $ProgDir/orthoMCLgroups2fasta.py --orthogroups $WorkDir/"$IsolateAbrv"_orthogroups.txt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
-for File in $(ls -v $OutDir/orthogroup*.fa); do
-cat $File | grep '>' | tr -d '> '
-done > $OutDir/orthogroup_genes.txt
-cat $GoodProt | grep '>' | tr -d '> ' | grep -v -f $OutDir/orthogroup_genes.txt > $OutDir/singleton_genes.txt
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_from_fasta.py --fasta $GoodProt --headers $OutDir/singleton_genes.txt > $OutDir/singleton_genes.fa
-echo "The numbe of singleton genes extracted is:"
-cat $OutDir/singleton_genes.fa | grep '>' | wc -l
+# for File in $(ls -v $OutDir/orthogroup*.fa); do
+# cat $File | grep '>' | tr -d '> '
+# done > $OutDir/orthogroup_genes.txt
+# cat $GoodProt | grep '>' | tr -d '> ' | grep -v -f $OutDir/orthogroup_genes.txt > $OutDir/singleton_genes.txt
+# ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+# $ProgDir/extract_from_fasta.py --fasta $GoodProt --headers $OutDir/singleton_genes.txt > $OutDir/singleton_genes.fa
+# echo "The numbe of singleton genes extracted is:"
+# cat $OutDir/singleton_genes.fa | grep '>' | wc -l
 
 ```

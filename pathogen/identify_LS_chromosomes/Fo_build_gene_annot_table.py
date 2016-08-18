@@ -42,7 +42,7 @@ ap.add_argument('--OrthoMCL_path',required=True,type=str,nargs='+',help='The ide
 ap.add_argument('--OrthoMCL_nonpath',required=True,type=str,nargs='+',help='The identifiers of non-pathogenic strains used in the orthology analysis')
 ap.add_argument('--InterPro',required=True,type=str,help='The Interproscan functional annotation .tsv file')
 ap.add_argument('--Swissprot',required=True,type=str,help='A parsed table of BLAST results against the Swissprot database. Note - must have been parsed with swissprot_parser.py')
-ap.add_argument('--DEG_Orthogroups',required=True,type=str,help='')
+# ap.add_argument('--DEG_Orthogroups',required=True,type=str,help='')
 
 
 # ap.add_argument('--FoL_LS_genes',required=True,type=str,help='A list of FoL LS genes and the chromosomes they are present on.')
@@ -90,8 +90,8 @@ with open(conf.InterPro) as f:
 with open(conf.Swissprot) as f:
     swissprot_lines = f.readlines()
 
-with open(conf.DEG_Orthogroups) as f:
-    diff_ortho_lines = f.readlines()
+# with open(conf.DEG_Orthogroups) as f:
+#     diff_ortho_lines = f.readlines()
 
 column_list=[]
 
@@ -483,19 +483,19 @@ for line in swissprot_lines:
 # reads aligned to Fus2 genes.
 #-----------------------------------------------------
 
-diff_ortho_dict = defaultdict(list)
-
-for line in diff_ortho_lines:
-    line = line.rstrip("\n")
-    split_line = line.split("\t")
-    if len(split_line) > 5:
-        orthogroup_id = split_line[5]
-        fus2_id = "Fus2|" + str(split_line[0])
-        base_mean = split_line[1]
-        fold_change = split_line[2]
-        significance = split_line[4]
-        expression_info = " ".join([fus2_id, base_mean,fold_change,significance])
-        diff_ortho_dict[orthogroup_id].append(expression_info)
+# diff_ortho_dict = defaultdict(list)
+#
+# for line in diff_ortho_lines:
+#     line = line.rstrip("\n")
+#     split_line = line.split("\t")
+#     if len(split_line) > 5:
+#         orthogroup_id = split_line[5]
+#         fus2_id = "Fus2|" + str(split_line[0])
+#         base_mean = split_line[1]
+#         fold_change = split_line[2]
+#         significance = split_line[4]
+#         expression_info = " ".join([fus2_id, base_mean,fold_change,significance])
+#         diff_ortho_dict[orthogroup_id].append(expression_info)
 
 
 
@@ -515,7 +515,7 @@ print ("\t".join([
 "MIMP_in_2Kb",
 "effectorP", "P-value",
 "orthogroup", "representation", "genes_per_isolate", "expansion_status",
-"DEG_in_orthogroup", "Fus2_expression_info",
+# "DEG_in_orthogroup", "Fus2_expression_info",
 "hit_FoL_contig", "hit_start", "hit_end", "hit_strand",
 "FoL_gene_start", "FoL_gene_end", "FoL_strand", "FoL_gene_ID", "FoL_gene_description",
 "Swissprot_organism", "Swissprot_hit", "Swissprot_function",
@@ -539,27 +539,27 @@ for gene_id in gene_id_set:
     useful_columns.append(mimp_col)
     useful_columns.extend(FoC_effectorP_dict[gene_id])
 
-    if FoC_orthogroup_dict[gene_id]:
-        useful_columns.extend(FoC_orthogroup_dict[gene_id])
-        orthogroup_id = FoC_orthogroup_dict[gene_id][0]
-        # diff_expr_ortho_info = [orthogroup_id]
-        diff_expr_ortho_info = []
-        # print orthogroup_id
-        # print diff_ortho_dict[orthogroup_id]
-        diff_expr_ortho_info.append(";".join(diff_ortho_dict[orthogroup_id]))
-        if any("P<0.05" in x for x in diff_expr_ortho_info):
-            significance = "P<0.05"
-            # print "yes"
-        else:
-            significance = ""
-            # print "no"
-        useful_columns.append(significance)
-        # print diff_expr_ortho_info
-        useful_columns.extend(diff_expr_ortho_info)
-
-    else:
-        useful_columns.extend(["", "singleton", "", ""])
-        useful_columns.extend(["", ""])
+    # if FoC_orthogroup_dict[gene_id]:
+    #     useful_columns.extend(FoC_orthogroup_dict[gene_id])
+    #     orthogroup_id = FoC_orthogroup_dict[gene_id][0]
+    #     # diff_expr_ortho_info = [orthogroup_id]
+    #     diff_expr_ortho_info = []
+    #     # print orthogroup_id
+    #     # print diff_ortho_dict[orthogroup_id]
+    #     diff_expr_ortho_info.append(";".join(diff_ortho_dict[orthogroup_id]))
+    #     if any("P<0.05" in x for x in diff_expr_ortho_info):
+    #         significance = "P<0.05"
+    #         # print "yes"
+    #     else:
+    #         significance = ""
+    #         # print "no"
+    #     useful_columns.append(significance)
+    #     # print diff_expr_ortho_info
+    #     useful_columns.extend(diff_expr_ortho_info)
+    #
+    # else:
+    #     useful_columns.extend(["", "singleton", "", ""])
+    #     useful_columns.extend(["", ""])
 
     useful_columns.extend(blast_dict[gene_id])
     # if FoC_reblast_dict[blast_id]:

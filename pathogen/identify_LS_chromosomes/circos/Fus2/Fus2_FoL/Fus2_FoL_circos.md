@@ -2,7 +2,7 @@
   OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL
   mkdir -p $OutDir
 
-  Fus2_genome=assembly/canu_spades_hybrid/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta
+  Fus2_genome=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask/Fus2_canu_contigs_unmasked.fa
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/fasta2circos.py --genome $Fus2_genome --contig_prefix "Fus2_" > $OutDir/Fus2_genome.txt
 
@@ -13,6 +13,7 @@
   cat $OutDir/FoL_genome.txt > $OutDir/Fus2_FoL_genome.txt
   tac $OutDir/Fus2_genome.txt >> $OutDir/Fus2_FoL_genome.txt
 
+  cp $OutDir/Fus2_FoL_genome.txt $OutDir/Fus2_FoL_genome_edited.txt
   # The file $OutDir/Fus2_FoL_genome.txt was maually edited:
   # It was called: $OutDir/Fus2_FoL_genome_edit.txt
 ```
@@ -20,7 +21,7 @@
 
 ```bash
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/ortholology2circos_ribbons.py --orthology analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt --name1 Fus2 --gff1 gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_appended.gff3 --name2 4287 --gff2 assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3 > $OutDir/Fus2_FoL_links.txt
+  $ProgDir/orthology2circos_ribbons.py --orthology analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt --name1 Fus2 --gff1 gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 --name2 4287 --gff2 assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3 > $OutDir/Fus2_FoL_links.txt
   # Links to FoL LS contigs 3, 6, 14 and 15 were coloured balck
   cat $OutDir/Fus2_FoL_links.txt \
     | sed '/4287_3/ s/$/\tcolor=black/' \
@@ -28,8 +29,10 @@
     | sed '/4287_14/ s/$/\tcolor=black/' \
     | sed '/4287_15/ s/$/\tcolor=black/' \
     > $OutDir/Fus2_FoL_links_edited.txt
+    ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+    circos -conf $ProgDir/Fus2/Fus2_FoL/Fus2_FoL_circos.conf -outputdir $OutDir
 ```
-
+<!--
 ```bash
 OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL
 OrthologyTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt
@@ -49,7 +52,7 @@ for Chr in $(seq 1 15); do
     circos -conf $ProgDir/Fus2/Fus2_FoL/Fus2_FoL_circos.conf -outputdir $OutDir
     mv $OutDir/circos.png $OutDir/Fus2_FoL_LS_"$Chr"_circos.png
   done
-```
+``` -->
 
 ```bash
 OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL

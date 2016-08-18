@@ -455,3 +455,43 @@ FoLIntersect=$HitsDir/4287_chromosomal_final_genes_combined_intersect.bed
 bedtools intersect -wo -a $HitsGff -b $FoLGenes > $FoLIntersect
 done
 ```
+
+
+
+## Identifying FTF genes
+
+Previously published FTF genes from Sanchez et al 2016 were blasted against
+Fusarium genomes.
+
+```bash
+FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
+Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
+for Assembly in $(ls $FoL_4287_assembly_parsed $Fo_Fo47_assembly_parsed); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo $Assembly
+Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
+OutDir=analysis/FTF/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $Assembly $OutDir
+done
+```
+
+BLAST hits were converted to Gff annotations and intersected with gene models:
+
+```bash
+for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -e '4287' -e 'fo47'); do
+Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+OutDir=analysis/FTF/$Organism/$Strain
+HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
+Column2=FTF_homolog
+NumHits=1
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+
+GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
+bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits_intersected.bed
+done
+```

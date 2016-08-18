@@ -162,7 +162,7 @@ ls gene_pred/cegma/*/*/*_dna_cegma.cegma.gff | grep -e 'F.oxysporum_fsp_cepae' -
 Interproscan was used to annotate predicted proteins:
 
 ```bash
-  ls gene_pred/interproscan/F.*/*/*_interproscan.tsv  | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
+  ls gene_pred/interproscan/F.*/*/*_interproscan.tsv  | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' -e 'oxysporum' -e 'lycopersici' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
@@ -175,41 +175,45 @@ Interproscan was used to annotate predicted proteins:
   gene_pred/interproscan/F.oxysporum_fsp_cepae/A28/A28_interproscan.tsv
   gene_pred/interproscan/F.oxysporum_fsp_cepae/CB3/CB3_interproscan.tsv
   gene_pred/interproscan/F.oxysporum_fsp_cepae/D2/D2_interproscan.tsv
-  gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_interproscan.tsv
-  gene_pred/interproscan/F.oxysporum_fsp_cepae/HB17/HB17_interproscan.tsv
+  gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv
+  gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
   gene_pred/interproscan/F.oxysporum_fsp_cepae/HB6/HB6_interproscan.tsv
   gene_pred/interproscan/F.oxysporum_fsp_cepae/PG/PG_interproscan.tsv
   gene_pred/interproscan/F.oxysporum_fsp_lycopersici/4287/4287_interproscan.tsv
+  gene_pred/interproscan/F.oxysporum_fsp_narcissi/N139/N139_interproscan.tsv
+  gene_pred/interproscan/F.proliferatum/A8/A8_interproscan.tsv
 ```
 
 as was swissprot:
 
 ```bash
-ls gene_pred/swissprot/*/*/swissprot_v2015_tophit_parsed.tbl  | grep -e 'F.oxysporum_fsp_cepae' -e 'fo47' -e '4287' | grep -w -v 'Fus2'
+ls gene_pred/swissprot/*/*/swissprot_vJul2016_tophit_parsed.tbl  | grep -e 'F.oxysporum_fsp_cepae' -e 'narcissi' -e 'F.proliferatum' -e 'oxysporum' -e 'lycopersici' | grep -v -e 'edited' -e 'Fus2_contigs' -e 'HB17'
 ```
 
 ```
-gene_pred/swissprot/F.oxysporum/fo47/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/125/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/55/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/A1-2/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/A13/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/A23/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/A28/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/CB3/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/D2/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/Fus2_edited_v2/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/HB17/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/HB6/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_cepae/PG/swissprot_v2015_tophit_parsed.tbl
-gene_pred/swissprot/F.oxysporum_fsp_lycopersici/4287/swissprot_v2015_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum/fo47/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/125/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/55/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/A1-2/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/A13/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/A23/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/A28/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/CB3/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/D2/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/Fus2_canu_new/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/Fus2/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/HB6/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_cepae/PG/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_lycopersici/4287/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.oxysporum_fsp_narcissi/N139/swissprot_vJul2016_tophit_parsed.tbl
+gene_pred/swissprot/F.proliferatum/A8/swissprot_vJul2016_tophit_parsed.tbl
 ```
 
 ## Final annotation tables:
 
 Annotation tables summarising gene locations, orthology and function and
 expression were generated:
-
+<!--
 ```bash
 ls gene_pred/annotations/*/*/*_gene_annotations.tab | grep -e 'F.oxysporum_fsp_cepae' -e 'fo47' -e '4287' | grep -w -v 'Fus2'
 ```
@@ -228,13 +232,13 @@ gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_gene_a
 gene_pred/annotations/F.oxysporum_fsp_cepae/HB6/HB6_gene_annotations.tab
 gene_pred/annotations/F.oxysporum_fsp_cepae/PG/PG_gene_annotations.tab
 gene_pred/annotations/F.oxysporum_fsp_lycopersici/4287/4287_gene_annotations.tab
-```
+``` -->
 
 ## Orthology results
 
 
 Othology analysis was performed on these isolates.
-The commands were documented in the following files under Methology 3:
+The commands were documented in the following files under Methology 4:
 
 https://github.com/harrisonlab/fusarium/blob/master/pathogen/orthology/F.oxysporum_fsp.cepae_pathogen_vs_non-pathogen_orthology.md
 
@@ -242,25 +246,25 @@ The total set of proteins used in the analysis can be found at:
 - note from this point onwards each gene name is preceeded by an isolate identifier in the fasta files.
 
 ```
-  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/goodProteins/goodProteins.fasta
+  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/goodProteins/goodProteins.fasta
 ```
 
 The list of genes present in each ortholog group is present at:
 
 ```bash
-  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt
+  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publicationorthogroups.txt
 ```
 
 Fasta files of orthogroups
 can be found within the directory:
 
 ```bash
-  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/fasta/all_orthogroups
+  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/fasta/all_orthogroups
 ```
 
 A venn diagram showing orthogroups common to all pathogens, common to all non-pathogens
 or shared between both of these groups can be found at:
 
 ```bash
-  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.pdf
+  analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.pdf
 ```

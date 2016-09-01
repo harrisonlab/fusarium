@@ -22,7 +22,7 @@ Circos plots were generated for reassembly of the Fus2 genome
   $ProgDir/fasta2gff_windows.py --genome $Fus2_genome > $OutDir/Fus2_100kb_windows.gff
 
   # Convert FoC MiSeq reads aligning in 100kb windows into coverage stats
-  for ReadsBam in $(ls analysis/genome_alignment/bowtie/F.*/*/vs_Fus2_unmasked/Fus2_canu_contigs_unmasked.fa_aligned_sorted.bam | grep -w -e 'Fus2' -e '125' -e 'A28' -e 'A13' -e 'CB3' -e 'PG' -e 'A23'); do
+  for ReadsBam in $(ls analysis/genome_alignment/bowtie/F.*/*/vs_Fus2_hardmasked_max1200/Fus2_canu_contigs_hardmasked_repeatmasker_TPSI_appended.fa_aligned_sorted.bam | grep -w -e 'Fus2' -e '125' -e 'A28' -e 'A13' -e 'CB3' -e 'PG' -e 'A23' -e 'A28'); do
     Organism=$(echo $ReadsBam | rev | cut -f4 -d '/' | rev)
     Strain=$(echo $ReadsBam | rev | cut -f3 -d '/' | rev)
     AlignDir=$(dirname $ReadsBam)

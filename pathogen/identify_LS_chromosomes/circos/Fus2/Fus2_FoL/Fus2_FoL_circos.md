@@ -10,8 +10,8 @@
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/fasta2circos.py --genome $FoL_genome --contig_prefix "4287_" > $OutDir/FoL_genome.txt
 
-  cat $OutDir/FoL_genome.txt > $OutDir/Fus2_FoL_genome.txt
-  tac $OutDir/Fus2_genome.txt >> $OutDir/Fus2_FoL_genome.txt
+  cat $OutDir/Fus2_genome.txt > $OutDir/Fus2_FoL_genome.txt
+  tac $OutDir/FoL_genome.txt >> $OutDir/Fus2_FoL_genome.txt
 
   cp $OutDir/Fus2_FoL_genome.txt $OutDir/Fus2_FoL_genome_edited.txt
   # The file $OutDir/Fus2_FoL_genome.txt was maually edited:
@@ -56,28 +56,56 @@ for Chr in $(seq 1 15); do
 
 ```bash
 OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL
-cat gene_pred/annotations/F.oxysporum_fsp_lycopersici/4287/4287_gene_annotations.tab | grep -e 'transpos' | cut -f16 | sort | uniq > $OutDir/FoL_transposase_orthogroups.txt
-OrthologyTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt
-OrthologyTxt_ed=$OutDir/FoC_vs_Fo_vs_FoL_orthogroups_ed_no_transposase.txt
-cat $OrthologyTxt | grep -v -w  -f $OutDir/FoL_transposase_orthogroups.txt > $OrthologyTxt_ed
+# cat gene_pred/annotations/F.oxysporum_fsp_lycopersici/4287/4287_gene_annotations.tab | grep -e 'transpos' | cut -f16 | sort | uniq > $OutDir/FoL_transposase_orthogroups.txt
+OrthologyTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt
+# OrthologyTxt_ed=$OutDir/FoC_vs_Fo_vs_FoL_orthogroups_ed_no_transposase.txt
+# cat $OrthologyTxt | grep -v -w  -f $OutDir/FoL_transposase_orthogroups.txt > $OrthologyTxt_ed
 for Chr in $(seq 1 15); do
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/orthology2ribons_circos_by_chr.py \
-    --chr1 $Chr \
-    --orthology $OrthologyTxt \
-    --name1 4287 \
-    --gff1 assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3 \
-    --name2 Fus2 \
-    --gff2 gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2/final/final_genes_appended.gff3 \
-    > $OutDir/Fus2_FoL_LS_links.txt
+ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+$ProgDir/orthology2ribons_circos_by_chr.py \
+--chr1 $Chr \
+--orthology $OrthologyTxt \
+--name1 4287 \
+--gff1 assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3 \
+--name2 Fus2 \
+--gff2 gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 \
+> $OutDir/Fus2_FoL_LS_links.txt
 
-    ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-    circos -conf $ProgDir/Fus2/Fus2_FoL/Fus2_FoL_circos.conf -outputdir $OutDir
-    mv $OutDir/circos.png $OutDir/Fus2_FoL_LS_"$Chr"_circos_no_transposase.png
-  done
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+circos -conf $ProgDir/Fus2/Fus2_FoL/Fus2_FoL_circos.conf -outputdir $OutDir
+mkdir -p $OutDir/by_FoL_chr
+mv $OutDir/circos.png $OutDir/by_FoL_chr/Fus2_FoL_LS_"$Chr"_circos.png
+mv $OutDir/circos.svg $OutDir/by_FoL_chr/Fus2_FoL_LS_"$Chr"_circos.svg
+done
 ```
 
 
+```bash
+OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL
+# cat gene_pred/annotations/F.oxysporum_fsp_lycopersici/4287/4287_gene_annotations.tab | grep -e 'transpos' | cut -f16 | sort | uniq > $OutDir/FoL_transposase_orthogroups.txt
+OrthologyTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt
+# OrthologyTxt_ed=$OutDir/FoC_vs_Fo_vs_FoL_orthogroups_ed_no_transposase.txt
+# cat $OrthologyTxt | grep -v -w  -f $OutDir/FoL_transposase_orthogroups.txt > $OrthologyTxt_ed
+for Chr in $(seq 1 34); do
+ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+$ProgDir/orthology2ribons_circos_by_chr.py \
+--chr1 $Chr \
+--orthology $OrthologyTxt \
+--name1 Fus2 \
+--gff1 gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 \
+--name2 4287 \
+--gff2 assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3 \
+> $OutDir/Fus2_FoL_LS_links.txt
+
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+circos -conf $ProgDir/Fus2/Fus2_FoL/Fus2_FoL_circos.conf -outputdir $OutDir
+mkdir -p $OutDir/by_FoC_chr
+mv $OutDir/circos.png $OutDir/by_FoC_chr/Fus2_FoL_LS_"$Chr"_circos.png
+mv $OutDir/circos.svg $OutDir/by_FoC_chr/Fus2_FoL_LS_"$Chr"_circos.svg
+done
+```
+
+<!--
 ```bash
 # for Orthogroup in $(seq 1 10); do
 for Orthogroup in 68 22 36 34; do
@@ -104,4 +132,4 @@ circos -conf $ProgDir/Fus2/Fus2_FoL/Fus2_FoL_circos.conf -outputdir $OutDir
 mv $OutDir/circos.png $OutDir/Fus2_FoL_LS_"$Chr"_circos_Orthogroup"$orthogroup".png
 done
 done
-```
+``` -->

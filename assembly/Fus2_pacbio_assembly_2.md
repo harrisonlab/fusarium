@@ -103,6 +103,19 @@ Assemblies were polished using Pilon
 ```
 
 After investigation, it was found that contigs didnt need to be split.
+
+Assembly stats were collected using quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    OutDir=assembly/canu-1.3/$Organism/$Strain/pilon
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
 <!--
 After investigation it was found that contig_17 should be split.
 
@@ -241,46 +254,58 @@ Inspection of flagged regions didn't identify any contigs that needed to be brok
 ``` -->
 
 
+ Preliminary analysis of these contigs allowed the quality of this assembly to be assessed:
 
-<!--
+ ```bash
+   ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+   for Assembly in $(ls assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/pilon/pilon.fasta); do
+     echo $Assembly
+     Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+     qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+   done
+ ```
 
-#### Hybrid assembly: DBG2OLC assembly
+ ```bash
+   for Genome in $(ls assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2_3/pilon/pilon.fasta); do
+     for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
+       Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
+       Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
+       Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
+       echo "$Organism - $Strain - $Chr"
+       OutDir=analysis/blast_homology/$Organism/$Strain
+       ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+       qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
+     done
+   done
+ ```
 
- To select a subset of the PacBio reads for assembly:
 
-```bash
-  for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq); do
-    NumReads=10000000 # 100 million reads.
-    SelectLongest=0 # Set to 1 if you want to turn on
-    PacBioReads=$PacBioDat
-    OutDir=
-    OutFile=$OutDir/
-    SelectLongestReads sum $NumReads longest $SelectLongest o $OutFile f $PacBioReads
-  done
-```
+ Convert top blast hits into gff annotations
 
-To perform assembly using DBG2OLC
-
-```bash
-
-for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq); do
-  Organism=$(echo $PacBioDat | rev | cut -f4 -d '/' | rev)
-  Strain=$(echo $PacBioDat | rev | cut -f3 -d '/' | rev)
-  IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-  TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
-  TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
-  TrimF2_Read=$(ls $IlluminaDir/F/FUS2_S2_L001_R1_001_trim.fq.gz);
-  TrimR2_Read=$(ls $IlluminaDir/R/FUS2_S2_L001_R2_001_trim.fq.gz);
-  OutDir=assembly/spades_pacbio/$Organism/"$Strain"
-  echo $TrimR1_Read
-  echo $TrimR1_Read
-  echo $TrimF2_Read
-  echo $TrimR2_Read
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades/multiple_libraries
-  qsub $ProgDir/subSpades_2lib_pacbio.sh $PacBioDat $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $OutDir 20
-done
-```
--->
+ ```bash
+   for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_3/*_chr_*_gene_single_copy.aa_hits.csv); do
+     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+     echo "$Organism - $Strain"
+     HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+     Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+     Column2=Chr"$Chr"_gene_homolog
+     NumHits=1
+     ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+     $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+   done
+   for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_3/Fus2_3_Fo_path_genes_CRX.fa_homologs.csv); do
+     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
+     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
+     echo "$Organism - $Strain"
+     HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
+     Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
+     Column2=Fo_path_gene_homolog
+     NumHits=12
+     ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+     $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
+   done
+ ```
 
 
 ## Merging pacbio and hybrid assemblies
@@ -327,21 +352,46 @@ This merged assembly was polished using Pilon
   rm tmp.csv
 ```
 
+
 ```bash
-ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta); do
-echo $Assembly
-Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
-qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
-done
+  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta
+  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
+  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_canu_new
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
+  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
+```
+
+Contigs were renamed in and split at a flagged region on contig 10
+
+```bash
+  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+  printf "contig_10\t\tsplit\t1695182\t1696920\tcanu:missassembly\n" > tmp.csv
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    OutDir=assembly/merged_canu_spades/$Organism/$Strain/edited_contigs
+    mkdir -p $OutDir
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_edited.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+  for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs/Fus2_canu_new_contigs_edited.fasta); do
+    echo $Assembly
+    Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
 ```
 
 
 ```bash
-  for Genome in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta); do
+  for Genome in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs/Fus2_canu_new_contigs_edited.fasta); do
     for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
-      Organism=$(echo $Genome | rev | cut -f3 -d '/' | rev)
-      Strain=$(echo $Genome | rev | cut -f2 -d '/' | rev)
+      Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
+      Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
       Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
       echo "$Organism - $Strain - $Chr"
       OutDir=analysis/blast_homology/$Organism/$Strain
@@ -354,7 +404,7 @@ done
 Convert top blast hits into gff annotations
 
 ```bash
-  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_edited3/*_chr_*_gene_single_copy.aa_hits.csv); do
+  for BlastHitsCsv in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_canu_new/*_chr_*_gene_single_copy.aa_hits.csv); do
     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
     echo "$Organism - $Strain"
@@ -367,13 +417,6 @@ Convert top blast hits into gff annotations
   done
 ```
 
-```bash
-  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta
-  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_canu_new
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
-  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
-```
 
 
 # Repeatmasking assemblies
@@ -381,17 +424,17 @@ Convert top blast hits into gff annotations
 ```bash
   Fus2_pacbio_canu=$(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta)
   for Assembly in $(echo $Fus2_pacbio_canu); do
-    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu/filtered_contigs_repmask
+    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-    qsub $ProgDir/rep_modeling.sh $Assembly
-    qsub $ProgDir/transposonPSI.sh $Assembly
+    qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+    qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
   done
-  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/polished/Fus2_canu_new_contigs_renamed.fasta)
+  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs/Fus2_canu_new_contigs_edited.fasta)
   for Assembly in $(echo $Fus2_pacbio_merged); do
-    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_merged/filtered_contigs_repmask
+    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_merged/edited_contigs_repmask
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-    qsub $ProgDir/rep_modeling.sh $Assembly
-    qsub $ProgDir/transposonPSI.sh $Assembly
+    qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+    qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
   done
 ```
 
@@ -404,142 +447,26 @@ Convert top blast hits into gff annotations
   done
 ```
 
-# Preliminary analysis
 
-## Checking PacBio coverage against Fus2 contigs
-
-The accuracy of PacBio assembly pipelines is currently unknown. To help identify
-regions that may have been missassembled the pacbio reads were aligned back to
-the assembled genome. Coverage was determined using bedtools genomecov and
-regions with low coverage flagged using a python script flag_low_coverage.py.
-These low coverage regions were visually inspected using IGV.
+The number of bases masked by transposonPSI and Repeatmasker were summarised
+using the following commands:
 
 ```bash
-  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta
-  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
-  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
-
-  Assembly=assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited/filtered_contigs/Fus2_edited_contigs_renamed.fasta
-  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_edited
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
-  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
-
-  Assembly=assembly/canu/F.oxysporum_fsp_cepae/Fus2_edited3/Fus2_canu_manual_edits.fasta
-  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_edited3
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
-  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
-
-  Assembly=assembly/spades_pacbio/F.oxysporum_fsp_cepae/Fus2/edited_contigs/pilon.fasta
-  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_spades_pacbio
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
-  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
+for RepDir in $(ls -d repeat_masked/F.*/*/*); do
+Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
+RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+printf "$Organism\t$Strain\n"
+printf "The number of bases masked by RepeatMasker:\t"
+sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+printf "The number of bases masked by TransposonPSI:\t"
+sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+printf "The total number of masked bases are:\t"
+cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+echo
+done | cut -f2
 ```
-<!--
-The same analysis was performed on the pacbio only assembly to see if errors
-occurred at the merging step:
-
-```bash
-  Assembly=assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta
-  Reads=raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq
-  OutDir=analysis/genome_alignment/bwa/F.oxysporum_fsp_cepae/Fus2/vs_Fus2_canu_only
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/bwa
-  qsub $ProgDir/sub_bwa_pacbio.sh $Assembly $Reads $OutDir
-
-  AlignedBam=$OutDir/Fus2_canu_contigs_renamed.fasta_aligned_sorted.bam
-  CoverageTxt=$OutDir/Fus2_bp_genome_cov.txt
-  bedtools genomecov -max 5 -d -ibam $AlignedBam -g $Assembly > $CoverageTxt
-
-  Threshold=5
-  FlaggedRegions=$OutDir/Fus2_flagged_regions.txt
-  $ProgDir/flag_low_coverage.py --genomecov $CoverageTxt --min $Threshold > $FlaggedRegions
-
-```
--->
-
-
-## Blast searches of LS region genes vs FoC
-
-Some preliminary commands were used to analyse Pacbio assemblies Richard had generated
-
-Blast searches were performed against these assembled contigs to identify which
-contigs contained blast homologs from known FoL LS genes.
-
-Headers of LS genes from FoL had previously been extracted. These were used to
-extract the relevant proteins from fasta files.
-
-```bash
-  ProtFastaUnparsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
-  ProtFasta=analysis/FoL_ls_genes/4287_proteins_renamed.fasta
-  cat $ProtFastaUnparsed | sed -r "s/^>.*FOXG/>FOXG/g" > $ProtFasta
-  for File in $(ls analysis/FoL_ls_genes/chr_*_gene_headers.txt); do
-    Chr=$(echo $File | rev | cut -f3 -d '_' | rev);
-    echo $File;
-    echo "extracting proteins associated with chromosome: $Chr";
-    OutFile=$(echo $File | sed 's/_headers.txt/.aa/g')
-    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-    $ProgDir/extract_from_fasta.py --fasta $ProtFasta --headers $File | grep -v -P '^$' > $OutFile
-  done
-```
-
-Searches were not performed for these genes as it was found that many are in
-multiple copy gene families and therefore have many blast hits throughout the
-genome. Single copy genes in the genome were used instead.
-
-
-<!--
-## Merging pacbio and hybrid assemblies
-
-```bash
-
-for PacBioAssembly in $(ls assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged/test/Fus2_pacbio_merged.fa); do
-Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
-Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
-HybridAssembly=$(ls assembly/spades_pacbio/$Organism/Fus2/contigs.fasta)
-OutDir=assembly/pacbio_test/$Organism/$Strain
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
-qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir
-done
-``` -->
-
-<!-- ```bash
-  Fus2_pacbio_canu=$(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_pacbio_test/filtered_contigs/Fus2_canu_contigs_renamed.fasta)
-  Fus2_pacbio_merged=$(ls assembly/canu_spades_hybrid/F.oxysporum_fsp_cepae/Fus2_pacbio_test/filtered_contigs/Fus2_contigs_renamed.fasta)
-  for $Genome in $(ls $Fus2_pacbio_merged $Fus2_pacbio_canu); do
-    for Proteome in $(ls analysis/FoL_ls_genes/chr_*_gene.aa); do
-      Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
-      Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
-      Chr=$(echo $Proteome | rev | cut -f2 -d '_' | rev);
-      echo "$Organism - $Strain - $Chr"
-      OutDir=analysis/blast_homology/$Organism/$Strain
-      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
-    done
-  done
-```
-
-Convert top blast hits into gff annotations
-
-```bash
-  for BlastHitsCsv in $(ls analysis/blast_homology/*/Fus2_pacbio_test_*/*_chr_*_gene.aa_hits.csv); do
-    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
-    Chr=$(echo $BlastHitsCsv | rev | cut -f3 -d '_' | rev);
-    Column2=Chr"$Chr"_gene_homolog
-    NumHits=1
-    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
-  done
-```
-
--->
-
 
 
 ## Blast searches of LS region genes in single copy orthogroups vs FoC
@@ -599,7 +526,6 @@ Note - There were no single copy orthologs from genes on Chromosome 15.
 
 ```bash
   Fus2_pacbio_merged=$(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_edited3/Fus2_canu_manual_edits.fasta)
-  # Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited3/Fus2_edited3_contigs_renamed.fasta)
   for Genome in $(ls $Fus2_pacbio_merged); do
     for Proteome in $(ls analysis/FoL_genes/chr_*_gene_single_copy.aa); do
       Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
@@ -617,7 +543,6 @@ Convert top blast hits into gff annotations
 
 ```bash
   for BlastHitsCsv in $(ls analysis/blast_homology/canu/F.oxysporum_fsp_cepae/*_chr_*_gene_single_copy.aa_hits.csv); do
-  # for BlastHitsCsv in $(ls analysis/blast_homology/*/Fus2_edited3/*_chr_*_gene_single_copy.aa_hits.csv); do
     Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
     echo "$Organism - $Strain"
@@ -649,174 +574,3 @@ Copying data
   cp -r analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/Fus2_genes pacbio_assembly/orthology/.
   cp -r analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/fasta pacbio_assembly/orthology/.
 ```
-
-
-
-
-
-<!--
-# Analysis of preliminary assemblies
-
-Analysis was performed on the genomes generated by Richard.
-
-## Preparing data
-
-projects/pacbio_test/fus2-auto/fus2.contigs.fasta
-```bash
-  ProjDir=/home/groups/harrisonlab/project_files/fusarium
-  cd $ProjDir
-
-  Fus2_pacbio_canu=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_canu/test/Fus2_pacbio_canu.fa
-  Fus2_pacbio_spades=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_spades/test/Fus2_pacbio_spades.fa
-  Fus2_pacbio_merged=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged/test/Fus2_pacbio_merged.fa
-
-  mkdir -p $(dirname $Fus2_pacbio_canu)
-  mkdir -p $(dirname $Fus2_pacbio_spades)
-  mkdir -p $(dirname $Fus2_pacbio_merged)
-  cp /home/harrir/projects/pacbio_test/fus2/fus2-auto/fus2.contigs.fasta $Fus2_pacbio_canu
-  cp /home/harrir/projects/pacbio_test/spades/FUS2/scaffolds.fasta $Fus2_pacbio_spades
-  cp /home/harrir/projects/pacbio_test/hybrid_merge/fus2/merged.fasta $Fus2_pacbio_merged
-```
-
-## Repeatmasking
-
-```bash
-  Fus2_pacbio_canu=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_canu/test/Fus2_pacbio_canu.fa
-  Fus2_pacbio_spades=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_spades/test/Fus2_pacbio_spades.fa
-  Fus2_pacbio_merged=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged/test/Fus2_pacbio_merged.fa
-  for Assembly in $(ls $Fus2_pacbio_spades $Fus2_pacbio_merged $Fus2_pacbio_canu); do
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-    qsub $ProgDir/rep_modeling.sh $Assembly
-    qsub $ProgDir/transposonPSI.sh $Assembly
-  done
-```
-
-## Blast searches of LS region genes vs FoC
-
-Some preliminary commands were used to analyse Pacbio assemblies Richard had generated
-
-Blast searches were performed against these assembled contigs to identify which
-contigs contained blast homologs from known FoL LS genes.
-
-Headers of LS genes from FoL had previously been extracted. These were used to
-extract the relevant proteins from fasta files.
-
-```bash
-  ProtFastaUnparsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
-  ProtFasta=analysis/FoL_ls_genes/4287_proteins_renamed.fasta
-  cat $ProtFastaUnparsed | sed -r "s/^>.*FOXG/>FOXG/g" > $ProtFasta
-  for File in $(ls analysis/FoL_ls_genes/chr_*_gene_headers.txt); do
-    Chr=$(echo $File | rev | cut -f3 -d '_' | rev);
-    echo $File;
-    echo "extracting proteins associated with chromosome: $Chr";
-    OutFile=$(echo $File | sed 's/_headers.txt/.aa/g')
-    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-    $ProgDir/extract_from_fasta.py --fasta $ProtFasta --headers $File | grep -v -P '^$' > $OutFile
-  done
-```
-
-```bash
-  Fus2_pacbio_canu=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_canu/test/Fus2_pacbio_canu.fa
-  Fus2_pacbio_spades=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_spades/test/Fus2_pacbio_spades.fa
-  Fus2_pacbio_merged=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged/test/Fus2_pacbio_merged.fa
-  for Genome in $(ls $Fus2_pacbio_spades $Fus2_pacbio_merged $Fus2_pacbio_canu); do
-    for Proteome in $(ls analysis/FoL_ls_genes/chr_*_gene.aa); do
-      Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
-      Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
-      Chr=$(echo $Proteome | rev | cut -f2 -d '_' | rev);
-      echo "$Organism - $Strain - $Chr"
-      OutDir=analysis/blast_homology/$Organism/$Strain
-      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
-    done
-  done
-```
-
-Convert top blast hits into gff annotations
-
-```bash
-  for BlastHitsCsv in $(ls analysis/blast_homology/*/Fus2_pacbio_*/*_chr_*_gene.aa_hits.csv); do
-    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
-    Chr=$(echo $BlastHitsCsv | rev | cut -f3 -d '_' | rev);
-    Column2=Chr"$Chr"_gene_homolog
-    NumHits=1
-    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
-  done
-```
-
-## Blast searches of LS region genes in single copy orthogroups vs FoC
-
-
-Blast searches were performed against these assembled contigs to identify which
-contigs contained blast homologs from known FoL LS genes.
-
-Headers of LS genes in single copy orthogroups that were also present in a
-single copy in FoC were extracted. These headers were used to extract the
-relevant proteins from fasta files.
-
-```bash
-FoLTable=gene_pred/annotations/F.oxysporum_fsp_lycopersici/4287/4287_gene_annotations.tab
-cat $FoLTable | cut -f1,2,17,18 |  grep -P '\t3\t' | grep '4287(1)' | grep 'Fus2(1)' | cut -f1 > analysis/FoL_ls_genes/chr_3_gene_single_copy_headers.txt
-cat $FoLTable | cut -f1,2,17,18 |  grep -P '\t6\t' | grep '4287(1)' | grep 'Fus2(1)' | cut -f1 > analysis/FoL_ls_genes/chr_6_gene_single_copy_headers.txt
-cat $FoLTable | cut -f1,2,17,18 |  grep -P '\t14\t' | grep '4287(1)' | grep 'Fus2(1)' | cut -f1 > analysis/FoL_ls_genes/chr_14_gene_single_copy_headers.txt
-cat $FoLTable | cut -f1,2,17,18 |  grep -P '\t15\t' | grep '4287(1)' | grep 'Fus2(1)' | cut -f1 > analysis/FoL_ls_genes/chr_15_gene_single_copy_headers.txt
-cat $FoLTable | cut -f1,2,17,18 | sed -r "s/\t/,/g" | grep -e ',3,' -e ',6,' -e ',14,' -e ',15,' | sed -r "s/,/\t/g" | grep '4287(1)' | grep 'Fus2(1)' | cut -f2 | sort | uniq -c | sort -n -r
-cat $FoLTable | cut -f1,2,17,18 | sed -r "s/\t/,/g" | grep -v -e ',3,' -e ',6,' -e ',14,' -e ',15,' | sed -r "s/,/\t/g" | grep '4287(1)' | grep 'Fus2(1)' | cut -f1 > analysis/FoL_ls_genes/chr_nonpath_gene_single_copy_headers.txt
-```
-This left the following number of genes for each chromosome to act as markers:
-20 14
-18 6
- 9 3
-
-Note - There were no single copy orthologs from genes on Chromosome 15.
-
-```bash
-  ProtFastaUnparsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
-  ProtFasta=analysis/FoL_ls_genes/4287_proteins_renamed.fasta
-  cat $ProtFastaUnparsed | sed -r "s/^>.*FOXG/>FOXG/g" > $ProtFasta
-  for File in $(ls analysis/FoL_ls_genes/chr_*_gene_single_copy_headers.txt); do
-    Chr=$(echo $File | rev | cut -f5 -d '_' | rev);
-    echo $File;
-    echo "extracting proteins associated with chromosome: $Chr";
-    OutFile=$(echo $File | sed 's/_headers.txt/.aa/g')
-    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-    $ProgDir/extract_from_fasta.py --fasta $ProtFasta --headers $File | grep -v -P '^$' > $OutFile
-  done
-```
-
-```bash
-  Fus2_pacbio_canu=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_canu/test/Fus2_pacbio_canu.fa
-  Fus2_pacbio_spades=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_spades/test/Fus2_pacbio_spades.fa
-  Fus2_pacbio_merged=assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged/test/Fus2_pacbio_merged.fa
-  for Genome in $(ls $Fus2_pacbio_spades $Fus2_pacbio_merged $Fus2_pacbio_canu); do
-    for Proteome in $(ls analysis/FoL_ls_genes/chr_*_gene_single_copy.aa); do
-      Strain=$(echo $Genome | rev | cut -f3 -d '/' | rev)
-      Organism=$(echo $Genome | rev | cut -f4 -d '/' | rev)
-      Chr=$(echo $Proteome | rev | cut -f4 -d '_' | rev);
-      echo "$Organism - $Strain - $Chr"
-      OutDir=analysis/blast_homology/$Organism/$Strain
-      ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-      qsub $ProgDir/run_blast2csv.sh $Proteome protein $Genome $OutDir
-    done
-  done
-```
-
-Convert top blast hits into gff annotations
-
-```bash
-  for BlastHitsCsv in $(ls analysis/blast_homology/*/Fus2_pacbio_*/*_chr_*_gene_single_copy.aa_hits.csv); do
-    Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-    HitsGff=$(echo $BlastHitsCsv | sed  's/.csv/.gff/g')
-    Chr=$(echo $BlastHitsCsv | rev | cut -f5 -d '_' | rev);
-    Column2=Chr"$Chr"_gene_homolog
-    NumHits=1
-    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-    $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHitsCsv > $HitsGff
-  done
-``` -->

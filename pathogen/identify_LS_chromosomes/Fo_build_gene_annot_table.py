@@ -539,27 +539,26 @@ for gene_id in gene_id_set:
     useful_columns.append(mimp_col)
     useful_columns.extend(FoC_effectorP_dict[gene_id])
 
-    # if FoC_orthogroup_dict[gene_id]:
-    #     useful_columns.extend(FoC_orthogroup_dict[gene_id])
-    #     orthogroup_id = FoC_orthogroup_dict[gene_id][0]
-    #     # diff_expr_ortho_info = [orthogroup_id]
-    #     diff_expr_ortho_info = []
-    #     # print orthogroup_id
-    #     # print diff_ortho_dict[orthogroup_id]
-    #     diff_expr_ortho_info.append(";".join(diff_ortho_dict[orthogroup_id]))
-    #     if any("P<0.05" in x for x in diff_expr_ortho_info):
-    #         significance = "P<0.05"
-    #         # print "yes"
-    #     else:
-    #         significance = ""
-    #         # print "no"
-    #     useful_columns.append(significance)
-    #     # print diff_expr_ortho_info
-    #     useful_columns.extend(diff_expr_ortho_info)
-    #
-    # else:
-    #     useful_columns.extend(["", "singleton", "", ""])
-    #     useful_columns.extend(["", ""])
+    if FoC_orthogroup_dict[gene_id]:
+        useful_columns.extend(FoC_orthogroup_dict[gene_id])
+        orthogroup_id = FoC_orthogroup_dict[gene_id][0]
+        # diff_expr_ortho_info = []
+        # # print orthogroup_id
+        # # print diff_ortho_dict[orthogroup_id]
+        # diff_expr_ortho_info.append(";".join(diff_ortho_dict[orthogroup_id]))
+        # if any("P<0.05" in x for x in diff_expr_ortho_info):
+        #     significance = "P<0.05"
+        #     # print "yes"
+        # else:
+        #     significance = ""
+        #     # print "no"
+        # useful_columns.append(significance)
+        # # print diff_expr_ortho_info
+        # useful_columns.extend(diff_expr_ortho_info)
+
+    else:
+        useful_columns.extend(["", "singleton", "", ""])
+        # useful_columns.extend(["", ""])
 
     useful_columns.extend(blast_dict[gene_id])
     # if FoC_reblast_dict[blast_id]:

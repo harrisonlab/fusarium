@@ -22,125 +22,121 @@ $ProgDir/diff_expressed_orthogroups.py \
 ```bash
   # for Strain in 125 A23 Fus2_canu_new 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
 for Strain in 125 A23 Fus2_canu_new CB3 A13 A28 PG; do
-  # for Strain in Fus2_canu_new; do
-  for GeneGff in $(ls gene_pred/codingquary/*/$Strain/final/final_genes_appended.gff3); do
-  Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
-  Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
-  echo "$Organism - $Strain"
-  Genome=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_unmasked.fa)
-  BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
-  FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
-  GeneGff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
-  SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
-  TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
-  MimpTxt=$(ls analysis/mimps/$Organism/$Strain/*_genes_in_2kb_mimp.txt)
-  EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
-  OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt)
-  InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
-  SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl)
-  # DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
+# for Strain in Fus2_canu_new; do
+for GeneGff in $(ls gene_pred/final_genes/*/$Strain/final/final_genes_appended.gff3); do
+Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Genome=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_unmasked.fa)
+BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
+FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
+GeneGff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
+TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
+MimpTxt=$(ls analysis/mimps/$Organism/$Strain/*_genes_in_2kb_mimp.txt)
+EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
+OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt)
+InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
+SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl)
+# DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
 
-  OrthoMCL_id="$Strain"
-  OrthoMCL_id_list="125 A23 Fus2 CB3 A13 A28 PG fo47 4287"
-  OrthoMCL_path_ids="125 A23 Fus2"
-  OrthoMCL_nonpath_ids="A13 A28 CB3 PG fo47"
+OrthoMCL_id="$Strain"
+OrthoMCL_id_list="125 A23 Fus2 CB3 A13 A28 PG fo47 4287"
+OrthoMCL_path_ids="125 A23 Fus2"
+OrthoMCL_nonpath_ids="A13 A28 CB3 PG fo47"
 
-  # if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
+if [ "$Strain" == 'Fus2_canu_new' ]; then OrthoMCL_id="Fus2"; fi
+# if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
 
-  OutDir=gene_pred/annotations/$Organism/$Strain
-  OutTable=$OutDir/"$Strain"_gene_annotations.tab
+OutDir=gene_pred/annotations/$Organism/$Strain
+OutTable=$OutDir/"$Strain"_gene_annotations.tab
 
-  mkdir -p $OutDir
+mkdir -p $OutDir
 
-  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
-  $ProgDir/Fo_build_gene_annot_table.py \
-  --blast_csv $BlastCsv \
-  --FoL_intersected_genes $FolIntersect \
-  --genome $Genome \
-  --FoC_genes_gff $GeneGff \
-  --FoC_SigP $SigpTab \
-  --FoC_TM_list $TmhmmTxt \
-  --FoC_MIMP_list $MimpTxt \
-  --FoC_effectorP $EffectorpTxt \
-  --FoC_orthogroup $OrthogroupsTxt \
-  --OrthoMCL_id $OrthoMCL_id \
-  --OrthoMCL_all $OrthoMCL_id_list \
-  --OrthoMCL_path $OrthoMCL_path_ids \
-  --OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
-  --InterPro $InterProTsv \
-  --Swissprot $SwissprotTab \
-  > $OutTable
-  # --DEG_Orthogroups $DEG_Orthogroups \
-  # > $OutTable
-  done
-  done
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+$ProgDir/Fo_build_gene_annot_table.py \
+--blast_csv $BlastCsv \
+--FoL_intersected_genes $FolIntersect \
+--genome $Genome \
+--FoC_genes_gff $GeneGff \
+--FoC_SigP $SigpTab \
+--FoC_TM_list $TmhmmTxt \
+--FoC_MIMP_list $MimpTxt \
+--FoC_effectorP $EffectorpTxt \
+--FoC_orthogroup $OrthogroupsTxt \
+--OrthoMCL_id $OrthoMCL_id \
+--OrthoMCL_all $OrthoMCL_id_list \
+--OrthoMCL_path $OrthoMCL_path_ids \
+--OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
+--InterPro $InterProTsv \
+--Swissprot $SwissprotTab \
+> $OutTable
+# --DEG_Orthogroups $DEG_Orthogroups \
+# > $OutTable
+done
+done
 ```
 
 Gene tables were made for Fo fo47 and FoL 4287
 
 ```bash
-  for Strain in fo47 4287; do
-    if [ $Strain == '4287' ]; then
-      GeneGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31_parsed.gff3)
-      Genome=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa)
-      BlastCsv=$(ls analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_Fusox1_GeneCatalog_proteins_20110522_parsed.fa_hits.csv)
-      FolIntersect=$(ls analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_final_genes_combined_intersect.bed)
-    elif [ $Strain == 'fo47' ]; then
-      GeneGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts_parsed.gff3)
-      Genome=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta)
-      BlastCsv=$(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
-      FolIntersect=$(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_final_genes_combined_intersect.bed)
-    fi
-    Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
-    # Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
-    echo "$Organism - $Strain"
-    # Genome=$(ls repeat_masked/$Organism/$Strain/filtered_contigs_repmask/*_contigs_unmasked.fa)
-    # BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
-    # FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
-    # GeneGff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
-    SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
-    TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain*/*_tmhmm_out.txt)
-    MimpTxt=$(ls analysis/mimps/$Organism/$Strain*/*_genes_in_2kb_mimp.txt)
-    EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
-    # OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_path_vs_non_path/FoC_path_vs_non_path_orthogroups.txt)
-    OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL/FoC_vs_Fo_vs_FoL_orthogroups.txt)
-    InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
-    SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_v2015_tophit_parsed.tbl)
-    DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
+for Strain in fo47 4287; do
+if [ $Strain == '4287' ]; then
+GeneGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31_parsed.gff3)
+Genome=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa)
+BlastCsv=$(ls analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_Fusox1_GeneCatalog_proteins_20110522_parsed.fa_hits.csv)
+FolIntersect=$(ls analysis/blast_homology/F.oxysporum_fsp_lycopersici/4287/4287_chromosomal_final_genes_combined_intersect.bed)
+elif [ $Strain == 'fo47' ]; then
+GeneGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts_parsed.gff3)
+Genome=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta)
+BlastCsv=$(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
+FolIntersect=$(ls analysis/blast_homology/F.oxysporum/fo47/4287_chromosomal_final_genes_combined_intersect.bed)
+fi
+Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain*/*_final_sp.tab)
+TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain*/*_tmhmm_out.txt)
+MimpTxt=$(ls analysis/mimps/$Organism/$Strain*/*_genes_in_2kb_mimp.txt)
+EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain*/*_EffectorP.txt)
+OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt)
+InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain*/*_interproscan.tsv)
+SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain*/swissprot_vJul2016_tophit_parsed.tbl)
+# DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
 
-    OrthoMCL_id="$Strain"
-    OrthoMCL_id_list="125 A23 Fus2 55 A1_2 CB3 HB6 A13 A28 D2 PG fo47 4287"
-    OrthoMCL_path_ids="125 A23 Fus2"
-    OrthoMCL_nonpath_ids="A13 A28 D2 PG fo47"
+OrthoMCL_id="$Strain"
+OrthoMCL_id_list="125 A23 Fus2 CB3 A13 A28 PG fo47 4287"
+OrthoMCL_path_ids="125 A23 Fus2"
+OrthoMCL_nonpath_ids="A13 A28 CB3 PG fo47"
 
-    if [ "$Strain" == 'Fus2_edited_v2' ]; then OrthoMCL_id="Fus2"; fi
-    if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
+# if [ "$Strain" == 'Fus2_edited_v2' ]; then OrthoMCL_id="Fus2"; fi
+# if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
 
-    OutDir=gene_pred/annotations/$Organism/$Strain
-    OutTable=$OutDir/"$Strain"_gene_annotations.tab
+OutDir=gene_pred/annotations/$Organism/$Strain
+OutTable=$OutDir/"$Strain"_gene_annotations.tab
 
-    mkdir -p $OutDir
+mkdir -p $OutDir
 
-    ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
-    $ProgDir/Fo_build_gene_annot_table.py \
-    --blast_csv $BlastCsv \
-    --FoL_intersected_genes $FolIntersect \
-    --genome $Genome \
-    --FoC_genes_gff $GeneGff \
-    --FoC_SigP $SigpTab \
-    --FoC_TM_list $TmhmmTxt \
-    --FoC_MIMP_list $MimpTxt \
-    --FoC_effectorP $EffectorpTxt \
-    --FoC_orthogroup $OrthogroupsTxt \
-    --OrthoMCL_id $OrthoMCL_id \
-    --OrthoMCL_all $OrthoMCL_id_list \
-    --OrthoMCL_path $OrthoMCL_path_ids \
-    --OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
-    --InterPro $InterProTsv \
-    --Swissprot $SwissprotTab \
-    --DEG_Orthogroups $DEG_Orthogroups \
-    > $OutTable
-  done
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+$ProgDir/Fo_build_gene_annot_table.py \
+--blast_csv $BlastCsv \
+--FoL_intersected_genes $FolIntersect \
+--genome $Genome \
+--FoC_genes_gff $GeneGff \
+--FoC_SigP $SigpTab \
+--FoC_TM_list $TmhmmTxt \
+--FoC_MIMP_list $MimpTxt \
+--FoC_effectorP $EffectorpTxt \
+--FoC_orthogroup $OrthogroupsTxt \
+--OrthoMCL_id $OrthoMCL_id \
+--OrthoMCL_all $OrthoMCL_id_list \
+--OrthoMCL_path $OrthoMCL_path_ids \
+--OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
+--InterPro $InterProTsv \
+--Swissprot $SwissprotTab \
+> $OutTable
+# --DEG_Orthogroups $DEG_Orthogroups \
+# > $OutTable
+done
 ```
 
 
@@ -155,7 +151,7 @@ from excel.
 
 ```bash
 # Number of secreted proteins
-  for File in $(ls gene_pred/annotations/FOP1/*/*_gene_annotations.tab); do
+  for File in $(ls gene_pred/annotations/*/*/*_gene_annotations.tab); do
     echo $(basename $File);
     cat $File | cut -f12 | grep -i 'Yes' | wc -l;
   done
@@ -169,11 +165,21 @@ from excel.
     echo $(basename $File);
     cat $File | cut -f12,13 | grep -i "Yes.*Yes" | wc -l;
   done
-  # Secreted genes in expanded gene families in pathogens
-  for File in $(ls gene_pred/annotations/F*/A23/*_gene_annotations.tab); do
+  #  Genes in expanded gene families in pathogens
+  for File in $(ls gene_pred/annotations/F*/*/*_gene_annotations.tab); do
     echo $(basename $File);
-    cat $File | cut -f12,16,18,19,34 | grep -i "Yes" | grep -P "\tpathogen_expanded" | less -S;
+    cat $File | cut -f12,13,16,18,19,32 | grep -P "\tpathogen_expanded" | wc -l
   done
+  # Secreted genes in expanded gene families in pathogens
+  for File in $(ls gene_pred/annotations/F*/*/*_gene_annotations.tab); do
+    echo $(basename $File);
+    cat $File | cut -f12,16,18,19,33 | grep -i "Yes" | grep -P "\tpathogen_expanded" | wc -l
+  done
+  #  Genes in expanded gene families in non-pathogens
+  for File in $(ls gene_pred/annotations/F*/*/*_gene_annotations.tab | grep 'PG'); do
+    echo $(basename $File);
+    cat $File | cut -f12,13,16,18,19,32 | grep -w "non-pathogen_expanded"
+  done | less -S
   # Secreted genes in expanded gene families in non-pathogens
   for File in $(ls gene_pred/annotations/F*/PG/*_gene_annotations.tab); do
     echo $(basename $File);
@@ -184,7 +190,7 @@ from excel.
     echo $(basename $File);
     cat $File | cut -f12,13,19,34 | grep -i "Yes.*Yes" | grep 'expanded' | wc -l;
   done
-  for File in $(ls gene_pred/annotations/F*/125/*_gene_annotations.tab); do
+  for File in $(ls gene_pred/annotations/F*/Fus2_canu_new/*_gene_annotations.tab); do
     echo $(basename $File);
     cat $File | cut -f1,12,13,16,18,19,20,34 | grep -i "Yes.*Yes" | grep 'expanded';
     echo ""
@@ -195,8 +201,9 @@ from excel.
 The number of pathogen expanded orthogroups was identified:
 
 ```bash
-  cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,18,19 | grep -P "\tpathogen_expanded" | cut -f1 | sort | uniq | wc -l
-  cat gene_pred/annotations/F.oxysporum_fsp_cepae/*/*_gene_annotations.tab | cut -f 16,17,18,19,34 | grep -P "\tpathogen_expanded" | grep 'path_isolates_all' | cut -f1 | sort | uniq | wc -l
+  cat gene_pred/annotations/*/*/*_gene_annotations.tab | cut -f 16,18,19 | grep -P "\tpathogen_expanded" | cut -f1 | sort | uniq | wc -l
+  cat gene_pred/annotations/*/*/*_gene_annotations.tab | cut -f 16,17,18,19,34 | grep -P "\tpathogen_expanded" | grep -w 'path_isolates_all' | cut -f1 | sort | uniq | wc -l
+  cat gene_pred/annotations/*/*/*_gene_annotations.tab | cut -f 16,17,18,19,34 | grep -P "\tpathogen_expanded" | grep -w 'path_isolates_all' | grep -v '4287(0)' | cut -f1 | sort | uniq | wc -l
 ```
 
 

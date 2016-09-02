@@ -1534,14 +1534,43 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-Proteome=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_combined.pep.fasta
-OutDir=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new
-mkdir -p $OutDir
-CazyHmm=/home/groups/harrisonlab/dbCAN/dbCAN-fam-HMMs.txt
-hmmscan --cpu 16 --domtblout $OutDir/Fus2_canu_new_CAZY.out.dm $CazyHmm $Proteome > $OutDir/Fus2_canu_new_CAZY.out
-ProgDir=/home/groups/harrisonlab/dbCAN
-$ProgDir/hmmscan-parser.sh $OutDir/Fus2_canu_new_CAZY.out.dm > $OutDir/Fus2_canu_new_CAZY.out.dm.ps
+	for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -v 'Fus2'); do
+		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+		OutDir=gene_pred/CAZY/$Organism/$Strain
+		mkdir -p $OutDir
+		CazyHmm=../../dbCAN/dbCAN-fam-HMMs.txt
+		Prefix=Fus2_canu_new_CAZY
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
+		qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+	done
 ```
+
+The Hmm parser was used to filter hits by an E-value of E1x10-5 or E 1x10-e3 if they had a hit over a length of X %.
+
+Those proteins with a signal peptide were extracted from the list and gff files
+representing these proteins made.
+
+```bash
+for File in $(ls gene_pred/CAZY/F.*/*/*CAZY.out.dm); do
+	Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+	OutDir=$(dirname $File)
+	echo "$Organism - $Strain"
+	ProgDir=/home/groups/harrisonlab/dbCAN
+	$ProgDir/hmmscan-parser.sh $OutDir/Fus2_canu_new_CAZY.out.dm > $OutDir/Fus2_canu_new_CAZY.out.dm.ps
+	SecretedProts=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+	SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
+	cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
+	Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+	CazyGff=$OutDir/Fus2_canu_new_CAZY.gff
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+	$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $Gff CAZyme ID > $CazyGff
+done
+```
+
+Note - the CAZY genes identified may need further filtering based on e value and
+cuttoff length - see below:
 
 Cols in yourfile.out.dm.ps:
 1. Family HMM

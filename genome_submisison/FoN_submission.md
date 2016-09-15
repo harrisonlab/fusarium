@@ -13,6 +13,21 @@ The commands used to parse these files and prepare the F. oxysporum f. sp.
 narcissi genome for submisson are shown below.
 
 
+The following note was provided in the WGS submission page on NCBI in the box
+labeled "Private comments to NCBI staff":
+
+```
+I have been advised to submit my assemblies to NCBI early in my submission process to ensure that my contigs pass the contamination screen. This assembly will be revised as appropriate, including renaming of contigs where needed. Please allow me to modify this submission at a later date, including upload of the final gene models.
+
+'For future submissions, you could send us the fasta files early
+in the submission process so we can run them through our foreign
+contamination screen. We will let you know if we find any
+sequences to exclude or trim before you generate your final
+WGS submission.'...'*IMPORTANT* Include a comment that you are submitting
+the fasta files to be screened by the contamination screen
+prior to creating your final annotated submission.'
+```
+
 # Final Submission
 
 These commands were used in the final submission of the FoN genome:
@@ -53,8 +68,9 @@ Vairables containing locations of files and options for scripts were set:
   # ncbi_tbl_corrector script options:
   SubmissionID="BFJ63"
   LabID="ArmitageEMR"
-  GeneSource='ab initio prediction:Braker:1.9, CodingQuary:2.0'
-  IDSource='similar to AA sequence:SwissProt:2016_07'
+  # GeneSource='ab initio prediction:Braker:1.9, CodingQuary:2.0'
+  # IDSource='similar to AA sequence:SwissProt:2016_07'
+  IDSource='similar to AA sequence:SwissProt'
   # Final submisison file name:
   FinalName="FoN_Armitage_2016"
 ```
@@ -136,7 +152,8 @@ them as incomplete ('unknown_UTR').
 
 ```bash
   	mkdir -p $OutDir/gag/edited
-  	$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$GeneSource" "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
+  	$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
+  	# $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$GeneSource" "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
 ```
 
 ## Final run of tbl2asn

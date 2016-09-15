@@ -38,12 +38,15 @@ done
   GffMimp=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_mimps.gff
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/gff2circos_scatterplot.py --gff $GffMimp --feature MIMP_motif --value 1 > $OutDir/Fus2_mimp_plot.txt
-  GffCAZY=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.gff
+  GffCAZY=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_MIMP_secreted.gff
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/gff2circos_scatterplot.py --gff $GffCAZY --feature gene --value 1 > $OutDir/Fus2_CAZY_plot.txt
   GffEffP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted.gff
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/gff2circos_scatterplot.py --gff $GffEffP --feature gene --value 1 > $OutDir/Fus2_effectorP_plot.txt
+  GffAntiSmash=analysis/antismash/Fus2_clusters.gff
+  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+  $ProgDir/gff2circos_scatterplot.py --gff $GffAntiSmash --feature indole indole-nrps nrps nrps-t1pks other t1pks t1pks-nrps t3pks terpene --value 1 > $OutDir/Fus2_antismash_plot.txt
 
   BlastHits=analysis/blast_homology/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_Fo_path_genes_CRX.fa_homologs.gff
   GffSIX=$OutDir/Fus2_SIX.gff

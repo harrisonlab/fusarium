@@ -210,10 +210,22 @@ The number of pathogen expanded orthogroups was identified:
 ## Identification of transcription factors
 
 ```bash
-cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2/Fus2_gene_annotations.tab | grep -w -e 'contig_11' -e 'contig_14' -e 'contig_15' -e 'contig_17' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | sort -k16 | less -S
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab | grep -e 'contig_10' -e 'contig_14' -e 'contig_16' -e 'contig_19' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | sort -k16 | less -S
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab | grep -e 'contig_10' -e 'contig_14' -e 'contig_16' -e 'contig_19' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | cut -f2 | sort | uniq -c
 echo "The number of transcription factors on LS contigs 11, 14, 15, 17, 20 & 21 is:"
-cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2/Fus2_gene_annotations.tab | grep -w -e 'contig_11' -e 'contig_14' -e 'contig_15' -e 'contig_17' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | sort -k16 | wc -l
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab | grep -e 'contig_10' -e 'contig_14' -e 'contig_16' -e 'contig_19' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | sort -k16 | wc -l
 echo "These are present in the following number of orthogroups:"
-cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2/Fus2_gene_annotations.tab | grep -w -e 'contig_11' -e 'contig_14' -e 'contig_15' -e 'contig_17' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | cut -f16 | sort | uniq -c | sort -r -n | wc -l
+cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab | grep -e 'contig_10' -e 'contig_14' -e 'contig_16' -e 'contig_19' -e 'contig_20' -e 'contig_21' | grep -i 'transcription' | cut -f16 | sort | uniq -c | sort -r -n | wc -l
 
+```
+
+
+## annotations in LS regions:
+
+```bash
+AnnotTable=gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab
+OutDir=$(dirname $AnnotTable)
+cat $AnnotTable | grep -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' > $OutDir/Fus2_canu_new_sp._specific_regions.tab
+cat $AnnotTable | grep -w -e 'contig_9_pilon' -e 'contig_11_pilon' -e 'contig_12_pilon' -e 'contig_13_pilon' -e 'contig_15_pilon' -e 'contig_18_pilon' > $OutDir/Fus2_canu_new_sp._specific_regions.tab
+cat $AnnotTable | grep -w -e 'contig_1_pilon' -e 'contig_2_pilon' -e 'contig_3_pilon' -e 'contig_4_pilon' -e 'contig_5_pilon' -e 'contig_6_pilon' -e 'contig_7_pilon' -e 'contig_8_pilon' > $OutDir/Fus2_canu_new_core_regions.tab
 ```

@@ -1534,16 +1534,16 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-	for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
-		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-		OutDir=gene_pred/CAZY/$Organism/$Strain
-		mkdir -p $OutDir
-		Prefix="$Strain"_CAZY
-		CazyHmm=../../dbCAN/dbCAN-fam-HMMs.txt
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
-		qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
-	done
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+OutDir=gene_pred/CAZY/$Organism/$Strain
+mkdir -p $OutDir
+Prefix="$Strain"_CAZY
+CazyHmm=../../dbCAN/dbCAN-fam-HMMs.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
+qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+done
 ```
 
 The Hmm parser was used to filter hits by an E-value of E1x10-5 or E 1x10-e3 if they had a hit over a length of X %.
@@ -1552,30 +1552,31 @@ Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-	for File in $(ls gene_pred/CAZY/F.*/*/*CAZY.out.dm); do
-		Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-		OutDir=$(dirname $File)
-		echo "$Organism - $Strain"
-		ProgDir=/home/groups/harrisonlab/dbCAN
-		$ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
-		CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
-		cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
-		echo "number of CAZY genes identified:"
-		cat $CazyHeaders | wc -l
-		Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
-		CazyGff=$OutDir/"$Strain"_CAZY.gff
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-		$ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $File)
+echo "$Organism - $Strain"
+ProgDir=/home/groups/harrisonlab/dbCAN
+$ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
+CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
+cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
+echo "number of CAZY genes identified:"
+cat $CazyHeaders | wc -l
+# Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
+Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+CazyGff=$OutDir/"$Strain"_CAZY.gff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
 
-		SecretedProts=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
-		SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
-		cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
-		CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
-		$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
-		echo "number of Secreted CAZY genes identified:"
-		cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
-	done
+SecretedProts=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
+cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
+CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
+$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
+echo "number of Secreted CAZY genes identified:"
+cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
+done
 ```
 
 Note - the CAZY genes identified may need further filtering based on e value and
@@ -1596,6 +1597,51 @@ Cols in yourfile.out.dm.ps:
 * For fungi, use E-value < 1e-17 and coverage > 0.45
 
 * The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
+
+## D) AntiSMASH
+
+Antismash was run to identify clusters of secondary metabolite genes within
+the genome. Antismash was run using the weserver at:
+http://antismash.secondarymetabolites.org
+
+The assembly and Gff annotaiton of gene models was converted into EMBL format prior to submission:
+
+<!-- ```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/antismash/$Organism/$Strain
+mkdir -p $OutDir
+Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+seqret -sequence $Assembly -feature -fformat gff -fopenfile $Gff -osformat embl -auto
+mv contig_1_pilon.embl $OutDir/"$Strain"_parsed_genome.embl
+done
+``` -->
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/antismash/$Organism/$Strain
+mkdir -p $OutDir
+Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+$ProgDir/antismash_gff2tab.py --gff $Gff --fasta $Assembly --out $OutDir
+cp $ProgDir/format_embl.py $OutDir/.
+# cp $Assembly $OutDir/assembly.fasta
+CurDir=$PWD
+cd $OutDir
+python format_embl.py
+cd $CurDir
+rm $OutDir/annotationtable.txt
+seqret -sequence $Assembly -feature -fformat gff -fopenfile $Gff -osformat embl -auto
+mv contig_1_pilon.embl $OutDir/"$Strain"_parsed_genome.embl
+done
+```
+
+
 
 #Genomic analysis
 
@@ -1697,25 +1743,25 @@ done
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
-Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
-Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
-InStringAA=''
-InStringNeg=''
-InStringTab=''
-InStringTxt=''
-SigpDir=final_genes_signalp-4.1
-for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
-InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
-InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
-InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
-done
-cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
-cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
-tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
-cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
-done
+	for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+	Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
+	Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+	InStringAA=''
+	InStringNeg=''
+	InStringTab=''
+	InStringTxt=''
+	SigpDir=final_genes_signalp-4.1
+	for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+	InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
+	InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
+	InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
+	InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
+	done
+	cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
+	cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
+	tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
+	cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
+	done
 ```
 
 Some proteins that are incorporated into the cell membrane require secretion.
@@ -1795,7 +1841,7 @@ done
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 BrakerGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
@@ -1833,6 +1879,24 @@ done
 ```
 
 
+Those genes that were predicted as secreted and within 2Kb of a MIMP
+were identified:
+
+```bash
+	for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -w -v -e 'Fus2_edited_v1' -e 'Fus2_edited_v2' -e 'Fus2_merged' -e 'Fus2'); do
+		Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+		OutFile=$(echo "$File" | sed 's/.gff/_secreted.gff/g')
+		SecretedHeaders=$(echo "$Secretome" | sed 's/.aa/_headers.txt/g')
+		cat $Secretome | grep '>' | tr -d '>' > $SecretedHeaders
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+		$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
+		cat $OutFile | grep -w 'mRNA' | wc -l
+	done
+```
+
 
 # 4. Genomic analysis
 <!--
@@ -1858,6 +1922,9 @@ commands to do this were as follows:
 	done
 ``` -->
 
+## 4.1 Chracterisation of LS regions
+
+See pathogen/identifying_LS_chromosomes/characterising_LS_contigs.md
 
 ## 4.2 Orthology
 
@@ -2069,6 +2136,43 @@ identified in Sanchez et al 2016.
 This led to orthogroups_652 being identified as the FTF  
  -->
 
+
+## 5.1.C) Identifying Mitochondrial genes in assemblies
+
+ Previously published Fusarium spp. Mitcochondial genes from Al-Reedy 2012 were blasted against
+ assembled genomes.
+
+ ```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -e 'HB17' | grep -w 'Fus2_canu_new'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo $Assembly
+Query=analysis/blast_homology/Mt_genes/F.spp._mt_prots_Al-Reedy_et_al._2012.fasta
+OutDir=analysis/Mt_genes/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query protein $Assembly $OutDir
+done
+ ```
+
+ BLAST hits were converted to Gff annotations and intersected with gene models:
+
+ ```bash
+	 for BlastHits in $(ls analysis/Mt_genes/*/*/*_F.spp._mt_prots_Al-Reedy_et_al._2012.fasta_hits.csv | grep -v -e 'HB17' | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
+		 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+		 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+		 echo "$Organism - $Strain"
+		 OutDir=analysis/Mt_genes/$Organism/$Strain
+		 HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
+		 Column2=Mt_gene_homolog
+		 NumHits=1
+		 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		 $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+
+		 GffAppended=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+		 bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_Mt_hits_intersected.bed
+	 done
+ ```
 
 
 ## 5.2 Identifying PHIbase homologs

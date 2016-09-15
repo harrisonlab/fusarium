@@ -276,6 +276,24 @@ Proteins containing a transmembrane domain were identified:
   done
 ```
 
+Those proteins with transmembrane domains were removed from lists of Signal
+peptide containing proteins
+
+```bash
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -e 'fo47' -e '4287'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+TmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
+cat $File | cut -f1 > $TmHeaders
+SigP=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.aa)
+OutDir=$(dirname $SigP)
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $SigP --headers $TmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
+cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l
+done
+```
+
 
 
 ### B) From Augustus gene models - Effector identification using EffectorP
@@ -300,42 +318,61 @@ Required programs:
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-  Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
-  Fo_Fo47_genes=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta
-  Fo_Fo47_gff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf
+Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
+Fo_Fo47_genes=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta
+Fo_Fo47_gff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf
 
-  FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
-  FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
-  FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3
-  for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed); do
-    Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
-    Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
-    if [ $Strain == 'fo47' ]; then
-      BrakerGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
-    elif [ $Strain == '4287_chromosomal' ]; then
-      BrakerGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3)
-    fi
-    OutDir=analysis/mimps/$Organism/$Strain
-    mkdir -p "$OutDir"
-    echo "$Organism - $Strain"
-    ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
-    $ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
-    $ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
-    echo "The number of mimps identified:"
-    cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
-    bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
-    echo "The following transcripts intersect mimps:"
-    MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-    if [ $Strain == 'fo47' ]; then
-      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpGenesTxt
-    elif [ $Strain == '4287_chromosomal' ]; then
-      cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 | cut -f1 -d';' | cut -f2 -d':' | sort | uniq | grep -v 'P' > $MimpGenesTxt
-    fi
-    cat $MimpGenesTxt | wc -l
-    echo ""
-  done
+FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
+FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
+FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3
+for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed); do
+Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
+Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
+if [ $Strain == 'fo47' ]; then
+  BrakerGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
+elif [ $Strain == '4287_chromosomal' ]; then
+  BrakerGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3)
+fi
+OutDir=analysis/mimps/$Organism/$Strain
+mkdir -p "$OutDir"
+echo "$Organism - $Strain"
+ProgDir="/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder"
+$ProgDir/mimp_finder.pl $Genome $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
+$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
+echo "The number of mimps identified:"
+cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
+bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+echo "The following transcripts intersect mimps:"
+MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
+if [ $Strain == 'fo47' ]; then
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpGenesTxt
+elif [ $Strain == '4287_chromosomal' ]; then
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'transcript' | cut -f9 | cut -f1 -d';' | cut -f2 -d':' | sort | uniq | grep -v 'P' > $MimpGenesTxt
+fi
+cat $MimpGenesTxt | wc -l
+echo ""
+done
 ```
 
+
+Those genes that were predicted as secreted and within 2Kb of a MIMP
+were identified:
+
+```bash
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_chromosomal'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/.gff/_secreted.gff/g')
+SecretedHeaders=$(echo "$Secretome" | sed 's/.aa/_headers.txt/g')
+cat $Secretome | grep '>' | tr -d '>' > $SecretedHeaders
+cat $File $SecretedHeaders | cut -f1 | sed -r 's/T.$//g' | uniq | sort | uniq -d | wc -l
+# ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+# $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
+# cat $OutFile | grep -w 'mRNA' | wc -l
+done
+```
 
 ## A) Interproscan
 
@@ -405,6 +442,105 @@ commands:
     $ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
   done
 ```
+
+
+
+## C) CAZY proteins
+
+Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
+at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
+
+```bash
+  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
+  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+  		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+  		OutDir=gene_pred/CAZY/$Organism/$Strain
+  		mkdir -p $OutDir
+  		Prefix="$Strain"_CAZY
+  		CazyHmm=../../dbCAN/dbCAN-fam-HMMs.txt
+  		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
+  		qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+  	done
+```
+
+The Hmm parser was used to filter hits by an E-value of E1x10-5 or E 1x10-e3 if they had a hit over a length of X %.
+
+Those proteins with a signal peptide were extracted from the list and gff files
+representing these proteins made.
+
+```bash
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'fo47' -e '4287'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $File)
+echo "$Organism - $Strain"
+ProgDir=/home/groups/harrisonlab/dbCAN
+$ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
+CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
+cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
+echo "number of CAZY genes identified:"
+cat $CazyHeaders | wc -l
+# if [ $Strain == 'fo47' ]; then
+#   Gff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
+# elif [ $Strain == '4287_chromosomal' ]; then
+#   Gff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3)
+# fi
+# CazyGff=$OutDir/"$Strain"_CAZY.gff
+# ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+# $ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
+
+SecretedProts=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
+cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
+# CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
+# $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
+echo "number of Secreted CAZY genes identified:"
+# cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
+cat $CazyHeaders $SecretedHeaders | cut -f1 | sort | uniq -d | wc -l
+done
+```
+
+Note - the CAZY genes identified may need further filtering based on e value and
+cuttoff length - see below:
+
+Cols in yourfile.out.dm.ps:
+1. Family HMM
+2. HMM length
+3. Query ID
+4. Query length
+5. E-value (how similar to the family HMM)
+6. HMM start
+7. HMM end
+8. Query start
+9. Query end
+10. Coverage
+
+* For fungi, use E-value < 1e-17 and coverage > 0.45
+
+* The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
+<!--
+## D) AntiSMASH
+
+Antismash was run to identify clusters of secondary metabolite genes within
+the genome. Antismash was run using the weserver at:
+http://antismash.secondarymetabolites.org
+
+The assembly and Gff annotaiton of gene models was converted into EMBL format prior to submission:
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/antismash/$Organism/$Strain
+mkdir -p $OutDir
+Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+seqret -sequence $Assembly -feature -fformat gff -fopenfile $Gff -osformat embl -auto
+mv contig_1_pilon.embl $OutDir/"$Strain"_parsed_genome.embl
+done
+``` -->
 
 
 #Genomic analysis

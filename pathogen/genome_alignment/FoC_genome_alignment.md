@@ -136,8 +136,8 @@ Sequence data for isolates with a data from a single sequencing run was aligned
 against the Fus2 genome
 
 ```bash
-Reference=$(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new')
-for StrainPath in $(ls -d qc_dna/paired/F.oxysporum_fsp_cepae/* | grep -v 'HB6' | grep -v 'HB17' | grep -v 'Fus2'); do
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w 'Fus2_canu_new')
+for StrainPath in $(ls -d qc_dna/paired/F.*/* | grep -v 'HB6' | grep -v 'HB17' | grep -v 'Fus2' | grep 'A8'); do
 Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
 Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -145,7 +145,7 @@ F_Read=$(ls $StrainPath/F/*.fq.gz)
 R_Read=$(ls $StrainPath/R/*.fq.gz)
 echo $F_Read
 echo $R_Read
-OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Fus2_unmasked_max1200
+OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Fus2_hardmasked_max1200
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment
 qsub $ProgDir/bowtie/sub_bowtie.sh $Reference $F_Read $R_Read $OutDir $Strain
 done
@@ -155,7 +155,7 @@ Sequence data for isolates with a data from two sequencing runs was aligned
 against the Fus2 genome
 
 ```bash
-Reference=$(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new')
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w 'Fus2_canu_new')
 for StrainPath in $(ls -d qc_dna/paired/F.*/* | grep -e 'HB6' -e 'Fus2'); do
 echo $StrainPath
 Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
@@ -169,7 +169,7 @@ echo $F1_Read
 echo $R1_Read
 echo $F2_Read
 echo $R2_Read
-OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Fus2_unmasked_max1200
+OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Fus2_hardmasked_max1200
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment
 qsub $ProgDir/bowtie/sub_bowtie_2lib.sh $Reference $F1_Read $R1_Read $F2_Read $R2_Read $OutDir $Strain
 done

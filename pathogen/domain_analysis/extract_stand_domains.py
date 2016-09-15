@@ -98,8 +98,9 @@ for line in summary_table_lines:
     line = line.rstrip()
     split_line = line.split("\t")
     gene_id = split_line[0]
-    if len(split_line) >= 34:
-        interpro_info = split_line[33]
+    if len(split_line) >= 32:
+        interpro_info = split_line[31]
+        # print interpro_info
         orthogroup = split_line[15]
         orthogroup_content = split_line[17]
         Fol_contig = split_line[21]

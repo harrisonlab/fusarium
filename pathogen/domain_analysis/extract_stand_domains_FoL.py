@@ -123,7 +123,6 @@ for line in summary_table_lines:
         Fol_contig = split_line[1]
         gene_start = split_line[2]
         gene_end = split_line[3]
-
         FoL_Chr1_LS_start = int(5963944)
         FoL_Chr2_LS_start = int(4903160)
         if str(1) == Fol_contig:

@@ -460,6 +460,40 @@ Contigs were renamed in accordance with ncbi recomendations.
 ```
 
 
+A Bioproject and Biosample was made with NCBI genbank for submission of genomes.
+Following the creation of these submissions, the .fasta assembly was uploaded
+through the submission portal. A note was provided requesting that the assembly
+be run through the contamination screen to aid a more detailed resubmission in
+future. The returned FCSreport.txt was downloaded from the NCBI webportal and
+used to correct the assembly to NCBI standards.
+
+NCBI reports (FCSreport.txt) were manually downloaded to the following loactions:
+
+```bash
+	for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		NCBI_report_dir=genome_submission/$Organism/$Strain/initial_submission
+		mkdir -p $NCBI_report_dir
+	done
+```
+
+These downloaded files were used to correct assemblies:
+
+```bash
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+NCBI_report=$(ls genome_submission/$Organism/$Strain/initial_submission/FCSreport.txt)
+OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+mkdir -p $OutDir
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report > $OutDir/log.txt
+done
+```
+
+<!--
 The Fus2 was manually edited as SIX9 was noted to be split over 2 contigs. These
 contigs were manually joined in geneious and exported back to the cluster
 at the location indicated below. These contigs were renamed.
@@ -474,7 +508,7 @@ at the location indicated below. These contigs were renamed.
     $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file tmp.csv
   done
   rm tmp.csv
-```
+``` -->
 
 
 
@@ -488,12 +522,15 @@ Repeat masking was performed and used the following programs:
 The best assemblies were used to perform repeatmasking
 
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	for BestAss in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep 'FOP2'); do
-	# for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
-		qsub $ProgDir/rep_modeling.sh $BestAss
-		qsub $ProgDir/transposonPSI.sh $BestAss
-	done
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+# for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+Strain=$(echo $BestAss | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $BestAss | rev | cut -f4 -d '/' | rev)
+OutDir=repeat_masked/$Organism/"$Strain"_ncbi/ncbi_submission
+qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
+qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
+done
 ```
 
 The published non-pathogen genome for isolate FO47 was also repeatmasked as
@@ -1240,7 +1277,7 @@ Gene models requireing editing
 	> $OutDir/final_genes_Braker_ed.gff3
 	printf \
 	"contig_19_pilon\tManual_annotation\tgene\t445791\t445964\t0\t+\t.\tID=man_1;
-	contig_19_pilon\tManual_annotation\tmRNA\t445791\t445964\t.\t+\t.\tID=man_1.t1;Parent=man_1;
+	contig_19_pilon\tManual_annotation\tmRNA\t445791\t445964\t.\t+\t.\tID=man_1.t1;Parent=man_1
 	contig_19_pilon\tManual_annotation\tstart_codon\t445791\t445793\t.\t+\t.\tParent=man_1.t1;
 	contig_19_pilon\tManual_annotation\tCDS\t445791\t445964\t.\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
 	contig_19_pilon\tManual_annotation\texon\t445791\t445964\t.\t+\t.\tParent=man_1.t1
@@ -1256,7 +1293,7 @@ Gene models requireing editing
 
 	printf \
 	"contig_10_pilon\tManual_annotation\tgene\t1569\t5055\t0\t+\t.\tID=g13345_ps;
-	contig_10_pilon\tManual_annotation\tmRNA\t1569\t5055\t.\t+\t.\tID=g13345_ps.t1;Parent=g13345_ps;
+	contig_10_pilon\tManual_annotation\tmRNA\t1569\t5055\t.\t+\t.\tID=g13345_ps.t1;Parent=g13345_ps
 	contig_10_pilon\tManual_annotation\tstart_codon\t1569\t1571\t.\t+\t.\tParent=g13345_ps.t1;
 	contig_10_pilon\tManual_annotation\tCDS\t1569\t2856\t.\t+\t0\tID=g13345_ps.t1.CDS1;Parent=g13345_ps.t1
 	contig_10_pilon\tManual_annotation\texon\t1569\t2856\t.\t+\t.\tParent=g13345_ps.t1
@@ -1521,7 +1558,7 @@ done
 		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
 		echo "$Organism - $Strain"
-		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_v2016_tophit_parsed.tbl
+		OutTable=gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
 		$ProgDir/swissprot_parser.py --blast_tbl $SwissTable --blast_db_fasta ../../uniprot/swissprot/uniprot_sprot.fasta > $OutTable
 	done

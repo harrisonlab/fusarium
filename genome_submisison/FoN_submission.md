@@ -156,16 +156,37 @@ them as incomplete ('unknown_UTR').
   	# $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$GeneSource" "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
 ```
 
+```bash
+  	mkdir -p $OutDir/gag/edited2
+  	$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl  $OutDir/gag/edited2/genome.tbl
+```
+
+
+## Generating a structured comment detailing annotation methods
+
+```bash
+printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
+Annotation Provider\tHarrison Lab NIAB-EMR
+Annotation Date\tSEP-2016
+Annotation Version\tRelease 1.01
+Annotation Method\tAb initio gene prediction: Braker 1.9 and CodingQuary 2.0; Functional annotation: Swissprot (July 2016 release) and Interproscan 5.18-57.0" \
+> $OutDir/gag/edited2/annotation_methods.strcmt.txt
+
+```
 ## Final run of tbl2asn
 
 Following correction of the GAG .tbl file, tbl2asn was re-run to provide the
 final genbank submission file.
 
+The options -l paired-ends -a r10k inform how to handle runs of Ns in the
+sequence, these options show that paired-ends have been used to estimate gaps
+and that runs of N's longer than 10 bp should be labelled as gaps.
+
 ```bash
   	cp $Assembly $OutDir/gag/edited/genome.fsa
   	cp $SbtFile $OutDir/gag/edited/genome.sbt
   	mkdir $OutDir/tbl2asn/final
-  	tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]"
+  	tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited2/annotation_methods.strcmt.txt
   	cp $OutDir/tbl2asn/final/genome.sqn $OutDir/tbl2asn/final/$FinalName.sqn
 ```
 

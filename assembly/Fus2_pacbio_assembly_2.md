@@ -104,6 +104,40 @@ Assemblies were polished using Pilon
 
 After investigation, it was found that contigs didnt need to be split.
 
+
+A Bioproject and Biosample was made with NCBI genbank for submission of genomes.
+Following the creation of these submissions, the .fasta assembly was uploaded
+through the submission portal. A note was provided requesting that the assembly
+be run through the contamination screen to aid a more detailed resubmission in
+future. The returned FCSreport.txt was downloaded from the NCBI webportal and
+used to correct the assembly to NCBI standards.
+
+NCBI reports (FCSreport.txt) were manually downloaded to the following loactions:
+
+```bash
+	for Assembly in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		NCBI_report_dir=genome_submission/$Organism/$Strain/initial_submission
+		mkdir -p $NCBI_report_dir
+	done
+```
+
+These downloaded files were used to correct assemblies:
+
+```bash
+	for Assembly in $(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+		NCBI_report=$(ls genome_submission/$Organism/$Strain/initial_submission/FCSreport.txt)
+		OutDir=assembly/canu-1.3/$Organism/$Strain/ncbi_edits
+		mkdir -p $OutDir
+		ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+		$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report > $OutDir/log.txt
+	done
+```
+
+
 Assembly stats were collected using quast
 
 ```bash
@@ -422,9 +456,12 @@ Convert top blast hits into gff annotations
 # Repeatmasking assemblies
 
 ```bash
-  Fus2_pacbio_canu=$(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta)
+  Fus2_pacbio_canu=$(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/ncbi_edits/contigs_min_500bp_renamed.fasta)
   for Assembly in $(echo $Fus2_pacbio_canu); do
-    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    OutDir=repeat_masked/$Organism/"$Strain"_ncbi/ncbi_submission
+    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_ncbi/edited_contigs_repmask
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
     qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
     qsub $ProgDir/transposonPSI.sh $Assembly $OutDir

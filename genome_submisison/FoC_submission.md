@@ -1,0 +1,262 @@
+# Submission Commands
+
+Submisison of annotations with an assembly appears to be a complex process.
+If a genome is to be submitted without annotation then all that is needed is the
+fasta file containing the assembled contigs. If an annotated genome is to be
+submitted then a number of processing steps are required before submission. The
+fasta file of contigs and the gff file of annotations must be combined to form a
+.asn file. The program that does this conversion (tbl2asn) requires the fasta
+files and gff files to be formatted correctly. In the case of the gff file, this
+means parsing it to a .tbl file.
+
+The commands used to parse these files and prepare the F. oxysporum f. sp.
+cepae genome for submisson are shown below.
+
+
+The following note was provided in the WGS submission page on NCBI in the box
+labeled "Private comments to NCBI staff":
+
+```
+I have been advised to submit my assemblies to NCBI early in my submission process to ensure that my contigs pass the contamination screen. This assembly will be revised as appropriate, including renaming of contigs where needed. Please allow me to modify this submission at a later date, including upload of the final gene models.
+
+'For future submissions, you could send us the fasta files early
+in the submission process so we can run them through our foreign
+contamination screen. We will let you know if we find any
+sequences to exclude or trim before you generate your final
+WGS submission.'...'*IMPORTANT* Include a comment that you are submitting
+the fasta files to be screened by the contamination screen
+prior to creating your final annotated submission.'
+```
+
+# Final Submission
+
+These commands were used in the final submission of the FoC Fus2 genome:
+
+
+## Output directory
+An output and working directory was made for genome submission:
+
+```bash
+ProjDir=/home/groups/harrisonlab/project_files/fusarium
+cd $ProjDir
+OutDir="genome_submission/F.oxysporum_fsp_cepae/Fus2"
+  	mkdir -p $OutDir
+```
+
+## SbtFile
+The genbank submission template tool was used at:
+http://www.ncbi.nlm.nih.gov/WebSub/template.cgi
+This produce a template file detailing the submission.
+
+## Setting varibales
+Vairables containing locations of files and options for scripts were set:
+
+```bash
+# Program locations:
+AnnieDir="/home/armita/prog/annie/genomeannotation-annie-c1e848b"
+ProgDir="/home/armita/git_repos/emr_repos/tools/genbank_submission"
+# File locations:
+SbtFile="$ProjDir/$OutDir/genome.sbt"
+Assembly=$(ls $ProjDir/repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask/Fus2_canu_contigs_unmasked.fa)
+InterProTab=$(ls gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv)
+SwissProtBlast=$(ls gene_pred/swissprot/F.oxysporum_fsp_cepae/Fus2_canu_new/swissprot_vJul2016_tophit_parsed.tbl)
+SwissProtFasta=$(ls /home/groups/harrisonlab/uniprot/swissprot/uniprot_sprot.fasta)
+GffFile=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3)
+# tbl2asn options:
+Organism="Fusarium oxysporum f. sp. cepae"
+Strain="Fus2"
+# ncbi_tbl_corrector script options:
+SubmissionID="BFJ63"
+LabID="ArmitageEMR"
+# GeneSource='ab initio prediction:Braker:1.9, CodingQuary:2.0'
+# IDSource='similar to AA sequence:SwissProt:2016_07'
+IDSource='similar to AA sequence:SwissProt'
+# Final submisison file name:
+FinalName="FoC_Fus2_Armitage_2016"
+```
+
+<!-- ## Preparing Gff input file
+
+Parse the Augustus Gff file.
+Transcripts should be renamed as mRNA features. Exons should be added to the
+Gff and unique IDs should be given to all features in the file.
+
+```bash
+# cat $GffFile | sed 's/transcript/mRNA/g' > $OutDir/GffMRNA.gff
+# $ProgDir/generate_tbl_file/exon_generator.pl $OutDir/GffMRNA.gff > $OutDir/corrected_exons.gff
+# $ProgDir/generate_tbl_file/gff_add_id.py --inp_gff $OutDir/corrected_exons.gff --out_gff $OutDir/corrected_exons_id.gff
+``` -->
+
+## Generating .tbl file (GAG)
+
+The Genome Annotation Generator (GAG.py) can be used to convert gff files into
+.tbl format, for use by tbl2asn.
+
+It can also add annotations to features as provided by Annie the Annotation
+extractor.
+
+### Extracting annotations (Annie)
+
+Interproscan and Swissprot annotations were extracted using annie, the
+ANNotation Information Extractor. The output of Annie was filtered to
+keep only annotations with references to ncbi approved databases.
+Note - It is important that transcripts have been re-labelled as mRNA by this
+point.
+
+```bash
+  	python3 $AnnieDir/annie.py -ipr $InterProTab -g $GffFile -b $SwissProtBlast -db $SwissProtFasta -o $OutDir/annie_output.csv --fix_bad_products
+  	$ProgDir/edit_tbl_file/annie_corrector.py --inp_csv $OutDir/annie_output.csv --out_csv $OutDir/annie_corrected_output.csv
+```
+
+### Running GAG
+
+Gag was run using the modified gff file as well as the annie annotation file.
+Gag was noted to output database references incorrectly, so these were modified.
+
+```bash
+mkdir -p $OutDir/gag/round1
+gag.py -f $Assembly -g $GffFile -a $OutDir/annie_corrected_output.csv -o $OutDir/gag/round1 2>&1 | tee $OutDir/gag_log1.txt
+sed -i 's/Dbxref/db_xref/g' $OutDir/gag/round1/genome.tbl
+```
+
+## tbl2asn round 1
+
+tbl2asn was run an initial time to collect error reports on the current
+formatting of the .tbl file.
+Note - all input files for tbl2asn need to be in the same directory and have the
+same basename.
+
+```bash
+cp $Assembly $OutDir/gag/round1/genome.fsa  
+cp $SbtFile $OutDir/gag/round1/genome.sbt
+mkdir -p $OutDir/tbl2asn/round1
+tbl2asn -p $OutDir/gag/round1/. -r $OutDir/tbl2asn/round1 -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]"
+```
+
+## Editing .tbl file
+
+The tbl2asn .val output files were observed and errors corrected. This was done
+with an in house script. The .val file indicated that some cds had premature
+stops, so these were marked as pseudogenes ('pseudo' - SEQ_FEAT.InternalStop)
+and that some genes had cds coordinates that did not match the end of the gene
+if the protein was hanging off a contig ('stop' - SEQ_FEAT.NoStop).
+Furthermore a number of other edits were made to bring the .tbl file in line
+with ncbi guidelines. This included: Marking the source of gene
+predictions and annotations ('add_inference'); Correcting locus_tags to use the
+given ncbi_id ('locus_tag'); Correcting the protein and transcript_ids to
+include the locus_tag and reference to submitter/lab id ('lab_id'), removal of
+annotated names of genes if you don't have high confidence in their validity
+(--gene_id 'remove'). If 5'-UTR and 3'-UTR were not predicted during gene
+annotation then genes, mRNA and exon features need to reflect this by marking
+them as incomplete ('unknown_UTR').
+<!--
+```bash
+  	mkdir -p $OutDir/gag/edited
+  	$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
+  	# $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$GeneSource" "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
+``` -->
+
+```bash
+  	mkdir -p $OutDir/gag/edited
+  	$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl  $OutDir/gag/edited/genome.tbl
+```
+
+
+## Generating a structured comment detailing annotation methods
+
+```bash
+printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
+Annotation Provider\tHarrison Lab NIAB-EMR
+Annotation Date\tSEP-2016
+Annotation Version\tRelease 1.01
+Annotation Method\tAb initio gene prediction: Braker 1.9 and CodingQuary 2.0; Functional annotation: Swissprot (July 2016 release) and Interproscan 5.18-57.0" \
+> $OutDir/gag/edited/annotation_methods.strcmt.txt
+
+```
+## Final run of tbl2asn
+
+Following correction of the GAG .tbl file, tbl2asn was re-run to provide the
+final genbank submission file.
+
+The options -l paired-ends -a r10k inform how to handle runs of Ns in the
+sequence, these options show that paired-ends have been used to estimate gaps
+and that runs of N's longer than 10 bp should be labelled as gaps.
+
+```bash
+  	cp $Assembly $OutDir/gag/edited/genome.fsa
+  	cp $SbtFile $OutDir/gag/edited/genome.sbt
+  	mkdir $OutDir/tbl2asn/final
+  	tbl2asn -p $OutDir/gag/edited/. -r $OutDir/tbl2asn/final -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
+  	cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' >  $OutDir/tbl2asn/final/$FinalName.sqn
+```
+
+
+
+
+
+
+# Preperation of files for FoC isolates 125 and A23
+
+
+
+```bash
+ProjDir=/home/groups/harrisonlab/project_files/fusarium
+cd $ProjDir
+for Assembly in $(ls repeat_masked/F.oxysporum_fsp_cepae/*/filtered_contigs_repmask/*_contigs_unmasked.fa | grep -e '125' -e 'A23' | grep -v -e 'ncbi'); do
+$Organism
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir="genome_submission/F.oxysporum_fsp_cepae/Fus2"
+mkdir -p $OutDir
+
+# Program locations:
+AnnieDir="/home/armita/prog/annie/genomeannotation-annie-c1e848b"
+ProgDir="/home/armita/git_repos/emr_repos/tools/genbank_submission"
+# File locations:
+SbtFile="$ProjDir/$OutDir/genome.sbt"
+
+InterProTab=$(ls gene_pred/interproscan/$Organism/$Strain/"$Strain"_interproscan.tsv)
+SwissProtBlast=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl)
+SwissProtFasta=$(ls /home/groups/harrisonlab/uniprot/swissprot/uniprot_sprot.fasta)
+GffFile=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+# tbl2asn options:
+Organism="Fusarium oxysporum f. sp. cepae"
+Strain="$Strain"
+# ncbi_tbl_corrector script options:
+SubmissionID="BFJ63"
+LabID="ArmitageEMR"
+IDSource='similar to AA sequence:SwissProt'
+# Final submisison file name:
+FinalName="FoC_"$Strain"_Armitage_2016"
+# Generating .tbl file (GAG)
+# Extracting annotations (Annie)
+python3 $AnnieDir/annie.py -ipr $InterProTab -g $GffFile -b $SwissProtBlast -db $SwissProtFasta -o $OutDir/annie_output.csv --fix_bad_products
+$ProgDir/edit_tbl_file/annie_corrector.py --inp_csv $OutDir/annie_output.csv --out_csv $OutDir/annie_corrected_output.csv
+# Running GAG
+mkdir -p $OutDir/gag/round1
+gag.py -f $Assembly -g $GffFile -a $OutDir/annie_corrected_output.csv -o $OutDir/gag/round1 2>&1 | tee $OutDir/gag_log1.txt
+sed -i 's/Dbxref/db_xref/g' $OutDir/gag/round1/genome.tbl
+# tbl2asn round 1
+cp $Assembly $OutDir/gag/round1/genome.fsa  
+cp $SbtFile $OutDir/gag/round1/genome.sbt
+mkdir -p $OutDir/tbl2asn/round1
+tbl2asn -p $OutDir/gag/round1/. -r $OutDir/tbl2asn/round1 -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]"
+# edit tbl file based upon tbl2asn errors file
+mkdir -p $OutDir/gag/edited
+$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl  $OutDir/gag/edited/genome.tbl
+# Generating a structured comment detailing annotation methods
+printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
+Annotation Provider\tHarrison Lab NIAB-EMR
+Annotation Date\tSEP-2016
+Annotation Version\tRelease 1.01
+Annotation Method\tAb initio gene prediction: Braker 1.9 and CodingQuary 2.0; Functional annotation: Swissprot (July 2016 release) and Interproscan 5.18-57.0" \
+> $OutDir/gag/edited2/annotation_methods.strcmt.txt
+# Final run of tbl2asn
+cp $Assembly $OutDir/gag/edited/genome.fsa
+cp $SbtFile $OutDir/gag/edited/genome.sbt
+mkdir $OutDir/tbl2asn/final
+tbl2asn -p $OutDir/gag/edited/. -r $OutDir/tbl2asn/final -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited2/annotation_methods.strcmt.txt
+cp $OutDir/tbl2asn/final/genome.sqn $OutDir/tbl2asn/final/$FinalName.sqn
+done
+```

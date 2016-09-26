@@ -493,6 +493,19 @@ $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_
 done
 ```
 
+Quast was used to collect details on these assemblies
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		echo "$Organism - $Strain"
+    OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
 <!--
 The Fus2 was manually edited as SIX9 was noted to be split over 2 contigs. These
 contigs were manually joined in geneious and exported back to the cluster
@@ -557,31 +570,58 @@ The TransposonPSI masked bases were used to mask additional bases from the
 repeatmasker / repeatmodeller softmasked and harmasked files.
 
 ```bash
-for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w 'Fus2_canu_new'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
-bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
 echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
 echo "Number of masked bases:"
 cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
-	for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa); do
-		OutDir=$(dirname $File)
-		TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-		OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
-		bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
-		echo "$OutFile"
-		echo "Number of masked bases:"
-		cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
-	done
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+```
+
+```
+	repeat_masked/F.oxysporum_fsp_cepae/125/filtered_contigs_repmask/125_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	3952973
+	repeat_masked/F.oxysporum_fsp_cepae/A13/filtered_contigs_repmask/A13_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	4712084
+	repeat_masked/F.oxysporum_fsp_cepae/A23/filtered_contigs_repmask/A23_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	3446078
+	repeat_masked/F.oxysporum_fsp_cepae/A28/filtered_contigs_repmask/A28_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	4304881
+	repeat_masked/F.oxysporum_fsp_cepae/CB3/filtered_contigs_repmask/CB3_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	2630520
+	repeat_masked/F.oxysporum_fsp_cepae/PG/filtered_contigs_repmask/PG_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	3005423
+	repeat_masked/F.oxysporum_fsp_narcissi/N139/filtered_contigs_repmask/N139_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	5709023
+	repeat_masked/F.proliferatum/A8/filtered_contigs_repmask/A8_contigs_softmasked_repeatmasker_TPSI_appended.fa
+	Number of masked bases:
+	1266227
 ```
 
 The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'Fus2_canu' -e 'Fus2_merged'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_edits | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -596,7 +636,7 @@ cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=
 echo
 done
 ```
-
+<!--
 ```
 	F.avenaceum	PG8
 	The number of bases masked by RepeatMasker:	0
@@ -702,7 +742,7 @@ done
 	The number of bases masked by RepeatMasker:	2610912
 	The number of bases masked by TransposonPSI:	806717
 	The total number of masked bases are:	2842870
-```
+``` -->
 
 # Gene Prediction
 
@@ -721,7 +761,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 cd /home/groups/harrisonlab/project_files/fusarium
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e 'Fus2_canu_new'); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 #for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w 'fo47'); do
 echo $Genome;
 qsub $ProgDir/sub_cegma.sh $Genome dna;
@@ -730,7 +770,7 @@ done
 
 Outputs were summarised using the commands:
 ```bash
-	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report | grep -e 'Fus2_canu' -e 'Fus2_merged'); do
+	for File in $(ls gene_pred/cegma/F*/*/*_dna_cegma.completeness_report | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
 		printf "$Species\t$Strain\n";
@@ -972,13 +1012,13 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e 'Fus2_canu' -e 'Fus2_merged' | grep -w 'Fus2_canu_new'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e '125' -e 'A23' -e 'N139' -e 'PG' -e 'CB3'); do
 # for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
 # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
-for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
+for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -e 'FO47_72hrs_rep1' -e 'FO47_72hrs_rep2' -e '55_72hrs_rep3' -e 'Fus2_72hrs_rep2'); do
 Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 echo "$Timepoint"
 FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -1011,57 +1051,75 @@ directory:
 	cp /home/armita/prog/genemark/gm_key_64 ~/.gm_key
 ```
 
+<!-- ```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+done
+printf "\n"
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+for File in alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam; do
+ls -lh $File;
+done
+done
+``` -->
+
+
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep 'Fus2' | grep -e 'Fus2_canu_new' -e 'Fus2_merged' | grep 'cepae' | grep 'Fus2_merged'); do
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'proliferatum'); do
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'narcissi'); do
-	Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
-	while [ $Jobs -gt 1 ]; do
-	sleep 10
-	printf "."
-	Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
-	done
-	printf "\n"
-	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-	echo "$Organism - $Strain"
-	mkdir -p alignment/$Organism/$Strain/concatenated
-	# samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-	# alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
-	# alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
-	# alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
-	# alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
-	# alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
-	# alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-	# alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-	OutDir=gene_pred/braker/$Organism/"$Strain"_braker_pacbio
-	AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
-	GeneModelName="$Organism"_"$Strain"_braker_new
-	rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_new
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-	qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
-	done
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+done
+printf "\n"
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+mkdir -p alignment/$Organism/$Strain/concatenated
+samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+OutDir=gene_pred/braker/$Organism/"$Strain"_braker_pacbio
+AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+GeneModelName="$Organism"_"$Strain"_braker_new
+rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_new
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+done
 ```
 
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff | grep -e 'Fus2_canu_new' -e 'Fus2_merged'); do
+	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 		getAnnoFasta.pl $File
 		OutDir=$(dirname $File)
 		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
@@ -1153,7 +1211,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -1170,7 +1228,7 @@ Secondly, genes were predicted using CodingQuary:
 
 ```bash
 
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1957,7 +2015,23 @@ commands to do this were as follows:
 	  $ProgDir/OPTIMuS_EMR.pl $GeneSeq "threshold" 1 > $OutDir/"$Strain"_protospacer_sites.txt
 	  $ProgDir/Optimus2csv.py --inp $OutDir/"$Strain"_protospacer_sites.txt  --out $OutDir/"$Strain"_protospacer_by_gene.csv
 	done
-``` -->
+```
+
+Unrelated to this project, protospacers were identified in some fasta files for Fiona
+```bash
+for GeneSeq in $(ls analysis/protospacers/for_fiona/*.fasta | grep -v 'parsed'); do
+echo $GeneSeq
+OutDir=$(dirname $GeneSeq)
+OutName=$(basename $GeneSeq | sed 's/.fasta//g')
+# cat $GeneSeq | sed 's/-//g' | tr '///'> $OutDir/"$OutName"_parsed.fasta
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+$ProgDir/fasta_replace_ambiguous_bp.py --inp $GeneSeq > $OutDir/"$OutName"_parsed.fasta
+ProgDir=~/git_repos/emr_repos/scripts/fusarium_venenatum/OPTIMus
+$ProgDir/OPTIMuS_EMR.pl $OutDir/"$OutName"_parsed.fasta "threshold" 1 > $OutDir/"$OutName"_protospacer_sites.txt
+$ProgDir/Optimus2csv.py --inp $OutDir/"$OutName"_protospacer_sites.txt  --out $OutDir/"$OutName"_protospacer_by_gene.csv
+done
+```
+-->
 
 ## 4.1 Chracterisation of LS regions
 

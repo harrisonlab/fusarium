@@ -93,7 +93,7 @@ An output and working directory was made for genome submission:
   ProjDir=/home/groups/harrisonlab/project_files/fusarium
   cd $ProjDir
   OutDir="genome_submission/F.oxysporum_fsp_cepae/Fus2"
-mkdir -p $OutDir
+  mkdir -p $OutDir
 ```
 
 ## SbtFile
@@ -183,7 +183,7 @@ same basename.
 cp $Assembly $OutDir/gag/round1/genome.fsa  
 cp $SbtFile $OutDir/gag/round1/genome.sbt
 mkdir -p $OutDir/tbl2asn/round1
-tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]"
+tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -Z $OutDir/gag/round1/discrep.txt -j "[organism=$Organism] [strain=$Strain]"
 ```
 
 ## Editing .tbl file
@@ -211,7 +211,7 @@ them as incomplete ('unknown_UTR').
 
 ```bash
   mkdir -p $OutDir/gag/edited
-  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl  $OutDir/gag/edited/genome.tbl
+  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl $OutDir/gag/edited/genome.tbl
 ```
 
 
@@ -239,7 +239,7 @@ and that runs of N's longer than 10 bp should be labelled as gaps.
   cp $Assembly $OutDir/gag/edited/genome.fsa
   cp $SbtFile $OutDir/gag/edited/genome.sbt
   mkdir $OutDir/tbl2asn/final
-  tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
+  tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
   cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' >  $OutDir/tbl2asn/final/$FinalName.sqn
 ```
 

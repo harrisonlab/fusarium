@@ -496,14 +496,14 @@ done
 Quast was used to collect details on these assemblies
 
 ```bash
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
-    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
-		echo "$Organism - $Strain"
-    OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
-    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-  done
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+echo "$Organism - $Strain"
+OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
 ```
 
 <!--
@@ -1245,7 +1245,7 @@ models:
 
 ```bash
 	# for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -w -e 'Fus2'); do
-for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_pacbio/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g' | sed 's/_braker_pacbio//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1286,7 +1286,7 @@ done
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep 'Fus2_canu_new'); do
+for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 echo $DirPath;
 cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1294,7 +1294,47 @@ cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
 echo "";
 done
 ```
+```
+gene_pred/codingquary/F.oxysporum_fsp_cepae/125/final
+17454
+1521
+18975
 
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/final
+18245
+901
+19146
+
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/final
+17245
+1087
+18332
+
+gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/final
+17367
+1434
+18801
+
+gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/final
+16975
+1326
+18301
+
+gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/final
+16784
+1286
+18070
+
+gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/final
+21647
+1773
+23420
+
+gene_pred/codingquary/F.proliferatum/A8/final
+20008
+97
+20105
+```
 
 ## Manual editing of gene models
 
@@ -1713,7 +1753,7 @@ seqret -sequence $Assembly -feature -fformat gff -fopenfile $Gff -osformat embl 
 mv contig_1_pilon.embl $OutDir/"$Strain"_parsed_genome.embl
 done
 ``` -->
-
+<!--
 ```bash
 for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1735,7 +1775,7 @@ seqret -sequence $Assembly -feature -fformat gff -fopenfile $Gff -osformat embl 
 mv contig_1_pilon.embl $OutDir/"$Strain"_parsed_genome.embl
 done
 ```
-
+ -->
 
 
 #Genomic analysis

@@ -183,7 +183,7 @@ same basename.
 cp $Assembly $OutDir/gag/round1/genome.fsa  
 cp $SbtFile $OutDir/gag/round1/genome.sbt
 mkdir -p $OutDir/tbl2asn/round1
-tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -Z $OutDir/gag/round1/discrep.txt -j "[organism=$Organism] [strain=$Strain]"
+tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -X E -Z $OutDir/gag/round1/discrep.txt -j "[organism=$Organism] [strain=$Strain]"
 ```
 
 ## Editing .tbl file
@@ -236,11 +236,12 @@ sequence, these options show that paired-ends have been used to estimate gaps
 and that runs of N's longer than 10 bp should be labelled as gaps.
 
 ```bash
-  cp $Assembly $OutDir/gag/edited/genome.fsa
+  # cp $Assembly $OutDir/gag/edited/genome.fsa
+  cat $Assembly | sed 's/>contig_23_pilon/>contig_23_pilon [location=mitochondrion]/g' | sed 's/>contig_26_pilon/>contig_26_pilon [location=ribosome] [completeness=complete]/g' > $OutDir/gag/edited/genome.fsa
   cp $SbtFile $OutDir/gag/edited/genome.sbt
   mkdir $OutDir/tbl2asn/final
-  tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
-  cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' >  $OutDir/tbl2asn/final/$FinalName.sqn
+  tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
+  cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
 ```
 
 

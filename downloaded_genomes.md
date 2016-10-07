@@ -312,7 +312,36 @@ Required programs:
     ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
     qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
   done
+```
 
+Those genes that were predicted as secreted and tested positive by effectorP
+were identified:
+
+```bash
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287' | grep 'fo47'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+cat $File | grep 'Effector' | cut -f1 > $Headers
+Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+cat $OutFile | grep '>' | tr -d '>' | cut -f1 > $OutFileHeaders
+cat $OutFileHeaders | wc -l
+# Gff=$(ls gene_pred/final_genes/$Organism/$Strain/*/final_genes_appended.gff3)
+# EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+# ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+# $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+done
+```
+```
+F.oxysporum - fo47
+319
+F.oxysporum_fsp_lycopersici - 4287
+294
 ```
 
 ### C) Identification of MIMP-flanking genes
@@ -498,10 +527,22 @@ cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
 # $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
 echo "number of Secreted CAZY genes identified:"
 # cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
-cat $CazyHeaders $SecretedHeaders | cut -f1 | sort | uniq -d | wc -l
+cat $CazyHeaders $SecretedHeaders | cut -f1 | sort | uniq -d > $OutDir/"$Strain"_CAZY_secreted_headers.txt
+cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l
 done
 ```
-
+```
+  F.oxysporum - fo47
+  number of CAZY genes identified:
+  1108
+  number of Secreted CAZY genes identified:
+  411
+  F.oxysporum_fsp_lycopersici - 4287
+  number of CAZY genes identified:
+  880
+  number of Secreted CAZY genes identified:
+  346
+```
 Note - the CAZY genes identified may need further filtering based on e value and
 cuttoff length - see below:
 
@@ -520,27 +561,24 @@ Cols in yourfile.out.dm.ps:
 * For fungi, use E-value < 1e-17 and coverage > 0.45
 
 * The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
-<!--
+
 ## D) AntiSMASH
 
 Antismash was run to identify clusters of secondary metabolite genes within
 the genome. Antismash was run using the weserver at:
 http://antismash.secondarymetabolites.org
 
-The assembly and Gff annotaiton of gene models was converted into EMBL format prior to submission:
+Parsing results for fo47:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/antismash/$Organism/$Strain
-mkdir -p $OutDir
-Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
-seqret -sequence $Assembly -feature -fformat gff -fopenfile $Gff -osformat embl -auto
-mv contig_1_pilon.embl $OutDir/"$Strain"_parsed_genome.embl
-done
-``` -->
+AntiSmash=analysis/antismash/04337fe1-dce8-460b-9111-873d28f4f8e2/Supercontig_1.1.final.gbk
+OutDir=$(dirname $AntiSmash)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/Fus2_secondary_metabolite_regions.gff
+GeneGff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf
+bedtools intersect -u -a $GeneGff -b $OutDir/Fus2_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f4 -d '"' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+```
 
 
 #Genomic analysis

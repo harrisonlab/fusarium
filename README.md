@@ -570,7 +570,7 @@ The TransposonPSI masked bases were used to mask additional bases from the
 repeatmasker / repeatmodeller softmasked and harmasked files.
 
 ```bash
-for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
@@ -579,49 +579,50 @@ bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
 echo "Number of masked bases:"
 cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
-for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
 echo "$OutFile"
-bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
-echo "Number of masked bases:"
-cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+# echo "Number of masked bases:"
+# cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[N]", ".")}' | cut -f2 -d ' '
 done
 ```
 
 ```
-	repeat_masked/F.oxysporum_fsp_cepae/125/filtered_contigs_repmask/125_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	3952973
-	repeat_masked/F.oxysporum_fsp_cepae/A13/filtered_contigs_repmask/A13_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	4712084
-	repeat_masked/F.oxysporum_fsp_cepae/A23/filtered_contigs_repmask/A23_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	3446078
-	repeat_masked/F.oxysporum_fsp_cepae/A28/filtered_contigs_repmask/A28_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	4304881
-	repeat_masked/F.oxysporum_fsp_cepae/CB3/filtered_contigs_repmask/CB3_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	2630520
-	repeat_masked/F.oxysporum_fsp_cepae/PG/filtered_contigs_repmask/PG_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	3005423
-	repeat_masked/F.oxysporum_fsp_narcissi/N139/filtered_contigs_repmask/N139_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	5709023
-	repeat_masked/F.proliferatum/A8/filtered_contigs_repmask/A8_contigs_softmasked_repeatmasker_TPSI_appended.fa
-	Number of masked bases:
-	1266227
+repeat_masked/F.oxysporum_fsp_cepae/125_ncbi/ncbi_submission/125_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+3967501
+repeat_masked/F.oxysporum_fsp_cepae/A13_ncbi/ncbi_submission/A13_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+4946858
+repeat_masked/F.oxysporum_fsp_cepae/A23_ncbi/ncbi_submission/A23_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+3546886
+repeat_masked/F.oxysporum_fsp_cepae/A28_ncbi/ncbi_submission/A28_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+4456082
+repeat_masked/F.oxysporum_fsp_cepae/CB3_ncbi/ncbi_submission/CB3_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+2927012
+repeat_masked/F.oxysporum_fsp_cepae/PG_ncbi/ncbi_submission/PG_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+3038447
+repeat_masked/F.oxysporum_fsp_narcissi/N139_ncbi/ncbi_submission/N139_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+5671216
+repeat_masked/F.proliferatum/A8_ncbi/ncbi_submission/A8_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+1124505
 ```
 
 The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_edits | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_submission | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -638,110 +639,42 @@ done
 ```
 <!--
 ```
-	F.avenaceum	PG8
-	The number of bases masked by RepeatMasker:	0
-	The number of bases masked by TransposonPSI:	0
-	The total number of masked bases are:	0
+F.oxysporum_fsp_cepae   A13_ncbi
+The number of bases masked by RepeatMasker:     4673077
+The number of bases masked by TransposonPSI:    1555142
+The total number of masked bases are:   4946858
 
-	F.oxysporum_fsp_cepae		125
-	The number of bases masked by RepeatMasker:		3707484
-	The number of bases masked by TransposonPSI:		1210934
-	The total number of masked bases are:		3952973
+F.oxysporum_fsp_cepae   A23_ncbi
+The number of bases masked by RepeatMasker:     3279757
+The number of bases masked by TransposonPSI:    1061656
+The total number of masked bases are:   3546886
 
-	F.oxysporum_fsp_cepae		55
-	The number of bases masked by RepeatMasker:		3206161
-	The number of bases masked by TransposonPSI:		1031019
-	The total number of masked bases are:		3466359
+F.oxysporum_fsp_cepae   A28_ncbi
+The number of bases masked by RepeatMasker:     4149965
+The number of bases masked by TransposonPSI:    1190026
+The total number of masked bases are:   4456082
 
-	F.oxysporum_fsp_cepae		A1-2
-	The number of bases masked by RepeatMasker:		1937168
-	The number of bases masked by TransposonPSI:		816426
-	The total number of masked bases are:		2177343
+F.oxysporum_fsp_cepae   CB3_ncbi
+The number of bases masked by RepeatMasker:     2686212
+The number of bases masked by TransposonPSI:    842157
+The total number of masked bases are:   2927012
 
-	F.oxysporum_fsp_cepae		A13
-	The number of bases masked by RepeatMasker:		4414509
-	The number of bases masked by TransposonPSI:		1555142
-	The total number of masked bases are:		4712084
+F.oxysporum_fsp_cepae   PG_ncbi
+The number of bases masked by RepeatMasker:     2827891
+The number of bases masked by TransposonPSI:    865813
+The total number of masked bases are:   3038447
 
-	F.oxysporum_fsp_cepae		A23
-	The number of bases masked by RepeatMasker:		3156362
-	The number of bases masked by TransposonPSI:		1061656
-	The total number of masked bases are:		3446078
+F.oxysporum_fsp_narcissi        N139_ncbi
+The number of bases masked by RepeatMasker:     5377773
+The number of bases masked by TransposonPSI:    1642358
+The total number of masked bases are:   5671216
 
-	F.oxysporum_fsp_cepae		A28
-	The number of bases masked by RepeatMasker:		4001386
-	The number of bases masked by TransposonPSI:		1189369
-	The total number of masked bases are:		4304881
+F.proliferatum  A8_ncbi
+The number of bases masked by RepeatMasker:     924627
+The number of bases masked by TransposonPSI:    258296
+The total number of masked bases are:   1124505
 
-	F.oxysporum_fsp_cepae		CB3
-	The number of bases masked by RepeatMasker:		2382071
-	The number of bases masked by TransposonPSI:		842157
-	The total number of masked bases are:		2630520
 
-	F.oxysporum_fsp_cepae		D2
-	The number of bases masked by RepeatMasker:		1363000
-	The number of bases masked by TransposonPSI:		594012
-	The total number of masked bases are:		1632798
-
-	F.oxysporum_fsp_cepae	Fus2
-	The number of bases masked by RepeatMasker:	3716805
-	The number of bases masked by TransposonPSI:	1280301
-	The total number of masked bases are:	3934042
-
-	F.oxysporum_fsp_cepae		HB17
-	The number of bases masked by RepeatMasker:		3385838
-	The number of bases masked by TransposonPSI:		1077091
-	The total number of masked bases are:		3649652
-
-	F.oxysporum_fsp_cepae		HB6
-	The number of bases masked by RepeatMasker:		3216000
-	The number of bases masked by TransposonPSI:		995170
-	The total number of masked bases are:		3455823
-
-	F.oxysporum_fsp_cepae		PG
-	The number of bases masked by RepeatMasker:		2769568
-	The number of bases masked by TransposonPSI:		865813
-	The total number of masked bases are:		3005423
-
-	F.oxysporum_fsp_narcissi		N139
-	The number of bases masked by RepeatMasker:		5404179
-	The number of bases masked by TransposonPSI:		1655249
-	The total number of masked bases are:		5709023
-
-	F.oxysporum_fsp_pisi	FOP1
-	The number of bases masked by RepeatMasker:	8494861
-	The number of bases masked by TransposonPSI:	2353732
-	The total number of masked bases are:	8868988
-
-	F.oxysporum_fsp_pisi		FOP5
-	The number of bases masked by RepeatMasker:		3880611
-	The number of bases masked by TransposonPSI:		1313995
-	The total number of masked bases are:		4193700
-
-	F.oxysporum_fsp_pisi		L5
-	The number of bases masked by RepeatMasker:		1287737
-	The number of bases masked by TransposonPSI:		417513
-	The total number of masked bases are:		1456488
-
-	F.oxysporum_fsp_pisi		PG18
-	The number of bases masked by RepeatMasker:		5349661
-	The number of bases masked by TransposonPSI:		1627436
-	The total number of masked bases are:		5673770
-
-	F.oxysporum_fsp_pisi		PG3
-	The number of bases masked by RepeatMasker:		4686428
-	The number of bases masked by TransposonPSI:		1663269
-	The total number of masked bases are:		5011872
-
-	F.proliferatum		A8
-	The number of bases masked by RepeatMasker:		1065627
-	The number of bases masked by TransposonPSI:		278366
-	The total number of masked bases are:		1266227
-
-	F.oxysporum	fo47
-	The number of bases masked by RepeatMasker:	2610912
-	The number of bases masked by TransposonPSI:	806717
-	The total number of masked bases are:	2842870
 ``` -->
 
 # Gene Prediction
@@ -802,8 +735,8 @@ First, RNAseq data was aligned to Fusarium genomes.
  for Folder in $(ls -d raw_rna/paired/F.oxysporum_fsp_cepae/*); do
 	 FolderName=$(echo $Folder | rev | cut -f1 -d '/' | rev);
 	 echo $FolderName;
-	 ls $Folder/F;
-	 ls $Folder/R;
+	 ls -lh $Folder/F;
+	 ls -lh $Folder/R;
 	done
 ```
 This contained the following data:
@@ -901,24 +834,6 @@ Perform qc of RNAseq timecourse data
 		done
 	done
 ```
-```
-raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep1
-Your job 6436212 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep2
-Your job 6436213 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/55_72hrs_rep3
-Your job 6436214 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/control_72hrs_rep2
-Your job 6436215 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/control_72hrs_rep3
-Your job 6436216 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep1
-Your job 6436217 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep2
-Your job 6436218 ("rna_qc_fastq-mcf.sh") has been submitted
-raw_rna/paired/F.oxysporum_fsp_cepae/FO47_72hrs_rep3
-Your job 6436219 ("rna_qc_fastq-mcf.sh") has been submitted
-```
 
 Data quality was visualised using fastqc:
 ```bash
@@ -1012,13 +927,13 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e '125' -e 'A23' -e 'N139' -e 'PG' -e 'CB3'); do
+# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8'); do
 # for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
-# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
-for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -e 'FO47_72hrs_rep1' -e 'FO47_72hrs_rep2' -e '55_72hrs_rep3' -e 'Fus2_72hrs_rep2'); do
+for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -e 'FO47_72hrs_rep2'); do
 Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 echo "$Timepoint"
 FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -1052,7 +967,7 @@ directory:
 ```
 
 <!-- ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 10
@@ -1072,7 +987,7 @@ done
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep 'Fus2' | grep -e 'Fus2_canu_new' -e 'Fus2_merged' | grep 'cepae' | grep 'Fus2_merged'); do
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'proliferatum'); do
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v -e 'A8' -e '125' -e 'CB3'); do
 Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 10
@@ -1687,7 +1602,7 @@ Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep 'Fus2'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 OutDir=$(dirname $File)
@@ -1710,7 +1625,8 @@ cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
 CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
 $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
 echo "number of Secreted CAZY genes identified:"
-cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
+cat $CazyGffSecreted | grep -w 'mRNA' | cut -f9 | tr -d 'ID=' | cut -f1 -d ';' > $OutDir/"$Strain"_CAZY_secreted_headers.txt
+cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l
 done
 ```
 
@@ -1777,6 +1693,16 @@ done
 ```
  -->
 
+```bash
+AntiSmash=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/contig_1_pilon.final.gbk
+OutDir=$(dirname $AntiSmash)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/Fus2_secondary_metabolite_regions.gff
+GeneGff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+bedtools intersect -u -a $GeneGff -b $OutDir/Fus2_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > $OutDir/metabolite_cluster_gene_headers.txt
+
+```
 
 #Genomic analysis
 

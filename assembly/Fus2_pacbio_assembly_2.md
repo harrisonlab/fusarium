@@ -467,12 +467,12 @@ Convert top blast hits into gff annotations
 # Repeatmasking assemblies
 
 ```bash
-  Fus2_pacbio_canu=$(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/ncbi_edits/contigs_min_500bp_renamed.fasta)
+  Fus2_pacbio_canu=$(ls assembly/canu-1.3/F.oxysporum_fsp_cepae/Fus2_canu/pilon/pilon.fasta)
   for Assembly in $(echo $Fus2_pacbio_canu); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
     OutDir=repeat_masked/$Organism/"$Strain"_ncbi/ncbi_submission
-    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_ncbi/edited_contigs_repmask
+    OutDir=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
     qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
     qsub $ProgDir/transposonPSI.sh $Assembly $OutDir

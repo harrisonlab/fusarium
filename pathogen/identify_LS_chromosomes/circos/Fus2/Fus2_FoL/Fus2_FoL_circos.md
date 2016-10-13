@@ -13,7 +13,8 @@
   cat $OutDir/Fus2_genome.txt > $OutDir/Fus2_FoL_genome.txt
   tac $OutDir/FoL_genome.txt >> $OutDir/Fus2_FoL_genome.txt
 
-  cp $OutDir/Fus2_FoL_genome.txt $OutDir/Fus2_FoL_genome_edited.txt
+  # cp $OutDir/Fus2_FoL_genome.txt $OutDir/Fus2_FoL_genome_edited.txt
+  cat $OutDir/Fus2_FoL_genome_edited.txt | grep -v -e 'chr23' -e 'chr24' -e 'chr25' -e 'chr26' -e 'chr27' -e 'chr28' -e 'chr29' -e 'chr30' -e 'chr31' -e 'chr32' -e 'chr33' -e 'chr34' > $OutDir/Fus2_FoL_genome_edited2.txt
   # The file $OutDir/Fus2_FoL_genome.txt was maually edited:
   # It was called: $OutDir/Fus2_FoL_genome_edit.txt
 ```

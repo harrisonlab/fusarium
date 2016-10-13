@@ -1293,28 +1293,28 @@ Gene models requireing editing
 	contig_19_pilon\tManual_annotation\tmRNA\t445791\t445964\t.\t+\t.\tID=man_1.t1;Parent=man_1
 	contig_19_pilon\tManual_annotation\tstart_codon\t445791\t445793\t.\t+\t.\tParent=man_1.t1;
 	contig_19_pilon\tManual_annotation\tCDS\t445791\t445964\t.\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
-	contig_19_pilon\tManual_annotation\texon\t445791\t445964\t.\t+\t.\tParent=man_1.t1
+	contig_19_pilon\tManual_annotation\texon\t445791\t445964\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;
 	contig_19_pilon\tManual_annotation\tstop_codon\t445962\t445964\t.\t+\t.\tParent=man_1.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 
 	cat $CodingQuaryGff \
-	| grep -v -w -e 'NS.00001' -e 'NS.00002' -e 'NS.00003' \
+	| grep -v -w -e 'NS.00001' -e 'NS.00002' -e 'NS.00003' -e 'NS.04463' -e 'CUFF.11065.1.82' \
 	> $OutDir/PredictedPass_ed.gff3
 	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 
 	touch $OutDir/manual_annotations.gff3
-
-	printf \
-	"contig_10_pilon\tManual_annotation\tgene\t1569\t5055\t0\t+\t.\tID=g13345_ps;
-	contig_10_pilon\tManual_annotation\tmRNA\t1569\t5055\t.\t+\t.\tID=g13345_ps.t1;Parent=g13345_ps
-	contig_10_pilon\tManual_annotation\tstart_codon\t1569\t1571\t.\t+\t.\tParent=g13345_ps.t1;
-	contig_10_pilon\tManual_annotation\tCDS\t1569\t2856\t.\t+\t0\tID=g13345_ps.t1.CDS1;Parent=g13345_ps.t1
-	contig_10_pilon\tManual_annotation\texon\t1569\t2856\t.\t+\t.\tParent=g13345_ps.t1
-	contig_10_pilon\tManual_annotation\tintron\t2857\t2905\t.\t+\t.\tParent=g13345_ps.t1
-	contig_10_pilon\tManual_annotation\tCDS\t2906\t5055\t.\t+\t2\tID=g13345_ps.t1.CDS2;Parent=g13345_ps.t1
-	contig_10_pilon\tManual_annotation\texon\t2906\t5055\t.\t+\t.\tParent=g13345_ps.t1
-	contig_10_pilon\tManual_annotation\tstop_codon\t5053\t5055\t.\t+\t.\tParent=g13345_ps.t1;\n" \
-	> $OutDir/pseudogenes.gff3
+	#
+	# printf \
+	# "contig_10_pilon\tManual_annotation\tgene\t1569\t5055\t0\t+\t.\tID=g13345_ps;
+	# contig_10_pilon\tManual_annotation\tmRNA\t1569\t5055\t.\t+\t.\tID=g13345_ps.t1;Parent=g13345_ps
+	# contig_10_pilon\tManual_annotation\tstart_codon\t1569\t1571\t.\t+\t.\tParent=g13345_ps.t1;
+	# contig_10_pilon\tManual_annotation\tCDS\t1569\t2856\t.\t+\t0\tID=g13345_ps.t1.CDS1;Parent=g13345_ps.t1
+	# contig_10_pilon\tManual_annotation\texon\t1569\t2856\t.\t+\t.\tParent=g13345_ps.t1
+	# contig_10_pilon\tManual_annotation\tintron\t2857\t2905\t.\t+\t.\tParent=g13345_ps.t1
+	# contig_10_pilon\tManual_annotation\tCDS\t2906\t5055\t.\t+\t2\tID=g13345_ps.t1.CDS2;Parent=g13345_ps.t1
+	# contig_10_pilon\tManual_annotation\texon\t2906\t5055\t.\t+\t.\tID=g13345_ps.t1.exon1;Parent=g13345_ps.t1;
+	# contig_10_pilon\tManual_annotation\tstop_codon\t5053\t5055\t.\t+\t.\tParent=g13345_ps.t1;\n" \
+	# > $OutDir/pseudogenes.gff3
 ```
 
 ```bash
@@ -1352,7 +1352,7 @@ Gene models requireing editing
 	"contig_1793\tManual_annotation\tgene\t2\t219\t1\t+\t.\tID=man_1;
 	contig_1793\tManual_annotation\tmRNA\t2\t219\t1\t+\t.\tID=man_1.t1;Parent=man_1
 	contig_1793\tManual_annotation\tCDS\t2\t219\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
-	contig_1793\tManual_annotation\texon\t2\t219\t.\t+\t.\tParent=man_1.t1
+	contig_1793\tManual_annotation\texon\t2\t219\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;
 	contig_1793\tManual_annotation\tstop_codon\t217\t219\t.\t+\t.\tParent=man_1.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 ```
@@ -1381,14 +1381,14 @@ Gene models requireing editing
 	contig_2087\tManual_annotation\tmRNA\t261\t524\t1\t+\t.\tID=man_1.t1;Parent=man_1
 	contig_2087\tManual_annotation\tstart_codon\t261\t263\t.\t+\t.\tParent=man_1.t1;
 	contig_2087\tManual_annotation\tCDS\t261\t524\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
-	contig_2087\tManual_annotation\texon\t261\t524\t.\t+\t.\tParent=man_1.t1\n" \
+	contig_2087\tManual_annotation\texon\t261\t524\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 	printf \
 	"contig_972\tManual_annotation\tgene\t333\t506\t1\t-\t.\tID=man_2;
 	contig_972\tManual_annotation\tmRNA\t333\t506\t1\t-\t.\tID=man_2.t1;Parent=man_2
 	contig_972\tManual_annotation\tstop_codon\t333\t335\t.\t-\t.\tParent=man_2.t1;
 	contig_972\tManual_annotation\tCDS\t333\t506\t1.0\t-\t0\tID=man_2.t1.CDS1;Parent=man_2.t1
-	contig_972\tManual_annotation\texon\t333\t506\t.\t-\t.\tParent=man_2.t1
+	contig_972\tManual_annotation\texon\t333\t506\t.\t-\t.\tID=man_2.t1.exon1;Parent=man_2.t1;
 	contig_972\tManual_annotation\tstart_codon\t504\t506\t.\t-\t.\tParent=man_2.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 ```

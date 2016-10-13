@@ -222,3 +222,111 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment
 qsub $ProgDir/bowtie/sub_bowtie_2lib.sh $Reference $F1_Read $R1_Read $F2_Read $R2_Read $OutDir $Strain
 done
 ```
+
+# 5 Promer alignment of Assemblies
+
+## 5.1 against Fus2 genome
+
+MUMmer was run to align assemblies against the reference genome. Previous publication
+of legum-infecting Fusarium used this approach to identify contigs that were present
+/ absent in different f. spp. - A cuttoff of 30% of the bp in a contig containing an
+alignment was used in that case.
+
+```bash
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w 'Fus2_canu_new')
+for Query in $(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'Fus2_canu_new' -e 'ncbi_submission' -e '4287_chromosomal' -e 'fo47'); do
+Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+Prefix="$Strain"_vs_Fus2
+OutDir=analysis/genome_alignment/mummer/$Organism/$Strain/$Prefix
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
+qsub $ProgDir/sub_MUMmer.sh $Reference $Query $Prefix $OutDir
+done
+```
+
+The number of bases of the reference covered with aligned reads were identified.
+The script below converts any base involved in an alignment to a 'Q' and then
+counts the number of Qs in each fasta sequence.
+
+```bash
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w 'Fus2_canu_new')
+for Coordinates in $(ls analysis/genome_alignment/mummer/F*/*/*/*_vs_Fus2_coords.tsv | grep -e 'ncbi' -e 'Fus2_canu_new' -e '4287_chromosomal' -e 'fo47' | grep -e '4287_chromosomal' -e 'fo47'); do
+Strain=$(echo $Coordinates | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Coordinates | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutFile=$(echo $Coordinates | sed 's/_coords.tsv/_results.tsv/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
+$ProgDir/mummer_ls_regions.py --coord $Coordinates --fasta $Reference > $OutFile
+done
+paste analysis/genome_alignment/mummer/F*/*/*/*_vs_Fus2_results.tsv > analysis/genome_alignment/mummer/vs_Fus2_canu_new.tsv
+```
+
+Sequences tend to show 50-70% of bp being covered by an aligned sequence in core contigs
+whereas 1-35% seem to represent regions which are LS. The weakness of this methodology is shown
+by mitochondrial sequence being absent as that seems to have not assembled in the
+majority of assemblies and with the long contigs of the reference genome seeming to have
+poorer alignment stats than MiSeq assemblies.
+
+## 5.2 against FoL genome
+
+```bash
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w '4287_chromosomal')
+for Query in $(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'Fus2_canu_new' -e 'ncbi_submission' -e '4287_chromosomal' -e 'fo47'); do
+Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+Prefix="$Strain"_vs_FoL
+OutDir=analysis/genome_alignment/mummer/$Organism/$Strain/$Prefix
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
+qsub $ProgDir/sub_MUMmer.sh $Reference $Query $Prefix $OutDir
+done
+```
+
+The number of bases of the reference covered with aligned reads were identified.
+The script below converts any base involved in an alignment to a 'Q' and then
+counts the number of Qs in each fasta sequence.
+
+```bash
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w '4287_chromosomal')
+for Coordinates in $(ls analysis/genome_alignment/mummer/F*/*/*/*_vs_FoL_coords.tsv | grep -e 'ncbi' -e 'Fus2_canu_new' -e '4287_chromosomal' -e 'fo47'); do
+Strain=$(echo $Coordinates | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Coordinates | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutFile=$(echo $Coordinates | sed 's/_coords.tsv/_results.tsv/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
+$ProgDir/mummer_ls_regions.py --coord $Coordinates --fasta $Reference > $OutFile
+done
+paste analysis/genome_alignment/mummer/F*/*/*/*_vs_FoL_results.tsv > analysis/genome_alignment/mummer/vs_FoL_canu_new.tsv
+```
+
+# 5 minimap alignment of Assemblies
+
+```bash
+Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w 'Fus2_canu_new')
+for Query in $(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'Fus2_canu_new' -e 'ncbi_submission'); do
+Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+Prefix="$Strain"_vs_Fus2
+OutDir=analysis/genome_alignment/minimap/$Organism/$Strain/$Prefix
+mkdir -p $OutDir
+# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
+# qsub $ProgDir/sub_MUMmer.sh $Reference $Query $Prefix $OutDir
+minimap $Reference $Query > $OutDir/$Prefix.mini
+Order=$(cat $Reference | grep '>' | sed 's/>//g' | sed -r "s/\n/ /g")
+OrderCSV=$(echo $Order | sed 's/ /,/g')
+cat $OutDir/$Prefix.mini | layout -i $OrderCSV > $OutDir/$Prefix.layout
+plotLayout.R -f $OutDir/$Prefix.layout -p $OutDir/$Prefix.pdf
+for Contig in $Order; do
+echo $Contig
+mkdir -p $OutDir/by_contig/$Contig
+# if [ $(cat $OutDir/$Prefix.mini | grep "$Contig") == '' ]; then
+# echo "No alignment"
+# else;
+cat $OutDir/$Prefix.mini | layout -i $Contig > $OutDir/by_contig/$Contig/"$Prefix"_"$Contig".layout
+plotLayout.R -f $OutDir/by_contig/$Contig/"$Prefix"_"$Contig".layout -p $OutDir/by_contig/$Contig/"$Prefix"_"$Contig".pdf
+# fi
+done
+done
+```

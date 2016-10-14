@@ -428,7 +428,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ```bash
   ProjDir=/home/groups/harrisonlab/project_files/fusarium
   cd $ProjDir
-  IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
+  IsolateAbrv=FoC_vs_Fo_vs_FoL_publication_ncbi
   WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
   mkdir -p $WorkDir
   mkdir -p $WorkDir/formatted
@@ -443,7 +443,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC 125
 ```bash
   Taxon_code=125
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -452,7 +452,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A23
 ```bash
   Taxon_code=A23
-  Fasta_file=$(ls  gene_pred/final_genes/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls  gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -461,7 +461,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC Fus2
 ```bash
   Taxon_code=Fus2
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -472,7 +472,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A13
 ```bash
   Taxon_code=A13
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -481,7 +481,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A28
 ```bash
   Taxon_code=A28
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -490,7 +490,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC CB3
 ```bash
   Taxon_code=CB3
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -499,7 +499,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC PG
 ```bash
   Taxon_code=PG
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta

@@ -61,7 +61,7 @@ Files were uploaded into a folder created within my preload folder using ftp.
 # Bioproject="PRJNA338236"
 SubFolder="FoC_PRJNA338256"
 mkdir $SubFolder
-for Read in $(ls raw_dna/paired/F.*/*/*/*.fastq.gz | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2'); do
+for Read in $(ls raw_dna/paired/F.*/*/*/*.fastq.gz | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'Fus2' | grep -v s_6_*_sequence.fastq.gz); do
   echo $Read;
   cp $Read $SubFolder/.
 done
@@ -70,8 +70,8 @@ cd $SubFolder
 gzip concatenated_pacbio.fastq
 ftp ftp-private.ncbi.nlm.nih.gov
 cd uploads/andrew.armitage@emr.ac.uk_6L2oakBI
-mkdir FoC_PRJNA338256
-cd FoC_PRJNA338256
+mkdir FoC_PRJNA338256_2
+cd FoC_PRJNA338256_2
 # put FoN_PRJNA338236
 prompt
 mput *
@@ -119,7 +119,7 @@ GffFile=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/fin
 Organism="Fusarium oxysporum f. sp. cepae"
 Strain="Fus2"
 # ncbi_tbl_corrector script options:
-SubmissionID="BFJ63"
+SubmissionID="BFJ65"
 LabID="ArmitageEMR"
 # GeneSource='ab initio prediction:Braker:1.9, CodingQuary:2.0'
 # IDSource='similar to AA sequence:SwissProt:2016_07'
@@ -170,6 +170,18 @@ Gag was noted to output database references incorrectly, so these were modified.
 mkdir -p $OutDir/gag/round1
 gag.py -f $Assembly -g $GffFile -a $OutDir/annie_corrected_output.csv --fix_start_stop -o $OutDir/gag/round1 2>&1 | tee $OutDir/gag_log1.txt
 sed -i 's/Dbxref/db_xref/g' $OutDir/gag/round1/genome.tbl
+```
+
+## manual edits
+
+The gene NS_04463 was found to use the same start and stop codon as predicted
+gene CUFF_4598_1_205. Both of these genes were predicted by codingquary. Neither
+of these genes were predicted as having alternative splicing. As such the gene
+NS_04463 was removed. The same was found for genes CUFF_11067_2_85 and
+CUFF_11065_1_82 and as a result CUFF_11067_2_85 was removed.
+
+```bash
+  nano $OutDir/gag/round1/genome.tbl
 ```
 
 ## tbl2asn round 1

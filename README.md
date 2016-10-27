@@ -66,8 +66,8 @@ Assembly of remaining reads
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/AF064/R
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CH5-2/F
 	mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_cepae/CH5-2/R
-
 ```
+
 Sequence data was moved into the appropriate directories
 
 ```bash

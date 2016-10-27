@@ -2,14 +2,14 @@
 ```bash
   # for Strain in 125 A23 Fus2_edited_v2 55 A1-2 CB3 HB6 A13 A28 D2 PG fo47 4287; do
 ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/domain_analysis
-for SummaryTab in $(ls gene_pred/annotations/*/*/*_gene_annotations.tab); do
+for SummaryTab in $(ls gene_pred/annotations/*/*/*_gene_annotations.tab | grep -v '4287' | grep 'Fus2'); do
 Organism=$(echo $SummaryTab | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $SummaryTab | rev | cut -f2 -d '/' | rev)
 echo "$Organism - $Strain"
 OutDir=analysis/NLR/$Organism/$Strain
 mkdir -p $OutDir
 StandTxt=$OutDir/"$Strain"_stand.txt
-$ProgDir/extract_stand_domains.py --summary_table $SummaryTab > $StandTxt
+$ProgDir/extract_stand_domains_Fus2.py --summary_table $SummaryTab > $StandTxt
 done
 ```
 

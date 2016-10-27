@@ -25,7 +25,7 @@ from operator import itemgetter
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--FoL_genome',required=True,type=str,help='The genome assembly of FoL 4287')
-ap.add_argument('--summary_table',required=True,type=str,help='The summary table from Fo)build_annot_table.py')
+ap.add_argument('--summary_table',required=True,type=str,help='The summary table from Fo_build_annot_table.py')
 ap.add_argument('--N_term_out',required=True,type=str,help='The output file detailing N terminal domains by chromosome')
 ap.add_argument('--NBD_out',required=True,type=str,help='The output file detailing NBD domains by chromosome')
 ap.add_argument('--C_term_out',required=True,type=str,help='The output file detailing C terminal domains by chromosome')
@@ -116,8 +116,8 @@ for line in summary_table_lines:
     line = line.rstrip()
     split_line = line.split("\t")
     gene_id = split_line[0]
-    if len(split_line) >= 34:
-        interpro_info = split_line[33]
+    if len(split_line) >= 32:
+        interpro_info = split_line[31]
         orthogroup = split_line[15]
         orthogroup_content = split_line[17]
         Fol_contig = split_line[1]

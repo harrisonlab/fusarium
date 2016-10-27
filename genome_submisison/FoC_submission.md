@@ -223,7 +223,7 @@ them as incomplete ('unknown_UTR').
 
 ```bash
   mkdir -p $OutDir/gag/edited
-  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl $OutDir/gag/edited/genome.tbl
+  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
 ```
 
 
@@ -248,14 +248,23 @@ sequence, these options show that paired-ends have been used to estimate gaps
 and that runs of N's longer than 10 bp should be labelled as gaps.
 
 ```bash
-  # cp $Assembly $OutDir/gag/edited/genome.fsa
-  cat $Assembly | sed 's/>contig_23_pilon/>contig_23_pilon [location=mitochondrion]/g' | sed 's/>contig_26_pilon/>contig_26_pilon [location=ribosome] [completeness=complete]/g' > $OutDir/gag/edited/genome.fsa
+  cp $Assembly $OutDir/gag/edited/genome.fsa
+  # cat $Assembly | sed 's/>contig_23_pilon/>contig_23_pilon [location=mitochondrion]/g' | sed 's/>contig_26_pilon/>contig_26_pilon [location=ribosome]/g' > $OutDir/gag/edited/genome.fsa
   cp $SbtFile $OutDir/gag/edited/genome.sbt
   mkdir $OutDir/tbl2asn/final
   tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
   cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
 ```
+<!--
+## Additional Information
 
+During genome submission the following files were provided in response to questions:
+
+Do any sequences belong to a chromosome?
+
+printf ""
+
+Contigs were associated with FoL chromosomes  -->
 
 
 

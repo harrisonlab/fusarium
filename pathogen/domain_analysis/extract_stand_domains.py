@@ -22,7 +22,7 @@ from collections import defaultdict
 from operator import itemgetter
 
 ap = argparse.ArgumentParser()
-ap.add_argument('--summary_table',required=True,type=str,help='The summary table from Fo)build_annot_table.py')
+ap.add_argument('--summary_table',required=True,type=str,help='The summary table from Fo_build_annot_table.py')
 
 
 conf = ap.parse_args()

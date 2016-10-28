@@ -927,9 +927,9 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi'); do
 # for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
-for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+# for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -987,7 +987,7 @@ done
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep 'Fus2' | grep -e 'Fus2_canu_new' -e 'Fus2_merged' | grep 'cepae' | grep 'Fus2_merged'); do
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'proliferatum'); do
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v -e 'A8' -e '125' -e 'CB3'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi'); do
 Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 10
@@ -1022,7 +1022,7 @@ alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
 alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
 alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
 alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
-OutDir=gene_pred/braker/$Organism/"$Strain"_braker_pacbio
+OutDir=gene_pred/braker/$Organism/"$Strain"_braker
 AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
 GeneModelName="$Organism"_"$Strain"_braker_new
 rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_new
@@ -1034,12 +1034,12 @@ done
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-	for File in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
-		getAnnoFasta.pl $File
-		OutDir=$(dirname $File)
-		echo "##gff-version 3" > $OutDir/augustus_extracted.gff
-		cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
-	done
+for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi' | grep -v '125'); do
+getAnnoFasta.pl $File
+OutDir=$(dirname $File)
+echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+done
 ```
 
 The relationship between gene models and aligned reads was investigated. To do
@@ -1126,14 +1126,13 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
-
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
 mkdir -p $OutDir
-AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+AcceptedHits=$(ls alignment/$Organism/$Strain/concatenated/concatenated.bam)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
@@ -1143,12 +1142,18 @@ Secondly, genes were predicted using CodingQuary:
 
 ```bash
 
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' | grep -e 'A8' -e '125' -e 'CB3'); do
+Jobs=$(qstat | grep 'sub_cuffli' | grep 'qw' | wc -l)
+while [ $Jobs -ge 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'sub_cuffli' | grep 'qw' | wc -l)
+done
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 OutDir=gene_pred/codingquary/$Organism/$Strain
-CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
+CufflinksGTF=$(ls gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf)
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 done
@@ -1160,15 +1165,15 @@ models:
 
 ```bash
 	# for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -w -e 'Fus2'); do
-for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
-Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g' | sed 's/_braker_pacbio//g')
+for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' | grep -v '125'); do
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_pacbio//g'| sed 's/_braker//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
 CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
 PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
 AddDir=gene_pred/codingquary/$Organism/$Strain/additional
-FinalDir=gene_pred/codingquary/$Organism/$Strain/final
+FinalDir=gene_pred/final_genes/$Organism/$Strain/final
 AddGenesList=$AddDir/additional_genes.txt
 AddGenesGff=$AddDir/additional_genes.gff
 FinalGff=$AddDir/combined_genes.gff
@@ -1201,7 +1206,7 @@ done
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/codingquary/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi' | grep -v '125'); do
 echo $DirPath;
 cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1210,45 +1215,40 @@ echo "";
 done
 ```
 ```
-gene_pred/codingquary/F.oxysporum_fsp_cepae/125/final
-17454
-1521
-18975
+gene_pred/final_genes/F.oxysporum_fsp_cepae/A13_ncbi/final
+18016
+922
+18938
 
-gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/final
-18245
-901
-19146
+gene_pred/final_genes/F.oxysporum_fsp_cepae/A23_ncbi/final
+17311
+1098
+18409
 
-gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/final
-17245
-1087
-18332
+gene_pred/final_genes/F.oxysporum_fsp_cepae/A28_ncbi/final
+17404
+1469
+18873
 
-gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/final
-17367
-1434
-18801
+gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3_ncbi/final
+16857
+1318
+18175
 
-gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/final
-16975
-1326
-18301
+gene_pred/final_genes/F.oxysporum_fsp_cepae/PG_ncbi/final
+16864
+1223
+18087
 
-gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/final
-16784
-1286
-18070
+gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/final
+19075
+1772
+20847
 
-gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/final
-21647
-1773
-23420
-
-gene_pred/codingquary/F.proliferatum/A8/final
-20008
-97
-20105
+gene_pred/final_genes/F.proliferatum/A8_ncbi/final
+15553
+42
+15595
 ```
 
 ## Manual editing of gene models
@@ -1262,7 +1262,7 @@ from other Fusarium spp. genomes:
 
 ### Fus2:
 
-Gene models requireing editing
+Gene models requiring editing
  * FTF1 g16934 - delete gene, replace with CodingQuary model.
  * SIX3 g16847, g16190 - A23 one copy
  * SIX5 g16849 - A23 missing intron
@@ -1649,15 +1649,27 @@ Cols in yourfile.out.dm.ps:
 
 * The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
 
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/CAZY
+Secreted=gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_final_sp_no_trans_mem_headers.txt
+CAZY=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY.out.dm.ps
+Gff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+$ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff | less -S
+```
+
+
+
 ## D) AntiSMASH
 
 Antismash was run to identify clusters of secondary metabolite genes within
 the genome. Antismash was run using the weserver at:
 http://antismash.secondarymetabolites.org
 
+
+<!--
 The assembly and Gff annotaiton of gene models was converted into EMBL format prior to submission:
 
-<!-- ```bash
+ ```bash
 for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -w 'Fus2_canu_new'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -1693,15 +1705,42 @@ done
 ```
  -->
 
+Results of web-annotation of gene clusters within the assembly were downloaded to
+the following firectories:
+
 ```bash
-AntiSmash=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/contig_1_pilon.final.gbk
-OutDir=$(dirname $AntiSmash)
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'canu_new' -e 'ncbi'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=analysis/antismash/$Organism/$Strain
+mkdir -p $OutDir
+done
+```
+
+```bash
+	for Zip in $(ls analysis/antismash/*/*/*.zip); do
+		OutDir=$(dirname $Zip)
+		unzip -d $OutDir $Zip
+	done
+```
+
+```bash
+# AntiSmash=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/contig_1_pilon.final.gbk
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk); do
+Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
+OutDir=analysis/antismash/$Organism/$Strain
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
 $ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/Fus2_secondary_metabolite_regions.gff
-GeneGff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+printf "Number of clusters detected:\t"
+cat $OutDir/Fus2_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
+# GeneGff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+GeneGff=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3
 bedtools intersect -u -a $GeneGff -b $OutDir/Fus2_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
 cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > $OutDir/metabolite_cluster_gene_headers.txt
-
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+done
 ```
 
 #Genomic analysis
@@ -2052,7 +2091,7 @@ assemblies.
 
 ```bash
 	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w 'Fus2_canu_new'); do
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -v 'Fus2_canu_new' | grep 'ncbi'); do
 		echo $Assembly
 		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
 		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
@@ -2063,7 +2102,7 @@ Once blast searches had completed, the BLAST hits were converted to GFF
 annotations:
 
 ```bash
-for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -w 'Fus2_canu_new'); do
+for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -v -w 'Fus2_canu_new' | grep 'ncbi'); do
 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
@@ -2082,7 +2121,7 @@ done
 OutFile=analysis/blast_homology/Fo_path_genes_CRX_summary.tab
 echo "Organism" > tmp2.tab
 cat analysis/blast_homology/F.proliferatum/A8/A8_Fo_path_genes_CRX.fa_homologs.csv | cut -f1 >> tmp2.tab
-for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -v -w -e 'Fus2' -e 'Fus2_edited_v1' -e 'Fus2_edited_v2' -e 'Fus2_canu' -e 'Fus2_3' -e '4287'); do
+for BlastHits in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.csv | grep -v -w -e 'Fus2' -e 'Fus2_edited_v1' -e 'Fus2_edited_v2' -e 'Fus2_canu' -e 'Fus2_3' -e '4287' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 echo "$Organism" > tmp.tab
@@ -2096,11 +2135,11 @@ rm tmp2.tab
 ```
 
 ```bash
-for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity' | grep -w 'Fus2_canu_new'); do
+for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.gff | grep -v 'trinity' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
 Strain=$(echo $HitsGff | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
-GffAppended=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3
+GffAppended=$(ls gene_pred/final/$Organism/"$Strain"*/final/final_genes_appended.gff3)
 OutDir=$(dirname $HitsGff)
 SixIntersect=$OutDir/"$Strain"_Fo_path_genes_CRX.fa_hit_genes.bed
 bedtools intersect -wao -a $HitsGff -b $GffAppended > $SixIntersect

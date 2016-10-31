@@ -443,7 +443,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC 125
 ```bash
   Taxon_code=125
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -452,7 +452,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A23
 ```bash
   Taxon_code=A23
-  Fasta_file=$(ls  gene_pred/codingquary/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls  gene_pred/final_genes/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -461,7 +461,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC Fus2
 ```bash
   Taxon_code=Fus2
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -472,7 +472,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A13
 ```bash
   Taxon_code=A13
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -481,7 +481,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A28
 ```bash
   Taxon_code=A28
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -490,7 +490,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC CB3
 ```bash
   Taxon_code=CB3
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/CB3/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -499,7 +499,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC PG
 ```bash
   Taxon_code=PG
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -541,33 +541,33 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ## 4.3.a Perform an all-vs-all blast of the proteins
 
 ```bash
-  BlastDB=$WorkDir/blastall/$IsolateAbrv.db
+BlastDB=$WorkDir/blastall/$IsolateAbrv.db
 
-  makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
-  BlastOut=$WorkDir/all-vs-all_results.tsv
-  mkdir -p $WorkDir/splitfiles
+makeblastdb -in $Good_proteins_file -dbtype prot -out $BlastDB
+BlastOut=$WorkDir/all-vs-all_results.tsv
+mkdir -p $WorkDir/splitfiles
 
-  SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-  $SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
+SplitDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+$SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
 
-  ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
-  for File in $(find $WorkDir/splitfiles); do
-    Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
-    while [ $Jobs -gt 1 ]; do
-      sleep 3
-      printf "."
-      Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
-    done
-    printf "\n"
-    echo $File
-    BlastOut=$(echo $File | sed 's/.fa/.tab/g')
-    qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
-  done
+ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
+for File in $(find $WorkDir/splitfiles); do
+Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 3
+printf "."
+Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+done
+printf "\n"
+echo $File
+BlastOut=$(echo $File | sed 's/.fa/.tab/g')
+qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
+done
 ```
 
 ## 4.3.b Merge the all-vs-all blast results  
 ```bash  
-  MergeHits="$IsolateAbrv"_blast.tab
+  MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
   printf "" > $MergeHits
   for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
     File=$(ls $WorkDir/splitfiles/*_$Num)
@@ -578,6 +578,18 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ## 4.4 Perform ortholog identification
 
 ```bash
+  Jobs=$(qstat | grep 'blast_500' | wc -l)
+  while [ $Jobs -gt 0 ]; do
+  sleep 60
+  printf "."
+  Jobs=$(qstat | grep 'blast_500' | wc -l)
+  done
+  MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
+  printf "" > $MergeHits
+  for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
+    File=$(ls $WorkDir/splitfiles/*_$Num)
+    cat $File
+  done > $MergeHits
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
   MergeHits="$IsolateAbrv"_blast.tab
   GoodProts=$WorkDir/goodProteins/goodProteins.fasta

@@ -481,7 +481,7 @@ NCBI reports (FCSreport.txt) were manually downloaded to the following loactions
 These downloaded files were used to correct assemblies:
 
 ```bash
-for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'N139'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -489,7 +489,7 @@ NCBI_report=$(ls genome_submission/$Organism/$Strain/initial_submission/FCSrepor
 OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
 mkdir -p $OutDir
 ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report > $OutDir/log.txt
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report > $OutDir/log.txt
 done
 ```
 
@@ -1034,7 +1034,7 @@ done
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi' | grep -v '125'); do
+for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi'); do
 getAnnoFasta.pl $File
 OutDir=$(dirname $File)
 echo "##gff-version 3" > $OutDir/augustus_extracted.gff
@@ -1165,7 +1165,7 @@ models:
 
 ```bash
 	# for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -w -e 'Fus2'); do
-for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' | grep -v '125'); do
+for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi'); do
 Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_pacbio//g'| sed 's/_braker//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1206,7 +1206,7 @@ done
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi' | grep -v '125'); do
+for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi'); do
 echo $DirPath;
 cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1215,6 +1215,11 @@ echo "";
 done
 ```
 ```
+gene_pred/final_genes/F.oxysporum_fsp_cepae/125_ncbi/final
+17225
+1612
+18837
+
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A13_ncbi/final
 18016
 922
@@ -1507,7 +1512,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1554,7 +1559,7 @@ commands:
 
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -1566,7 +1571,7 @@ done
 ```
 
 ```bash
-	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+	for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 		# SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 		Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
@@ -1584,7 +1589,7 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/CAZY/$Organism/$Strain
@@ -1718,29 +1723,63 @@ done
 ```
 
 ```bash
-	for Zip in $(ls analysis/antismash/*/*/*.zip); do
-		OutDir=$(dirname $Zip)
-		unzip -d $OutDir $Zip
-	done
+for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e 'A8' -e 'N139'); do
+OutDir=$(dirname $Zip)
+unzip -d $OutDir $Zip
+done
 ```
 
 ```bash
 # AntiSmash=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/contig_1_pilon.final.gbk
-for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk); do
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e 'A8' -e 'N139'); do
 Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
 OutDir=analysis/antismash/$Organism/$Strain
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
-$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/Fus2_secondary_metabolite_regions.gff
+$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/"$Strain"_secondary_metabolite_regions.gff
 printf "Number of clusters detected:\t"
-cat $OutDir/Fus2_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
+cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
 # GeneGff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
 GeneGff=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3
-bedtools intersect -u -a $GeneGff -b $OutDir/Fus2_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
+bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
 cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > $OutDir/metabolite_cluster_gene_headers.txt
 printf "Number of predicted genes in clusters:\t"
 cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
 done
+```
+
+These clusters represenyed the following genes. Note that these numbers just
+show the number of intersected genes with gff clusters and are not confirmed by
+function
+```
+F.oxysporum_fsp_cepae - Fus2_canu_new
+Number of clusters detected:	50
+Number of predicted genes in clusters:	720
+F.oxysporum_fsp_cepae - 125_ncbi
+Number of clusters detected:	46
+Number of predicted genes in clusters:	570
+F.oxysporum_fsp_cepae - A13_ncbi
+Number of clusters detected:	49
+Number of predicted genes in clusters:	624
+F.oxysporum_fsp_cepae - A23_ncbi
+Number of clusters detected:	46
+Number of predicted genes in clusters:	564
+F.oxysporum_fsp_cepae - A28_ncbi
+Number of clusters detected:	46
+Number of predicted genes in clusters:	667
+F.oxysporum_fsp_cepae - CB3_ncbi
+Number of clusters detected:	44
+Number of predicted genes in clusters:	611
+F.oxysporum_fsp_cepae - PG_ncbi
+Number of clusters detected:	45
+Number of predicted genes in clusters:	643
+F.oxysporum_fsp_narcissi - N139_ncbi
+Number of clusters detected:	46
+Number of predicted genes in clusters:	608
+F.proliferatum - A8_ncbi
+Number of clusters detected:	58
+Number of predicted genes in clusters:	770
 ```
 
 #Genomic analysis
@@ -1818,7 +1857,7 @@ the following commands:
 SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 CurPath=$PWD
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -1843,25 +1882,25 @@ done
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-	for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
-	Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
-	Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
-	InStringAA=''
-	InStringNeg=''
-	InStringTab=''
-	InStringTxt=''
-	SigpDir=final_genes_signalp-4.1
-	for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-	InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
-	InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
-	InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
-	InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
-	done
-	cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
-	cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
-	tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
-	cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
-	done
+for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
+Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=final_genes_signalp-4.1
+for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";  
+InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";  
+InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
+InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";  
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
+done
 ```
 
 Some proteins that are incorporated into the cell membrane require secretion.
@@ -1871,7 +1910,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -1883,18 +1922,37 @@ Those proteins with transmembrane domains were removed from lists of Signal
 peptide containing proteins
 
 ```bash
-	for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
-		Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-		echo "$Organism - $Strain"
-		TmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
-		cat $File | cut -f1 > $TmHeaders
-		SigP=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.aa)
-		OutDir=$(dirname $SigP)
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-		$ProgDir/extract_from_fasta.py --fasta $SigP --headers $TmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
-		cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l
-	done
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+TmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
+cat $File | cut -f1 > $TmHeaders
+SigP=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.aa)
+OutDir=$(dirname $SigP)
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $SigP --headers $TmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
+cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l
+done
+```
+
+```
+	F.oxysporum_fsp_cepae - 125_ncbi
+	1430
+	F.oxysporum_fsp_cepae - A13_ncbi
+	1515
+	F.oxysporum_fsp_cepae - A23_ncbi
+	1431
+	F.oxysporum_fsp_cepae - A28_ncbi
+	1454
+	F.oxysporum_fsp_cepae - CB3_ncbi
+	1439
+	F.oxysporum_fsp_cepae - PG_ncbi
+	1447
+	F.oxysporum_fsp_narcissi - N139_ncbi
+	1564
+	F.proliferatum - A8_ncbi
+	1275
 ```
 
 
@@ -1904,7 +1962,7 @@ Required programs:
  * EffectorP.py
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 BaseName="$Organism"_"$Strain"_EffectorP
@@ -1918,7 +1976,7 @@ Those genes that were predicted as secreted and tested positive by effectorP
 were identified:
 
 ```bash
-for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -1935,13 +1993,32 @@ Gff=$(ls gene_pred/final_genes/$Organism/$Strain/*/final_genes_appended.gff3)
 EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
-done
+done > tmp.txt
+```
+
+```
+F.oxysporum_fsp_cepae - 125_ncbi
+348
+F.oxysporum_fsp_cepae - A13_ncbi
+365
+F.oxysporum_fsp_cepae - A23_ncbi
+355
+F.oxysporum_fsp_cepae - A28_ncbi
+346
+F.oxysporum_fsp_cepae - CB3_ncbi
+351
+F.oxysporum_fsp_cepae - PG_ncbi
+342
+F.oxysporum_fsp_narcissi - N139_ncbi
+399
+F.proliferatum - A8_ncbi
+266
 ```
 
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 BrakerGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
@@ -1961,7 +2038,7 @@ MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
 cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpGenesTxt
 cat $MimpGenesTxt | wc -l
 echo ""
-done
+done > tmp.txt
 ```
 
 ```
@@ -1970,6 +2047,55 @@ done
 	153
 	The following transcripts intersect mimps:
 	157
+
+F.oxysporum_fsp_cepae - 125_ncbi
+The number of mimps identified:
+140
+The following transcripts intersect mimps:
+101
+
+F.oxysporum_fsp_cepae - A13_ncbi
+The number of mimps identified:
+55
+The following transcripts intersect mimps:
+52
+
+F.oxysporum_fsp_cepae - A23_ncbi
+The number of mimps identified:
+136
+The following transcripts intersect mimps:
+88
+
+F.oxysporum_fsp_cepae - A28_ncbi
+The number of mimps identified:
+35
+The following transcripts intersect mimps:
+35
+
+F.oxysporum_fsp_cepae - CB3_ncbi
+The number of mimps identified:
+30
+The following transcripts intersect mimps:
+33
+
+F.oxysporum_fsp_cepae - PG_ncbi
+The number of mimps identified:
+51
+The following transcripts intersect mimps:
+46
+
+F.oxysporum_fsp_narcissi - N139_ncbi
+The number of mimps identified:
+207
+The following transcripts intersect mimps:
+119
+
+F.proliferatum - A8_ncbi
+The number of mimps identified:
+6
+The following transcripts intersect mimps:
+11
+
 ```
 
 ```bash
@@ -1983,20 +2109,40 @@ Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-	for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -w -v -e 'Fus2_edited_v1' -e 'Fus2_edited_v2' -e 'Fus2_merged' -e 'Fus2'); do
-		Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-		echo "$Organism - $Strain"
-		Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
-		OutFile=$(echo "$File" | sed 's/.gff/_secreted.gff/g')
-		SecretedHeaders=$(echo "$Secretome" | sed 's/.aa/_headers.txt/g')
-		cat $Secretome | grep '>' | tr -d '>' > $SecretedHeaders
-		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-		$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
-		cat $OutFile | grep -w 'mRNA' | wc -l
-	done
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -w -v -e 'Fus2_edited_v1' -e 'Fus2_edited_v2' -e 'Fus2_merged' -e 'Fus2' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/.gff/_secreted.gff/g')
+SecretedHeaders=$(echo "$Secretome" | sed 's/.aa/_headers.txt/g')
+cat $Secretome | grep '>' | tr -d '>' > $SecretedHeaders
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
+cat $OutFile | grep -w 'mRNA' | wc -l
+done
 ```
 
+```
+F.oxysporum_fsp_cepae - 125_ncbi
+26
+F.oxysporum_fsp_cepae - A13_ncbi
+10
+F.oxysporum_fsp_cepae - A23_ncbi
+22
+F.oxysporum_fsp_cepae - A28_ncbi
+5
+F.oxysporum_fsp_cepae - CB3_ncbi
+1
+F.oxysporum_fsp_cepae - Fus2_canu_new
+31
+F.oxysporum_fsp_cepae - PG_ncbi
+3
+F.oxysporum_fsp_narcissi - N139_ncbi
+31
+F.proliferatum - A8_ncbi
+1
+```
 
 # 4. Genomic analysis
 <!--
@@ -2024,7 +2170,14 @@ commands to do this were as follows:
 
 Unrelated to this project, protospacers were identified in some fasta files for Fiona
 ```bash
-for GeneSeq in $(ls analysis/protospacers/for_fiona/*.fasta | grep -v 'parsed'); do
+CurDir=$PWD
+OutDir=analysis/protospacers/for_fiona
+mkdir -p $CurDir
+cd $OutDir
+wget ftp://ftp.bioinfo.wsu.edu/species/Fragaria_vesca/Fvesca-genome.v1.0/genes/fvesca_v1.0_genemark_hybrid.fna.gz
+gunzip fvesca_v1.0_genemark_hybrid.fna.gz
+cd $CurDir
+for GeneSeq in $(ls analysis/protospacers/for_fiona/fvesca_v1.0_genemark_hybrid.fna); do
 echo $GeneSeq
 OutDir=$(dirname $GeneSeq)
 OutName=$(basename $GeneSeq | sed 's/.fasta//g')
@@ -2035,6 +2188,8 @@ ProgDir=~/git_repos/emr_repos/scripts/fusarium_venenatum/OPTIMus
 $ProgDir/OPTIMuS_EMR.pl $OutDir/"$OutName"_parsed.fasta "threshold" 1 > $OutDir/"$OutName"_protospacer_sites.txt
 $ProgDir/Optimus2csv.py --inp $OutDir/"$OutName"_protospacer_sites.txt  --out $OutDir/"$OutName"_protospacer_by_gene.csv
 done
+
+cat analysis/protospacers/for_fiona/fvesca_v1.0_genemark_hybrid.fna_protospacer_by_gene.csv | grep "^>gene06466-v1.0-hybrid" | sed 's/\t/\n/g'| grep 'unique' | sort -t ':' -k3 -n  > $OutDir/"$OutName"_gene06466_unique_protospacers.txt
 ```
 -->
 
@@ -2139,7 +2294,7 @@ for HitsGff in $(ls analysis/blast_homology/*/*/*Fo_path_genes_CRX.fa_homologs.g
 Strain=$(echo $HitsGff | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
-GffAppended=$(ls gene_pred/final/$Organism/"$Strain"*/final/final_genes_appended.gff3)
+GffAppended=$(ls gene_pred/final_genes/$Organism/"$Strain"*/final/final_genes_appended.gff3)
 OutDir=$(dirname $HitsGff)
 SixIntersect=$OutDir/"$Strain"_Fo_path_genes_CRX.fa_hit_genes.bed
 bedtools intersect -wao -a $HitsGff -b $GffAppended > $SixIntersect

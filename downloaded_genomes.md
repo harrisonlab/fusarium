@@ -635,18 +635,73 @@ Antismash was run to identify clusters of secondary metabolite genes within
 the genome. Antismash was run using the weserver at:
 http://antismash.secondarymetabolites.org
 
-Parsing results for fo47:
+
+Results of web-annotation of gene clusters within the assembly were downloaded to
+the following directories:
 
 ```bash
-AntiSmash=analysis/antismash/04337fe1-dce8-460b-9111-873d28f4f8e2/Supercontig_1.1.final.gbk
-OutDir=$(dirname $AntiSmash)
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
-$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/Fus2_secondary_metabolite_regions.gff
-GeneGff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf
-bedtools intersect -u -a $GeneGff -b $OutDir/Fus2_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
-cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f4 -d '"' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '4287_v2' -e 'fo47'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=analysis/antismash/$Organism/$Strain
+mkdir -p $OutDir
+done
 ```
 
+```bash
+for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e '4287_v2' -e 'fo47'); do
+OutDir=$(dirname $Zip)
+unzip -d $OutDir $Zip
+done
+```
+
+
+```bash
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep 'fo47'); do
+Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/antismash/$Organism/$Strain
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/"$Strain"_secondary_metabolite_regions.gff
+printf "Number of clusters detected:\t"
+cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
+GeneGff=$(ls assembly/external_group/$Organism/$Strain/*/*.gtf | grep -e 'fungidb' -e 'broad' | grep -v -e 'FungiDB-29_Foxysporum4287_parsed' -e 'fo47_1_transcripts_parsed')
+bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f2 -d '"' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+done
+
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -e '4287_v2'); do
+Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/antismash/$Organism/$Strain
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+$ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/"$Strain"_secondary_metabolite_regions.gff
+printf "Number of clusters detected:\t"
+cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
+GeneGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff)
+bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > $OutDir/metabolite_cluster_gene_headers.txt
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+done
+```
+
+These clusters represenyed the following genes. Note that these numbers just
+show the number of intersected genes with gff clusters and are not confirmed by
+function
+
+```
+F.oxysporum - fo47
+Number of clusters detected:	47
+Number of predicted genes in clusters:	705
+F.oxysporum_fsp_lycopersici - 4287_v2
+Number of clusters detected:	49
+Number of predicted genes in clusters:	861
+```
 
 #Genomic analysis
 

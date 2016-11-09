@@ -24,18 +24,27 @@ Circos plots were generated for reassembly of the Fus2 genome
   # Make 100kb windows for plots
   $ProgDir/fasta2gff_windows.py --genome $Fus2_genome --size 20 > $OutDir/Fus2_20kb_windows.gff
 
-  # Convert FoC MiSeq reads aligning in 100kb windows into coverage stats
-# for ReadsBam in $(ls analysis/genome_alignment/bowtie/F.*/*/vs_Fus2_hardmasked_max1200/Fus2_canu_contigs_hardmasked_repeatmasker_TPSI_appended.fa_aligned_sorted.bam | grep -w -e 'Fus2' -e '125' -e 'A28' -e 'A13' -e 'CB3' -e 'PG' -e 'A23' -e 'A28' -e 'A8' ); do
-for ReadsBam in $(ls analysis/genome_alignment/bowtie/F.*/*/vs_Fus2_unmasked_max1200/Fus2_canu_contigs_unmasked.fa_aligned_sorted.bam | grep -w -e 'Fus2' -e '125' -e 'A28' -e 'A13' -e 'CB3' -e 'PG' -e 'A23' -e 'A28' -e 'A8' ); do
-Organism=$(echo $ReadsBam | rev | cut -f4 -d '/' | rev)
-Strain=$(echo $ReadsBam | rev | cut -f3 -d '/' | rev)
-AlignDir=$(dirname $ReadsBam)
-echo "$Organism - $Strain"
-bedtools coverage -abam $ReadsBam -b $OutDir/Fus2_20kb_windows.gff > $AlignDir/"$Strain"_coverage_vs_Fus2.bed
-# Convert coverage bed files into circos format
-$ProgDir/coverage_bed2circos.py --bed $AlignDir/"$Strain"_coverage_vs_Fus2.bed > $OutDir/"$Strain"_coverage_vs_Fus2_unmasked_scatterplot.txt
-ls $OutDir/"$Strain"_coverage_vs_Fus2_unmasked_scatterplot.txt
+#   # Convert FoC MiSeq reads aligning in 100kb windows into coverage stats
+# # for ReadsBam in $(ls analysis/genome_alignment/bowtie/F.*/*/vs_Fus2_hardmasked_max1200/Fus2_canu_contigs_hardmasked_repeatmasker_TPSI_appended.fa_aligned_sorted.bam | grep -w -e 'Fus2' -e '125' -e 'A28' -e 'A13' -e 'CB3' -e 'PG' -e 'A23' -e 'A28' -e 'A8' ); do
+# for ReadsBam in $(ls analysis/genome_alignment/bowtie/F.*/*/vs_Fus2_unmasked_max1200/Fus2_canu_contigs_unmasked.fa_aligned_sorted.bam | grep -w -e 'Fus2' -e '125' -e 'A28' -e 'A13' -e 'CB3' -e 'PG' -e 'A23' -e 'A28' -e 'A8' ); do
+# Organism=$(echo $ReadsBam | rev | cut -f4 -d '/' | rev)
+# Strain=$(echo $ReadsBam | rev | cut -f3 -d '/' | rev)
+# AlignDir=$(dirname $ReadsBam)
+# echo "$Organism - $Strain"
+# bedtools coverage -abam $ReadsBam -b $OutDir/Fus2_20kb_windows.gff > $AlignDir/"$Strain"_coverage_vs_Fus2.bed
+# # Convert coverage bed files into circos format
+# $ProgDir/coverage_bed2circos.py --bed $AlignDir/"$Strain"_coverage_vs_Fus2.bed > $OutDir/"$Strain"_coverage_vs_Fus2_unmasked_scatterplot.txt
+# ls $OutDir/"$Strain"_coverage_vs_Fus2_unmasked_scatterplot.txt
+# done
+
+# Convert whole genome MUMmer alignments into scatterplots
+for AlignedContigs in $(ls analysis/genome_alignment/mummer/F.*/*/*_vs_Fus2/*_vs_Fus2_results_10kb.tsv); do
+  Organism=$(echo $AlignedContigs | rev | cut -f4 -d '/' | rev)
+  Strain=$(echo $AlignedContigs | rev | cut -f3 -d '/' | rev)
+  echo "$Organism - $Strain"
+  cat $AlignedContigs | cut -f1,2,3,7 | tail -n +2 > $OutDir/"$Strain"_coverage_vs_Fus2_unmasked_scatterplot.txt
 done
+
 
   # Plot location of Fus2 mimps and secreted effectorP genes as a scatterplot
   GffMimp=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_mimps.gff

@@ -324,7 +324,7 @@ cp $SbtFile $OutDir/gag/round1/genome.sbt
 mkdir -p $OutDir/tbl2asn/round1
 tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]"# edit tbl file based upon tbl2asn errors file
 mkdir -p $OutDir/gag/edited
-$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl  $OutDir/gag/edited/genome.tbl
+$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
 # $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --rename_genes "vAg" --out_tbl  $OutDir/gag/edited/genome.tbl
 # Generating a structured comment detailing annotation methods
 printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
@@ -347,30 +347,19 @@ done
 An output and working directory was made for genome submission:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep 'A13'); do
-  # tbl2asn options:
-  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+num=0
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi'); do
+# tbl2asn options:
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OrganismOfficial=$(echo $Organism | sed 's/F./Fusarium /g')
+StrainOfficial=$(echo $Strain | sed 's/_ncbi//g')
+#
+ProjDir=/home/groups/harrisonlab/project_files/fusarium
+cd $ProjDir
+OutDir="genome_submission/$Organism/$Strain"
+mkdir -p $OutDir
 
-  OrganismOfficial="Fusarium oxysporum"
-  StrainOfficial=$(echo $Strain | sed 's/_ncbi//g')
-  #
-  ProjDir=/home/groups/harrisonlab/project_files/fusarium
-  cd $ProjDir
-  OutDir="genome_submission/$Organism/$Strain"
-  mkdir -p $OutDir
-done
-```
-
-## SbtFile
-The genbank submission template tool was used at:
-http://www.ncbi.nlm.nih.gov/WebSub/template.cgi
-This produce a template file detailing the submission.
-
-## Setting varibales
-Vairables containing locations of files and options for scripts were set:
-
-```bash
 # Program locations:
 AnnieDir="/home/armita/prog/annie/genomeannotation-annie-c1e848b"
 ProgDir="/home/armita/git_repos/emr_repos/tools/genbank_submission"
@@ -390,104 +379,28 @@ BioSample=$(cat $SRA_metadata | sed 's/PRJNA/\nPRJNA/g' | grep "$StrainOfficial"
 
 # ncbi_tbl_corrector script options:
 num=$(($num+1))
-SubmissionID="FOX0$num"
+SubmissionID="FXC0$num"
 LabID="ArmitageEMR"
 # Final submisison file name:
 FinalName="$Organism"_"$Strain"_Armitage_2016
-```
 
-## Generating .tbl file (GAG)
+python3 $AnnieDir/annie.py -ipr $InterProTab -g $GffFile -b $SwissProtBlast -db $SwissProtFasta -o $OutDir/annie_output.csv --fix_bad_products
+$ProgDir/edit_tbl_file/annie_corrector.py --inp_csv $OutDir/annie_output.csv --out_csv $OutDir/annie_corrected_output.csv
 
-The Genome Annotation Generator (GAG.py) can be used to convert gff files into
-.tbl format, for use by tbl2asn.
-
-It can also add annotations to features as provided by Annie the Annotation
-extractor.
-
-### Extracting annotations (Annie)
-
-Interproscan and Swissprot annotations were extracted using annie, the
-ANNotation Information Extractor. The output of Annie was filtered to
-keep only annotations with references to ncbi approved databases.
-Note - It is important that transcripts have been re-labelled as mRNA by this
-point.
-
-```bash
-  python3 $AnnieDir/annie.py -ipr $InterProTab -g $GffFile -b $SwissProtBlast -db $SwissProtFasta -o $OutDir/annie_output.csv --fix_bad_products
-  $ProgDir/edit_tbl_file/annie_corrector.py --inp_csv $OutDir/annie_output.csv --out_csv $OutDir/annie_corrected_output.csv
-```
-
-### Running GAG
-
-Gag was run using the modified gff file as well as the annie annotation file.
-Gag was noted to output database references incorrectly, so these were modified.
-
-```bash
 mkdir -p $OutDir/gag/round1
 gag.py -f $Assembly -g $GffFile -a $OutDir/annie_corrected_output.csv --fix_start_stop -o $OutDir/gag/round1 2>&1 | tee $OutDir/gag_log1.txt
 sed -i 's/Dbxref/db_xref/g' $OutDir/gag/round1/genome.tbl
 
-```
+# nano $OutDir/gag/round1/genome.tbl
 
-<!-- ## manual edits
-
-The gene NS_04463 was found to use the same start and stop codon as predicted
-gene CUFF_4598_1_205. Both of these genes were predicted by codingquary. Neither
-of these genes were predicted as having alternative splicing. As such the gene
-NS_04463 was removed. The same was found for genes CUFF_11067_2_85 and
-CUFF_11065_1_82 and as a result CUFF_11067_2_85 was removed.
-
-```bash
-  nano $OutDir/gag/round1/genome.tbl
-``` -->
-
-## tbl2asn round 1
-
-tbl2asn was run an initial time to collect error reports on the current
-formatting of the .tbl file.
-Note - all input files for tbl2asn need to be in the same directory and have the
-same basename.
-
-```bash
 cat $Fus2SbtFile | sed "s/SAMN05529097/$BioSample/g" > $SbtFile
 cp $Assembly $OutDir/gag/round1/genome.fsa  
 cp $SbtFile $OutDir/gag/round1/genome.sbt
 mkdir -p $OutDir/tbl2asn/round1
 tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -X E -Z $OutDir/gag/round1/discrep.txt -j "[organism=$OrganismOfficial] [strain=$StrainOfficial]"
-```
 
-## Editing .tbl file
-
-The tbl2asn .val output files were observed and errors corrected. This was done
-with an in house script. The .val file indicated that some cds had premature
-stops, so these were marked as pseudogenes ('pseudo' - SEQ_FEAT.InternalStop)
-and that some genes had cds coordinates that did not match the end of the gene
-if the protein was hanging off a contig ('stop' - SEQ_FEAT.NoStop).
-Furthermore a number of other edits were made to bring the .tbl file in line
-with ncbi guidelines. This included: Marking the source of gene
-predictions and annotations ('add_inference'); Correcting locus_tags to use the
-given ncbi_id ('locus_tag'); Correcting the protein and transcript_ids to
-include the locus_tag and reference to submitter/lab id ('lab_id'), removal of
-annotated names of genes if you don't have high confidence in their validity
-(--gene_id 'remove'). If 5'-UTR and 3'-UTR were not predicted during gene
-annotation then genes, mRNA and exon features need to reflect this by marking
-them as incomplete ('unknown_UTR').
-<!--
-```bash
-  mkdir -p $OutDir/gag/edited
-  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
-  # $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$GeneSource" "$IDSource" --edits stop pseudo unknown_UTR --out_tbl $OutDir/gag/edited/genome.tbl
-``` -->
-
-```bash
-  mkdir -p $OutDir/gag/edited
-  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
-```
-
-
-## Generating a structured comment detailing annotation methods
-
-```bash
+mkdir -p $OutDir/gag/edited
+$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
 printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
 Annotation Provider\tHarrison Lab NIAB-EMR
 Annotation Date\tSEP-2016
@@ -495,20 +408,11 @@ Annotation Version\tRelease 1.01
 Annotation Method\tAb initio gene prediction: Braker 1.9 and CodingQuary 2.0; Functional annotation: Swissprot (July 2016 release) and Interproscan 5.18-57.0" \
 > $OutDir/gag/edited/annotation_methods.strcmt.txt
 
-```
-## Final run of tbl2asn
+cp $Assembly $OutDir/gag/edited/genome.fsa
+cp $SbtFile $OutDir/gag/edited/genome.sbt
+mkdir $OutDir/tbl2asn/final
+tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$OrganismOfficial] [strain=$StrainOfficial]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
+cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
 
-Following correction of the GAG .tbl file, tbl2asn was re-run to provide the
-final genbank submission file.
-
-The options -l paired-ends -a r10k inform how to handle runs of Ns in the
-sequence, these options show that paired-ends have been used to estimate gaps
-and that runs of N's longer than 10 bp should be labelled as gaps.
-
-```bash
-  cp $Assembly $OutDir/gag/edited/genome.fsa
-  cp $SbtFile $OutDir/gag/edited/genome.sbt
-  mkdir $OutDir/tbl2asn/final
-  tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$OrganismOfficial] [strain=$StrainOfficial]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
-  cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
+done
 ```

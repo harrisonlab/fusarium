@@ -251,13 +251,15 @@ counts the number of Qs in each fasta sequence.
 
 ```bash
 Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w 'Fus2_canu_new')
-for Coordinates in $(ls analysis/genome_alignment/mummer/F*/*/*/*_vs_Fus2_coords.tsv | grep -e 'ncbi' -e 'Fus2_canu_new' -e '4287_chromosomal' -e 'fo47' | grep -e '4287_chromosomal' -e 'fo47'); do
+# for Coordinates in $(ls analysis/genome_alignment/mummer/F*/*/*/*_vs_Fus2_coords.tsv | grep -e 'ncbi' -e 'Fus2_canu_new' -e '4287_chromosomal' -e 'fo47' | grep -e '4287_chromosomal' -e 'fo47'); do
+for Coordinates in $(ls analysis/genome_alignment/mummer/F*/*/*/*_vs_Fus2_coords.tsv | grep -e 'ncbi' -e 'Fus2_canu_new' -e '4287_chromosomal' -e 'fo47'); do
 Strain=$(echo $Coordinates | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Coordinates | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
 OutFile=$(echo $Coordinates | sed 's/_coords.tsv/_results.tsv/g')
+Out10kb=$(echo $Coordinates | sed 's/_coords.tsv/_results_10kb.tsv/g')
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
-$ProgDir/mummer_ls_regions.py --coord $Coordinates --fasta $Reference > $OutFile
+$ProgDir/mummer_ls_regions.py --coord $Coordinates --fasta $Reference --out_contig $OutFile --out_10kb $Out10kb
 done
 paste analysis/genome_alignment/mummer/F*/*/*/*_vs_Fus2_results.tsv > analysis/genome_alignment/mummer/vs_Fus2_canu_new.tsv
 ```
@@ -290,13 +292,13 @@ counts the number of Qs in each fasta sequence.
 ```bash
 Reference=$(ls repeat_masked/*/*/*/*_contigs_hardmasked_repeatmasker_TPSI_appended.fa | grep -w '4287_chromosomal')
 for Coordinates in $(ls analysis/genome_alignment/mummer/F*/*/*/*_vs_FoL_coords.tsv | grep -e 'ncbi' -e 'Fus2_canu_new' -e '4287_chromosomal' -e 'fo47'); do
-Strain=$(echo $Coordinates | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Coordinates | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-OutFile=$(echo $Coordinates | sed 's/_coords.tsv/_results.tsv/g')
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
-$ProgDir/mummer_ls_regions.py --coord $Coordinates --fasta $Reference > $OutFile
-done
+  Strain=$(echo $Coordinates | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Coordinates | rev | cut -f4 -d '/' | rev)
+  echo "$Organism - $Strain"
+  OutFile=$(echo $Coordinates | sed 's/_coords.tsv/_results.tsv/g')
+  Out10kb=$(echo $Coordinates | sed 's/_coords.tsv/_results_10kb.tsv/g')
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment/promer
+  $ProgDir/mummer_ls_regions.py --coord $Coordinates --fasta $Reference --out_contig $OutFile --out_10kb $Out10kbdone
 paste analysis/genome_alignment/mummer/F*/*/*/*_vs_FoL_results.tsv > analysis/genome_alignment/mummer/vs_FoL_canu_new.tsv
 ```
 

@@ -415,7 +415,7 @@ Fo_Fo47_gff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo
   FoL_4287_gff_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff  
 # FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
 # FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3
-for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed | grep '4287'); do
+for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed ); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 if [ $Strain == 'fo47' ]; then
@@ -455,7 +455,7 @@ Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_v2' -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v -e 'PG8' -e 'PG18' -e 'PG3'); do
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_v2' -e 'ncbi' -e 'Fus2_canu_new' | grep -e 'fo47' -e '4287_v2'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -469,6 +469,11 @@ cat $File $SecretedHeaders | cut -f1 | sed -r 's/T.$//g' | uniq | sort | uniq -d
 # cat $OutFile | grep -w 'mRNA' | wc -l
 done
 ```
+
+F.oxysporum - fo47
+3
+F.oxysporum_fsp_lycopersici - 4287_v2
+23
 
 ## A) Interproscan
 

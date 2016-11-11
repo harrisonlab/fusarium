@@ -470,13 +470,14 @@ used to correct the assembly to NCBI standards.
 NCBI reports (FCSreport.txt) were manually downloaded to the following loactions:
 
 ```bash
-	for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+	for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep -v 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 		NCBI_report_dir=genome_submission/$Organism/$Strain/initial_submission
 		mkdir -p $NCBI_report_dir
 	done
 ```
+
 
 These downloaded files were used to correct assemblies:
 
@@ -493,15 +494,45 @@ $ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDi
 done
 ```
 
+
+A second submission of assemblies to ncbi gave a second round of edits to make.
+These reports (FCSreport.txt)  were stored in the following location:
+
+```bash
+for Assembly in $(ls assembly/spades/*/*/*/contigs_min_500bp_renamed.fasta | grep -w 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+NCBI_report_dir=genome_submission/$Organism/"$Strain"_ncbi/submission
+mkdir -p $NCBI_report_dir
+done
+```
+
+These downloaded files were used to correct assemblies:
+
+```bash
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta| grep 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+NCBI_report=$(ls genome_submission/$Organism/"$Strain"_ncbi/submission/FCSreport.txt)
+OutDir=assembly/spades/$Organism/$Strain/ncbi_edits2
+mkdir -p $OutDir
+touch $NCBI_report
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report
+done > $OutDir/log.txt
+```
+
+
 Quast was used to collect details on these assemblies
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 echo "$Organism - $Strain"
-OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+OutDir=$(dirname $Assembly)
 qsub $ProgDir/sub_quast.sh $Assembly $OutDir
 done
 ```
@@ -546,6 +577,18 @@ qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
 done
 ```
 
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+# for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
+Strain=$(echo $BestAss | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $BestAss | rev | cut -f4 -d '/' | rev)
+OutDir=repeat_masked/$Organism/"$Strain"_ncbi/ncbi_submission
+qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
+qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
+done
+```
+
 The published non-pathogen genome for isolate FO47 was also repeatmasked as
 this isolate was also used in experimental work.
 
@@ -567,7 +610,7 @@ done
 ```
 
 The TransposonPSI masked bases were used to mask additional bases from the
-repeatmasker / repeatmodeller softmasked and harmasked files.
+repeatmasker / repeatmodeller softmasked and hardmasked files.
 
 ```bash
 for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
@@ -932,6 +975,7 @@ Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
 for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi'); do
+# for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 # for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
 # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1326,10 +1370,15 @@ Gene models requiring editing
 	# > $OutDir/pseudogenes.gff3
 ```
 
+## A23
+
+Note that at this stage all codingquary genes contain . characters rather than _ characters
 g16298 - SIX12 - use alternative transcript
 g16360 - SIX5 - shorten intron and final CDS
 g15957 - SIX7 - remove intron and final CDS.
-
+Duplicated genes:
+NS_07493
+CUFF_7204_2_14
 
 ```bash
 Organism=F.oxysporum_fsp_cepae
@@ -1378,12 +1427,18 @@ contig_1794\tManual_annotation\texon\t1\t220\t.\t+\t.\tID=man_1.t1.exon1;Parent=
 contig_1794\tManual_annotation\tstop_codon\t218\t220\t.\t+\t.\tParent=man_1.t1;\n" \
 >> $OutDir/final_genes_Braker_ed.gff3
 
-cp $CodingQuaryGff $OutDir/PredictedPass_ed.gff3
+cat $CodingQuaryGff | grep -w -v -e 'NS.07493' -e 'CUFF.7204.2.14' > $OutDir/PredictedPass_ed.gff3
 cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 ```
 
+## FoC 125
+
+Note that at this stage all codingquary genes contain . characters rather than _ characters
 g16010 - SIX12 - remove gene and use PGN_predictedPass gene
 CUFF_14695 - SIX14 - Replace with manual annotation in correct orientation
+Duplicated genes:
+NS_09890
+CUFF_7215_2_7
 
 ```bash
 	Organism=F.oxysporum_fsp_cepae
@@ -1430,14 +1485,56 @@ CUFF_14695 - SIX14 - Replace with manual annotation in correct orientation
 	contig_971\tManual_annotation\tstart_codon\t504\t506\t.\t-\t.\tParent=man_2.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 
-	cp $CodingQuaryGff $OutDir/PredictedPass_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'NS.09890' -e 'CUFF.7215.2.7' > $OutDir/PredictedPass_ed.gff3
 	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
-
-
 ```
 
+## FoN N139
+
+Note that at this stage all codingquary genes contain . characters rather than _ characters
+g16582 - SIX10 - remove gene and use PGN_predictedPass gene
+g16581 - SIX12 - shorten intron and final CDS
+
+Duplicated genes:
+NS_00419
+
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'ncbi' -e 'Fus2_canu_new' | grep -v -e 'Fus2_canu_new' -e 'A23' -e '125'); do
+	Organism=F.oxysporum_fsp_narcissi
+	Strain=N139_ncbi
+	OutDir=gene_pred/final_genes/$Organism/$Strain/edited
+	mkdir -p $OutDir
+
+	Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+	BrakerGff=$(ls gene_pred/braker/$Organism/"$Strain"_braker/*/augustus.gff3)
+	CodingQuaryGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3)
+	PGNGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3)
+
+	cat $BrakerGff \
+	| grep -v -w 'g16582' \
+	| sed \
+	's/contig_732\tAUGUSTUS\tgene\t3227\t3658\t0.98\t+\t.\tID=g16581;/contig_732\tAUGUSTUS\tgene\t3317\t3658\t0.98\t+\t.\tID=g16581;/g' \
+	| sed \
+	's/contig_732\tAUGUSTUS\tmRNA\t3227\t3658\t0.98\t+\t.\tID=g16581.t1;Parent=g16581/contig_732\tAUGUSTUS\tmRNA\t3317\t3658\t0.98\t+\t.\tID=g16581.t1;Parent=g16581/g' \
+	| sed \
+	's/contig_732\tAUGUSTUS\tstart_codon\t3227\t3229\t.\t+\t0\tParent=g16581.t1;/contig_732\tAUGUSTUS\tstart_codon\t3317\t3319\t.\t+\t0\tParent=g16581.t1;/g' \
+	| sed \
+	's/contig_732\tAUGUSTUS\tCDS\t3227\t3248\t0.99\t+\t0\tID=g16581.t1.CDS1;Parent=g16581.t1/contig_732\tAUGUSTUS\tCDS\t3317\t3658\t0.99\t+\t0\tID=g16581.t1.CDS1;Parent=g16581.t1/g' \
+	| sed \
+	's/contig_732\tAUGUSTUS\texon\t3227\t3248\t.\t+\t.\tID=g16581.t1.exon1;Parent=g16581.t1;/contig_732\tAUGUSTUS\texon\t3317\t3658\t.\t+\t.\tID=g16581.t1.exon1;Parent=g16581.t1;/g' \
+	| grep -v -e 'intron\t3249\t3299\t0.99\t+\t.\tParent=g16581.t1' \
+	| grep -v -e 'g16581.t1.CDS2' -e 'g16581.t1.exon2' \
+	> $OutDir/final_genes_Braker_ed.gff3
+
+	cat $CodingQuaryGff | grep -v -w -e 'NS.00419' > $OutDir/PredictedPass_ed.gff3
+	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+```
+
+## For remaining Fo and Fp isolates
+
+Note that at this stage all codingquary genes contain . characters rather than _ characters
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'ncbi' -e 'Fus2_canu_new' | grep -v -e 'Fus2_canu_new' -e 'A23' -e '125' -e 'N139'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 OutDir=gene_pred/final_genes/$Organism/$Strain/edited
@@ -1446,15 +1543,28 @@ mkdir -p $OutDir
 BrakerGff=$(ls gene_pred/braker/$Organism/"$Strain"_braker/*/augustus.gff3)
 CodingQuaryGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3)
 PGNGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3)
-
-cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
-cp $CodingQuaryGff $OutDir/PredictedPass_ed.gff3
-cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+if [[ $Strain == 'A28_ncbi' ]]; then
+	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'NS.05035' >$OutDir/PredictedPass_ed.gff3
+	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+elif [[ $Strain == 'CB3_ncbi' ]]; then
+	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'NS.07769' >$OutDir/PredictedPass_ed.gff3
+	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+elif [[ $Strain == 'PG_ncbi' ]]; then
+	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'NS.08672' -e 'NS.05531' >$OutDir/PredictedPass_ed.gff3
+	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+else
+	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+	cp $CodingQuaryGff $OutDir/PredictedPass_ed.gff3
+	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+fi
 done
 ```
 
 ```bash
-for EditDir in $(ls -d gene_pred/final_genes/*/*/edited | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'Fus2_canu_new' | grep 'ncbi' | grep '125'); do
+for EditDir in $(ls -d gene_pred/final_genes/*/*/edited | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'Fus2_canu_new'); do
 Strain=$(echo $EditDir | rev | cut -d '/' -f2 | rev)
 Organism=$(echo $EditDir | rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
@@ -1549,7 +1659,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1560,7 +1670,7 @@ commands:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1596,7 +1706,7 @@ done
 
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -2103,7 +2213,7 @@ F.proliferatum - A8_ncbi
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' ); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 BrakerGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
@@ -2234,6 +2344,38 @@ F.proliferatum - A8_ncbi
 1
 ```
 
+## C)
+
+Secreted proteins with a N-terminal [SG]-P-C-[KR]-P motif
+
+```bash
+for File in $(ls gene_pred/final_genes_signalp-4.1/F.*/*/*_final_sp_no_trans_mem.aa | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+echo $File;
+cat $File | grep -B1 "[SG]PC[KR]P" | grep '>' | cut -f1 | tr -d '>' | wc -l;
+done
+cat gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_final_sp_no_trans_mem.aa | grep -B1 "[SG]PC[KR]P" | grep '>' | cut -f1 | tr -d '>' > tmp.txt
+cat analysis/expression/Fus2_expressed_genes.tsv | grep -w -f 'tmp.txt' > tmp.tsv
+```
+```
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/125_ncbi/125_ncbi_final_sp_no_trans_mem.aa
+43
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/A13_ncbi/A13_ncbi_final_sp_no_trans_mem.aa
+50
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/A23_ncbi/A23_ncbi_final_sp_no_trans_mem.aa
+42
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/A28_ncbi/A28_ncbi_final_sp_no_trans_mem.aa
+45
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_final_sp_no_trans_mem.aa
+42
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/CB3_ncbi/CB3_ncbi_final_sp_no_trans_mem.aa
+46
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/PG_ncbi/PG_ncbi_final_sp_no_trans_mem.aa
+42
+gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_final_sp_no_trans_mem.aa
+42
+gene_pred/final_genes_signalp-4.1/F.proliferatum/A8_ncbi/A8_ncbi_final_sp_no_trans_mem.aa
+40
+```
 # 4. Genomic analysis
 <!--
 ## 4.1 Identifcation of protospacers

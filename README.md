@@ -510,7 +510,7 @@ done
 These downloaded files were used to correct assemblies:
 
 ```bash
-for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta| grep 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta| grep 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'N139'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -519,8 +519,8 @@ OutDir=assembly/spades/$Organism/$Strain/ncbi_edits2
 mkdir -p $OutDir
 touch $NCBI_report
 ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report
-done > $OutDir/log.txt
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/contigs_min_500bp_renamed.fasta --coord_file $NCBI_report > $OutDir/log.txt
+done
 ```
 
 
@@ -579,7 +579,7 @@ done
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-for BestAss in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'N139'); do
 # for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $BestAss | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $BestAss | rev | cut -f4 -d '/' | rev)
@@ -613,7 +613,7 @@ The TransposonPSI masked bases were used to mask additional bases from the
 repeatmasker / repeatmodeller softmasked and hardmasked files.
 
 ```bash
-for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old' | grep -v -e 'A8' -e 'N139'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
@@ -623,7 +623,7 @@ echo "Number of masked bases:"
 cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
 # The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
-for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
@@ -637,35 +637,29 @@ done
 ```
 repeat_masked/F.oxysporum_fsp_cepae/125_ncbi/ncbi_submission/125_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-3967501
+3781475
 repeat_masked/F.oxysporum_fsp_cepae/A13_ncbi/ncbi_submission/A13_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
 4946858
 repeat_masked/F.oxysporum_fsp_cepae/A23_ncbi/ncbi_submission/A23_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-3546886
+3536570
 repeat_masked/F.oxysporum_fsp_cepae/A28_ncbi/ncbi_submission/A28_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-4456082
+4429343
 repeat_masked/F.oxysporum_fsp_cepae/CB3_ncbi/ncbi_submission/CB3_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-2927012
+2863123
 repeat_masked/F.oxysporum_fsp_cepae/PG_ncbi/ncbi_submission/PG_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
 3038447
-repeat_masked/F.oxysporum_fsp_narcissi/N139_ncbi/ncbi_submission/N139_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-5671216
-repeat_masked/F.proliferatum/A8_ncbi/ncbi_submission/A8_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-1124505
 ```
 
 The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_submission | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_submission | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v 'old' | grep -v -e 'A8' -e 'N139'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -682,44 +676,35 @@ done
 ```
 <!--
 ```
-F.oxysporum_fsp_cepae   125_ncbi
-The number of bases masked by RepeatMasker:     3663604
-The number of bases masked by TransposonPSI:    1210934
-The total number of masked bases are:   3967501
-F.oxysporum_fsp_cepae   A13_ncbi
-The number of bases masked by RepeatMasker:     4673077
-The number of bases masked by TransposonPSI:    1555142
-The total number of masked bases are:   4946858
+F.oxysporum_fsp_cepae	125_ncbi
+3536398
+1210934
+3781475
 
-F.oxysporum_fsp_cepae   A23_ncbi
-The number of bases masked by RepeatMasker:     3279757
-The number of bases masked by TransposonPSI:    1061656
-The total number of masked bases are:   3546886
+F.oxysporum_fsp_cepae	A13_ncbi
+4673077
+1555142
+4946858
 
-F.oxysporum_fsp_cepae   A28_ncbi
-The number of bases masked by RepeatMasker:     4149965
-The number of bases masked by TransposonPSI:    1190026
-The total number of masked bases are:   4456082
+F.oxysporum_fsp_cepae	A23_ncbi
+3287475
+1061656
+3536570
 
-F.oxysporum_fsp_cepae   CB3_ncbi
-The number of bases masked by RepeatMasker:     2686212
-The number of bases masked by TransposonPSI:    842157
-The total number of masked bases are:   2927012
+F.oxysporum_fsp_cepae	A28_ncbi
+4112848
+1190026
+4429343
 
-F.oxysporum_fsp_cepae   PG_ncbi
-The number of bases masked by RepeatMasker:     2827891
-The number of bases masked by TransposonPSI:    865813
-The total number of masked bases are:   3038447
+F.oxysporum_fsp_cepae	CB3_ncbi
+2601524
+842157
+2863123
 
-F.oxysporum_fsp_narcissi        N139_ncbi
-The number of bases masked by RepeatMasker:     5377773
-The number of bases masked by TransposonPSI:    1642358
-The total number of masked bases are:   5671216
-
-F.proliferatum  A8_ncbi
-The number of bases masked by RepeatMasker:     924627
-The number of bases masked by TransposonPSI:    258296
-The total number of masked bases are:   1124505
+F.oxysporum_fsp_cepae	PG_ncbi
+2827891
+865813
+3038447
 
 
 ``` -->
@@ -741,7 +726,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/cegma
 cd /home/groups/harrisonlab/project_files/fusarium
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi'); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v 'old'); do
 #for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -w 'fo47'); do
 echo $Genome;
 qsub $ProgDir/sub_cegma.sh $Genome dna;
@@ -974,14 +959,14 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi'); do
-# for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v -e 'A8' -e 'N139'); do
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 # for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
 # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
-for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -e 'FO47_72hrs_rep2'); do
+for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/*); do
 Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 echo "$Timepoint"
 FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -1035,7 +1020,7 @@ done
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep 'Fus2' | grep -e 'Fus2_canu_new' -e 'Fus2_merged' | grep 'cepae' | grep 'Fus2_merged'); do
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'proliferatum'); do
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v 'old' | grep -v -e 'PG' -e 'A13'); do
 Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 10
@@ -1076,13 +1061,13 @@ GeneModelName="$Organism"_"$Strain"_braker_new
 rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_new
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
 qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
-done
+done > log.txt
 ```
 
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi'); do
+for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi' | grep -v -e 'A8' -e 'N139'); do
 getAnnoFasta.pl $File
 OutDir=$(dirname $File)
 echo "##gff-version 3" > $OutDir/augustus_extracted.gff

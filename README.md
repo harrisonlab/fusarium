@@ -510,7 +510,7 @@ done
 These downloaded files were used to correct assemblies:
 
 ```bash
-for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta| grep 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'N139'); do
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta| grep 'ncbi_edits' | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'PG' -e 'A23'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -528,7 +528,7 @@ Quast was used to collect details on these assemblies
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'PG' -e 'A23'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 echo "$Organism - $Strain"
@@ -565,9 +565,9 @@ Repeat masking was performed and used the following programs:
 
 The best assemblies were used to perform repeatmasking
 
-```bash
+<!-- ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' ); do
 # for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $BestAss | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $BestAss | rev | cut -f4 -d '/' | rev)
@@ -575,11 +575,11 @@ OutDir=repeat_masked/$Organism/"$Strain"_ncbi/ncbi_submission
 qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
 qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
 done
-```
+``` -->
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-for BestAss in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'N139'); do
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'A8' -e 'PG' -e 'A23'); do
 # for BestAss in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $BestAss | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $BestAss | rev | cut -f4 -d '/' | rev)
@@ -613,7 +613,14 @@ The TransposonPSI masked bases were used to mask additional bases from the
 repeatmasker / repeatmodeller softmasked and hardmasked files.
 
 ```bash
-for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old' | grep -v -e 'A8' -e 'N139'); do
+# Jobs=$(qstat | grep 'rep_modeli' | grep -w 'r' | wc -l)
+# while [ $Jobs -gt 0 ]; do
+# sleep 10
+# printf "."
+# Jobs=$(qstat | grep 'rep_modeli' | grep -w 'r' | wc -l)
+# done
+# printf "\n"
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old' | grep 'N139'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
@@ -623,7 +630,7 @@ echo "Number of masked bases:"
 cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
 # The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
-for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old' | grep 'N139'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
@@ -643,7 +650,7 @@ Number of masked bases:
 4946858
 repeat_masked/F.oxysporum_fsp_cepae/A23_ncbi/ncbi_submission/A23_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-3536570
+3553622
 repeat_masked/F.oxysporum_fsp_cepae/A28_ncbi/ncbi_submission/A28_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
 4429343
@@ -652,14 +659,20 @@ Number of masked bases:
 2863123
 repeat_masked/F.oxysporum_fsp_cepae/PG_ncbi/ncbi_submission/PG_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-3038447
+3070545
+repeat_masked/F.proliferatum/A8_ncbi/ncbi_submission/A8_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+1209471
+repeat_masked/F.oxysporum_fsp_narcissi/N139_ncbi/ncbi_submission/N139_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+5689747
 ```
 
 The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_submission | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v 'old' | grep -v -e 'A8' -e 'N139'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_submission | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v 'old' | grep -e 'N139'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -687,9 +700,9 @@ F.oxysporum_fsp_cepae	A13_ncbi
 4946858
 
 F.oxysporum_fsp_cepae	A23_ncbi
-3287475
+3299913
 1061656
-3536570
+3553622
 
 F.oxysporum_fsp_cepae	A28_ncbi
 4112848
@@ -702,11 +715,19 @@ F.oxysporum_fsp_cepae	CB3_ncbi
 2863123
 
 F.oxysporum_fsp_cepae	PG_ncbi
-2827891
+2807690
 865813
-3038447
+3070545
 
+F.proliferatum	A8_ncbi
+1025299
+258296
+1209471
 
+F.oxysporum_fsp_narcissi	N139_ncbi
+5387901
+1641842
+5689747
 ``` -->
 
 # Gene Prediction
@@ -959,8 +980,8 @@ increase the accuracy of mapping.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v -e 'A8' -e 'N139'); do
-for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v 'old'); do
+# for Assembly in $(ls assembly/spades/*/*/ncbi_edits2/contigs_min_500bp_renamed.fasta | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'); do
 # for Assembly in $(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta); do
 # for Assembly in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs.fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1020,7 +1041,7 @@ done
 ```bash
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep 'Fus2' | grep -e 'Fus2_canu_new' -e 'Fus2_merged' | grep 'cepae' | grep 'Fus2_merged'); do
 	# for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'proliferatum'); do
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v 'old' | grep -v -e 'PG' -e 'A13'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep 'ncbi' | grep -v 'old'); do
 Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 10
@@ -1067,7 +1088,7 @@ done > log.txt
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi' | grep -v -e 'A8' -e 'N139'); do
+for File in $(ls gene_pred/braker/F.*/*_braker/*/augustus.gff | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'canu_new' -e 'ncbi' | grep -v 'canu_new'); do
 getAnnoFasta.pl $File
 OutDir=$(dirname $File)
 echo "##gff-version 3" > $OutDir/augustus_extracted.gff
@@ -1159,7 +1180,20 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi'); do
+# Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+# while [ $Jobs -gt 1 ]; do
+# sleep 10
+# printf "."
+# Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+# done
+# sleep 2h
+# Jobs=$(qstat | grep 'sub_br' | grep -w 'r' | wc -l)
+# while [ $Jobs -gt 1 ]; do
+# sleep 10
+# printf "."
+# Jobs=$(qstat | grep 'sub_br' | grep -w 'r' | wc -l)
+# done
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' | grep -v 'old'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1168,19 +1202,24 @@ mkdir -p $OutDir
 AcceptedHits=$(ls alignment/$Organism/$Strain/concatenated/concatenated.bam)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
-done
+done > log2.txt
 ```
 
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' | grep -e 'A8' -e '125' -e 'CB3'); do
-Jobs=$(qstat | grep 'sub_cuffli' | grep 'qw' | wc -l)
+# Jobs=$(qstat | grep 'armita' | wc -l)
+# while [ $Jobs -ge 1 ]; do
+# sleep 10m
+# printf "."
+# Jobs=$(qstat | grep 'armita' | wc -l)
+# done
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -v 'old'); do
+Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
 while [ $Jobs -ge 1 ]; do
 sleep 10
 printf "."
-Jobs=$(qstat | grep 'sub_cuffli' | grep 'qw' | wc -l)
+Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
 done
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -1198,7 +1237,7 @@ models:
 
 ```bash
 	# for BrakerGff in $(ls gene_pred/braker/F.*/*_braker_new/*/augustus.gff3 | grep -w -e 'Fus2'); do
-for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi'); do
+for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' | grep 'N139'); do
 Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_pacbio//g'| sed 's/_braker//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1239,7 +1278,7 @@ done
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi'); do
+for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi' | grep 'N139'); do
 echo $DirPath;
 cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1249,44 +1288,60 @@ done
 ```
 ```
 gene_pred/final_genes/F.oxysporum_fsp_cepae/125_ncbi/final
-17225
-1612
-18837
+17196
+1548
+18744
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A13_ncbi/final
-18016
-922
-18938
+17986
+948
+18934
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A23_ncbi/final
-17311
-1098
-18409
+17007
+1550
+18557
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A28_ncbi/final
-17404
-1469
-18873
+17426
+1449
+18875
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3_ncbi/final
-16857
-1318
-18175
+16833
+1346
+18179
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/PG_ncbi/final
-16864
-1223
-18087
+16811
+1292
+18103
 
 gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/final
-19075
-1772
-20847
+19060
+1643
+20703
 
 gene_pred/final_genes/F.proliferatum/A8_ncbi/final
-15553
-42
-15595
+15421
+37
+15458
+
+```
+
+## Identification of duplicated genes in additional CodingQuary gene models
+
+```bash
+for AddGenes in $(ls gene_pred/codingquary/F.*/*/additional/additional_genes.gff | grep 'ncbi' | grep -v 'ncbi_braker' | grep '125'); do
+Strain=$(echo $AddGenes| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $AddGenes | rev | cut -d '/' -f4 | rev)
+OutDir=$(dirname $AddGenes)
+echo "$Organism - $Strain" > $OutDir/duplicated_genes.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+$ProgDir/remove_dup_features.py --inp_gff $AddGenes >> $OutDir/duplicated_genes.txt
+cat $OutDir/duplicated_genes.txt
+echo ""
+done
 ```
 
 ## Manual editing of gene models
@@ -1358,12 +1413,15 @@ Gene models requiring editing
 ## A23
 
 Note that at this stage all codingquary genes contain . characters rather than _ characters
-g16298 - SIX12 - use alternative transcript
-g16360 - SIX5 - shorten intron and final CDS
-g15957 - SIX7 - remove intron and final CDS.
+g16038 - SIX12 - use alternative transcript
+no gene - SIX14 - manual annotation
+g16100 - SIX5 - shorten intron and final CDS
+g15699 - SIX7 - remove intron and final CDS.
+no gene - SIX9  - manual annotation
 Duplicated genes:
-NS_07493
-CUFF_7204_2_14
+CUFF.7204.2.14
+CUFF.7961.1.0
+CUFF.11924.2.127
 
 ```bash
 Organism=F.oxysporum_fsp_cepae
@@ -1377,89 +1435,97 @@ CodingQuaryGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gf
 PGNGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3)
 
 cat $BrakerGff \
-| grep -v 'g16298' \
+| grep -w -v 'g7779' \
+| grep -w -v 'g13351' \
+| grep -v 'g16038' \
 | sed \
-'s/contig_819\tAUGUSTUS\tgene\t655\t1273\t0.73\t+\t.\tID=g16360;/contig_819\tAUGUSTUS\tgene\t655\t1189\t0.73\t+\t.\tID=g16360;/g' \
-| sed \ 's/contig_819\tAUGUSTUS\tmRNA\t655\t1273\t0.73\t+\t.\tID=g16360.t1;Parent=g16360/contig_819\tAUGUSTUS\tmRNA\t655\t1189\t0.73\t+\t.\tID=g16360.t1;Parent=g16360/g' \
+'s/contig_819\tAUGUSTUS\tgene\t655\t1273\t0.65\t+\t.\tID=g16100;/contig_819\tAUGUSTUS\tgene\t655\t1189\t0.65\t+\t.\tID=g16100;/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\tintron\t1002\t1057\t1\t+\t.\tParent=g16360.t1;/contig_819\tAUGUSTUS\tintron\t1002\t1050\t1\t+\t.\tParent=g16360.t1;/g' \
+'s/contig_819\tAUGUSTUS\tmRNA\t655\t1273\t0.65\t+\t.\tID=g16100.t1;Parent=g16100/contig_819\tAUGUSTUS\tmRNA\t655\t1189\t0.65\t+\t.\tID=g16100.t1;Parent=g16100/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\tCDS\t1058\t1273\t0.76\t+\t0\tID=g16360.t1.CDS4;Parent=g16360.t1/contig_819\tAUGUSTUS\tCDS\t1051\t1189\t0.76\t+\t0\tID=g16360.t1.CDS4;Parent=g16360.t1/g' \
+'s/contig_819\tAUGUSTUS\tintron\t1002\t1057\t1\t+\t.\tParent=g16100.t1;/contig_819\tAUGUSTUS\tintron\t1002\t1050\t1\t+\t.\tParent=g16100.t1;/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\texon\t1058\t1273\t.\t+\t.\tID=g16360.t1.exon4;Parent=g16360.t1;/contig_819\tAUGUSTUS\texon\t1051\t1189\t.\t+\t.\tID=g16360.t1.exon4;Parent=g16360.t1;/g' \
+'s/contig_819\tAUGUSTUS\tCDS\t1058\t1273\t0.67\t+\t0\tID=g16100.t1.CDS4;Parent=g16100.t1/contig_819\tAUGUSTUS\tCDS\t1051\t1189\t0.67\t+\t0\tID=g16100.t1.CDS4;Parent=g16100.t1/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\tstop_codon\t1271\t1273\t.\t+\t0\tParent=g16360.t1;/contig_819\tAUGUSTUS\tstop_codon\t1187\t1189\t.\t+\t0\tParent=g16360.t1;/g' \
+'s/contig_819\tAUGUSTUS\texon\t1058\t1273\t.\t+\t.\tID=g16100.t1.exon4;Parent=g16100.t1;/contig_819\tAUGUSTUS\texon\t1051\t1189\t.\t+\t.\tID=g16100.t1.exon4;Parent=g16100.t1;/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tgene\t1055\t1683\t0.58\t+\t.\tID=g15957;/contig_592\tAUGUSTUS\tgene\t1055\t1544\t0.58\t+\t.\tID=g15957;/g' \
+'s/contig_819\tAUGUSTUS\tstop_codon\t1271\t1273\t.\t+\t0\tParent=g16100.t1;/contig_819\tAUGUSTUS\tstop_codon\t1187\t1189\t.\t+\t0\tParent=g16100.t1;/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tmRNA\t1055\t1683\t0.58\t+\t.\tID=g15957.t1;Parent=g15957/contig_592\tAUGUSTUS\tmRNA\t1055\t1544\t0.58\t+\t.\tID=g15957.t1;Parent=g15957/g' \
+'s/contig_592\tAUGUSTUS\tgene\t1046\t1683\t0.81\t+\t.\tID=g15699;/contig_592\tAUGUSTUS\tgene\t1046\t1544\t0.81\t+\t.\tID=g15699;/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tCDS\t1055\t1539\t0.58\t+\t0\tID=g15957.t1.CDS1;Parent=g15957.t1/contig_592\tAUGUSTUS\tCDS\t1055\t1544\t0.58\t+\t0\tID=g15957.t1.CDS1;Parent=g15957.t1/g' \
+'s/contig_592\tAUGUSTUS\tmRNA\t1046\t1683\t0.81\t+\t.\tID=g15699.t1;Parent=g15699/contig_592\tAUGUSTUS\tmRNA\t1046\t1544\t0.81\t+\t.\tID=g15699.t1;Parent=g15699/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\texon\t1055\t1539\t.\t+\t.\tID=g15957.t1.exon1;Parent=g15957.t1;/contig_592\tAUGUSTUS\texon\t1055\t1544\t.\t+\t.\tID=g15957.t1.exon1;Parent=g15957.t1;/g' \
-| grep -v 'intron\t1540\t1676\t0.87\t+\t.\tParent=g15957.t1;' \
-| grep -v 'g15957.t1.CDS2' | grep -v 'g15957.t1.exon2' \
+'s/contig_592\tAUGUSTUS\tCDS\t1046\t1539\t0.81\t+\t0\tID=g15699.t1.CDS1;Parent=g15699.t1/contig_592\tAUGUSTUS\tCDS\t1046\t1544\t0.81\t+\t0\tID=g15699.t1.CDS1;Parent=g15699.t1/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tstop_codon\t1681\t1683\t.\t+\t0\tParent=g15957.t1;/contig_592\tAUGUSTUS\tstop_codon\t1542\t1544\t.\t+\t0\tParent=g15957.t1;/g' \
+'s/contig_592\tAUGUSTUS\texon\t1046\t1539\t.\t+\t.\tID=g15699.t1.exon1;Parent=g15699.t1;/contig_592\tAUGUSTUS\texon\t1046\t1544\t.\t+\t.\tID=g15699.t1.exon1;Parent=g15699.t1;/g' \
+| grep -v 'intron\t1540\t1676\t1\t+\t.\tParent=g15699.t1;' \
+| grep -v 'g15699.t1.CDS2' | grep -v 'g15699.t1.exon2' \
+| sed \
+'s/contig_592\tAUGUSTUS\tstop_codon\t1681\t1683\t.\t+\t0\tParent=g15699.t1;/contig_592\tAUGUSTUS\tstop_codon\t1542\t1544\t.\t+\t0\tParent=g15699.t1;/g' \
 > $OutDir/final_genes_Braker_ed.gff3
 
 
 printf \
-"contig_1794\tManual_annotation\tgene\t1\t220\t1\t+\t.\tID=man_1;
-contig_1794\tManual_annotation\tmRNA\t1\t220\t1\t+\t.\tID=man_1.t1;Parent=man_1
-contig_1794\tManual_annotation\tCDS\t1\t220\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
-contig_1794\tManual_annotation\texon\t1\t220\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;
-contig_1794\tManual_annotation\tstop_codon\t218\t220\t.\t+\t.\tParent=man_1.t1;\n" \
+"contig_1792\tManual_annotation\tgene\t1\t220\t1\t+\t.\tID=man_1;
+contig_1792\tManual_annotation\tmRNA\t1\t220\t1\t+\t.\tID=man_1.t1;Parent=man_1
+contig_1792\tManual_annotation\tCDS\t1\t220\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
+contig_1792\tManual_annotation\texon\t1\t220\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;
+contig_1792\tManual_annotation\tstop_codon\t218\t220\t.\t+\t.\tParent=man_1.t1;\n" \
+>> $OutDir/final_genes_Braker_ed.gff3
+printf \
+"contig_1016\tManual_annotation\tgene\t2103\t2277\t1\t+\t.\tID=man_2;
+contig_1016\tManual_annotation\tmRNA\t2103\t2277\t1\t+\t.\tID=man_2.t1;Parent=man_2
+contig_1016\tManual_annotation\tstop_codon\t2103\t2105\t.\t+\t.\tParent=man_2.t1;
+contig_1016\tManual_annotation\tCDS\t2103\t2277\t1.0\t+\t0\tID=man_2.t1.CDS1;Parent=man_2.t1
+contig_1016\tManual_annotation\texon\t2103\t2277\t.\t+\t.\tID=man_2.t1.exon1;Parent=man_2.t1;
+contig_1016\tManual_annotation\tstop_codon\t2275\t2277\t.\t+\t.\tParent=man_2.t1;\n" \
 >> $OutDir/final_genes_Braker_ed.gff3
 
-cat $CodingQuaryGff | grep -w -v -e 'NS.07493' -e 'CUFF.7204.2.14' > $OutDir/PredictedPass_ed.gff3
+cat $CodingQuaryGff | grep -w -v -e 'CUFF.7204.2.14' -e 'CUFF.7961.1.0' -e 'CUFF.11924.2.127' > $OutDir/PredictedPass_ed.gff3
 cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 ```
 
 ## FoC 125
 
 Note that at this stage all codingquary genes contain . characters rather than _ characters
-g16010 - SIX12 - remove gene and use PGN_predictedPass gene
+g16001 - SIX12 - remove gene and use PGN_predictedPass gene
+g16002 - SIX7 - remove intron and make stop codon earlier
 CUFF_14695 - SIX14 - Replace with manual annotation in correct orientation
 Duplicated genes:
-NS_09890
-CUFF_7215_2_7
+CUFF.14630.2.11
+CUFF.7213.2.7
 
 ```bash
 	Organism=F.oxysporum_fsp_cepae
 	Strain=125_ncbi
 	OutDir=gene_pred/final_genes/$Organism/$Strain/edited
 	mkdir -p $OutDir
-
 	Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
 	BrakerGff=$(ls gene_pred/braker/$Organism/"$Strain"_braker/*/augustus.gff3)
 	CodingQuaryGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3)
 	PGNGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3)
-
 	cat $BrakerGff \
-	| grep -v -w 'g16010' \
+	| grep -v -w 'g16001' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tgene\t6160\t6788\t0.52\t+\t.\tID=g16011;/contig_714\tAUGUSTUS\tgene\t6151\t6649\t0.52\t+\t.\tID=g16011;/g' \
+	's/contig_714\tAUGUSTUS\tgene\t6151\t6788\t0.66\t+\t.\tID=g16002;/contig_714\tAUGUSTUS\tgene\t6151\t6649\t0.66\t+\t.\tID=g16002;/g' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tmRNA\t6160\t6788\t0.52\t+\t.\tID=g16011.t1;Parent=g16011/contig_714\tAUGUSTUS\tmRNA\t6151\t6649\t0.52\t+\t.\tID=g16011.t1;Parent=g16011/g' \
+	's/contig_714\tAUGUSTUS\tmRNA\t6151\t6788\t0.66\t+\t.\tID=g16002.t1;Parent=g16002/contig_714\tAUGUSTUS\tmRNA\t6151\t6649\t0.66\t+\t.\tID=g16002.t1;Parent=g16002/g' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tstart_codon\t6160\t6162\t.\t+\t0\tParent=g16011.t1;/contig_714\tAUGUSTUS\tstart_codon\t6151\t6649\t.\t+\t0\tParent=g16011.t1;/g' \
+	's/contig_714\tAUGUSTUS\tCDS\t6151\t6644\t0.66\t+\t0\tID=g16002.t1.CDS1;Parent=g16002.t1/contig_714\tAUGUSTUS\tCDS\t6151\t6649\t0.66\t+\t0\tID=g16002.t1.CDS1;Parent=g16002.t1/g' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tCDS\t6160\t6644\t0.52\t+\t0\tID=g16011.t1.CDS1;Parent=g16011.t1/contig_714\tAUGUSTUS\tCDS\t6151\t6649\t0.52\t+\t0\tID=g16011.t1.CDS1;Parent=g16011.t1/g' \
+	's/contig_714\tAUGUSTUS\texon\t6151\t6644\t.\t+\t.\tID=g16002.t1.exon1;Parent=g16002.t1;/contig_714\tAUGUSTUS\texon\t6151\t6649\t.\t+\t.\tID=g16002.t1.exon1;Parent=g16002.t1;/g' \
+	| grep -v -e 'g16002.t1.CDS2' -e 'g16002.t1.exon2' \
+	| grep -v 'intron\t6645\t6781\t0.89\t+\t.\tParent=g16002.t1;' \
 	| sed \
-	's/contig_714\tAUGUSTUS\texon\t6160\t6644\t.\t+\t.\tID=g16011.t1.exon1;Parent=g16011.t1;/contig_714\tAUGUSTUS\texon\t6151\t6649\t.\t+\t.\tID=g16011.t1.exon1;Parent=g16011.t1;/g' \
-	| grep -v -e 'g16011.t1.CDS2' -e 'g16011.t1.exon2' \
-	| grep -v 'intron\t6645\t6781\t1\t+\t.\tParent=g16011.t1;' \
-	| sed \
-	's/contig_714\tAUGUSTUS\tstop_codon\t6786\t6788\t.\t+\t0\tParent=g16011.t1;/contig_714\tAUGUSTUS\tstop_codon\t6647\t6649\t.\t+\t0\tParent=g16011.t1;/g' \
+	's/contig_714\tAUGUSTUS\tstop_codon\t6786\t6788\t.\t+\t0\tParent=g16002.t1;/contig_714\tAUGUSTUS\tstop_codon\t6647\t6649\t.\t+\t0\tParent=g16002.t1;/g' \
 	> $OutDir/final_genes_Braker_ed.gff3
 
 	printf \
-	"contig_2084\tManual_annotation\tgene\t261\t525\t1\t+\t.\tID=man_1;
-	contig_2084\tManual_annotation\tmRNA\t261\t525\t1\t+\t.\tID=man_1.t1;Parent=man_1
-	contig_2084\tManual_annotation\tstart_codon\t261\t263\t.\t+\t.\tParent=man_1.t1;
-	contig_2084\tManual_annotation\tCDS\t261\t525\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
-	contig_2084\tManual_annotation\texon\t261\t525\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;\n" \
+	"contig_2082\tManual_annotation\tgene\t261\t525\t1\t+\t.\tID=man_1;
+	contig_2082\tManual_annotation\tmRNA\t261\t525\t1\t+\t.\tID=man_1.t1;Parent=man_1
+	contig_2082\tManual_annotation\tstart_codon\t261\t263\t.\t+\t.\tParent=man_1.t1;
+	contig_2082\tManual_annotation\tCDS\t261\t525\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
+	contig_2082\tManual_annotation\texon\t261\t525\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 	printf \
 	"contig_971\tManual_annotation\tgene\t333\t506\t1\t-\t.\tID=man_2;
@@ -1470,18 +1536,18 @@ CUFF_7215_2_7
 	contig_971\tManual_annotation\tstart_codon\t504\t506\t.\t-\t.\tParent=man_2.t1;\n" \
 	>> $OutDir/final_genes_Braker_ed.gff3
 
-	cat $CodingQuaryGff | grep -v -w -e 'NS.09890' -e 'CUFF.7215.2.7' > $OutDir/PredictedPass_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'CUFF.14630.2.11' -e	'CUFF.7213.2.7' > $OutDir/PredictedPass_ed.gff3
 	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 ```
 
 ## FoN N139
 
 Note that at this stage all codingquary genes contain . characters rather than _ characters
-g16582 - SIX10 - remove gene and use PGN_predictedPass gene
-g16581 - SIX12 - shorten intron and final CDS
+g16592 - SIX10 - remove gene and use PGN_predictedPass gene
+g16591 - SIX12 - shorten intron and final CDS
 
 Duplicated genes:
-NS_00419
+CUFF.639.2.10
 
 ```bash
 	Organism=F.oxysporum_fsp_narcissi
@@ -1495,22 +1561,22 @@ NS_00419
 	PGNGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3)
 
 	cat $BrakerGff \
-	| grep -v -w 'g16582' \
+	| grep -v -w 'g16592' \
 	| sed \
-	's/contig_732\tAUGUSTUS\tgene\t3227\t3658\t0.98\t+\t.\tID=g16581;/contig_732\tAUGUSTUS\tgene\t3317\t3658\t0.98\t+\t.\tID=g16581;/g' \
+	's/contig_728\tAUGUSTUS\tgene\t3227\t3658\t0.98\t+\t.\tID=g16591;/contig_728\tAUGUSTUS\tgene\t3317\t3658\t0.98\t+\t.\tID=g16591;/g' \
 	| sed \
-	's/contig_732\tAUGUSTUS\tmRNA\t3227\t3658\t0.98\t+\t.\tID=g16581.t1;Parent=g16581/contig_732\tAUGUSTUS\tmRNA\t3317\t3658\t0.98\t+\t.\tID=g16581.t1;Parent=g16581/g' \
+	's/contig_728\tAUGUSTUS\tmRNA\t3227\t3658\t0.98\t+\t.\tID=g16591.t1;Parent=g16591/contig_728\tAUGUSTUS\tmRNA\t3317\t3658\t0.98\t+\t.\tID=g16591.t1;Parent=g16591/g' \
 	| sed \
-	's/contig_732\tAUGUSTUS\tstart_codon\t3227\t3229\t.\t+\t0\tParent=g16581.t1;/contig_732\tAUGUSTUS\tstart_codon\t3317\t3319\t.\t+\t0\tParent=g16581.t1;/g' \
+	's/contig_728\tAUGUSTUS\tstart_codon\t3227\t3229\t.\t+\t0\tParent=g16591.t1;/contig_728\tAUGUSTUS\tstart_codon\t3317\t3319\t.\t+\t0\tParent=g16591.t1;/g' \
 	| sed \
-	's/contig_732\tAUGUSTUS\tCDS\t3227\t3248\t0.99\t+\t0\tID=g16581.t1.CDS1;Parent=g16581.t1/contig_732\tAUGUSTUS\tCDS\t3317\t3658\t0.99\t+\t0\tID=g16581.t1.CDS1;Parent=g16581.t1/g' \
+	's/contig_728\tAUGUSTUS\tCDS\t3227\t3248\t0.99\t+\t0\tID=g16591.t1.CDS1;Parent=g16591.t1/contig_728\tAUGUSTUS\tCDS\t3317\t3658\t0.99\t+\t0\tID=g16591.t1.CDS1;Parent=g16591.t1/g' \
 	| sed \
-	's/contig_732\tAUGUSTUS\texon\t3227\t3248\t.\t+\t.\tID=g16581.t1.exon1;Parent=g16581.t1;/contig_732\tAUGUSTUS\texon\t3317\t3658\t.\t+\t.\tID=g16581.t1.exon1;Parent=g16581.t1;/g' \
-	| grep -v -e 'intron\t3249\t3299\t0.99\t+\t.\tParent=g16581.t1' \
-	| grep -v -e 'g16581.t1.CDS2' -e 'g16581.t1.exon2' \
+	's/contig_728\tAUGUSTUS\texon\t3227\t3248\t.\t+\t.\tID=g16591.t1.exon1;Parent=g16591.t1;/contig_728\tAUGUSTUS\texon\t3317\t3658\t.\t+\t.\tID=g16591.t1.exon1;Parent=g16591.t1;/g' \
+	| grep -v -e 'intron\t3249\t3299\t0.99\t+\t.\tParent=g16591.t1' \
+	| grep -v -e 'g16591.t1.CDS2' -e 'g16591.t1.exon2' \
 	> $OutDir/final_genes_Braker_ed.gff3
 
-	cat $CodingQuaryGff | grep -v -w -e 'NS.00419' > $OutDir/PredictedPass_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'CUFF.636.2.10' > $OutDir/PredictedPass_ed.gff3
 	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 ```
 
@@ -1519,7 +1585,7 @@ NS_00419
 Note that at this stage all codingquary genes contain . characters rather than _ characters
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'ncbi' -e 'Fus2_canu_new' | grep -v -e 'Fus2_canu_new' -e 'A23' -e '125' -e 'N139'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'ncbi' -e 'Fus2_canu_new' | grep -v -e 'Fus2_canu_new' -e 'A23' -e '125' -e 'N139' | grep -v 'old' | grep 'A8'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 OutDir=gene_pred/final_genes/$Organism/$Strain/edited
@@ -1529,27 +1595,27 @@ BrakerGff=$(ls gene_pred/braker/$Organism/"$Strain"_braker/*/augustus.gff3)
 CodingQuaryGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3)
 PGNGff=$(ls gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3)
 if [[ $Strain == 'A28_ncbi' ]]; then
-	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
-	cat $CodingQuaryGff | grep -v -w -e 'NS.05035' >$OutDir/PredictedPass_ed.gff3
-	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+cat $CodingQuaryGff | grep -v -w -e 'CUFF.7109.1.50' > $OutDir/PredictedPass_ed.gff3
+cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 elif [[ $Strain == 'CB3_ncbi' ]]; then
-	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
-	cat $CodingQuaryGff | grep -v -w -e 'NS.07769' >$OutDir/PredictedPass_ed.gff3
-	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+cat $CodingQuaryGff | grep -v -w -e 'CUFF.10490.1.97' > $OutDir/PredictedPass_ed.gff3
+cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 elif [[ $Strain == 'PG_ncbi' ]]; then
-	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
-	cat $CodingQuaryGff | grep -v -w -e 'NS.08672' -e 'NS.05531' >$OutDir/PredictedPass_ed.gff3
-	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+cat $CodingQuaryGff | grep -v -w -e 'CUFF.7109.1.38' -e 'CUFF.11875.1.103' > $OutDir/PredictedPass_ed.gff3
+cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 else
-	cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
-	cp $CodingQuaryGff $OutDir/PredictedPass_ed.gff3
-	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+cp $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+cp $CodingQuaryGff $OutDir/PredictedPass_ed.gff3
+cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 fi
 done
 ```
 
 ```bash
-for EditDir in $(ls -d gene_pred/final_genes/*/*/edited | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'Fus2_canu_new'); do
+for EditDir in $(ls -d gene_pred/final_genes/*/*/edited | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'Fus2_canu_new' | grep -e '125' -e 'A23' -e 'N139'); do
 Strain=$(echo $EditDir | rev | cut -d '/' -f2 | rev)
 Organism=$(echo $EditDir | rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
@@ -1644,7 +1710,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23' -e 'N139' ); do
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1655,7 +1721,7 @@ commands:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e 'A8'); do
 Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1691,7 +1757,7 @@ done
 
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23' -e 'N139'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -1703,7 +1769,7 @@ done
 ```
 
 ```bash
-for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_vJul2016_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep 'A8'); do
 # SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
@@ -1739,7 +1805,7 @@ Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -e '125' -e 'A23'); do
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -e '125' -e 'A23' -e 'N139'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 OutDir=$(dirname $File)
@@ -1960,6 +2026,32 @@ Number of predicted genes in clusters:	608
 F.proliferatum - A8_ncbi
 Number of clusters detected:	58
 Number of predicted genes in clusters:	770
+```
+
+## E) SSCP
+
+Small secreted cysteine rich proteins were identified within secretomes. These
+proteins may be identified by EffectorP, but this approach allows direct control
+over what constitutes a SSCP.
+
+```bash
+
+for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/sscp/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+$ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
+cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
+echo "Number of effectors predicted by EffectorP:"
+EffectorP=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP_secreted_headers.txt)
+cat $EffectorP | wc -l
+echo "Number of SSCPs predicted by both effectorP and this approach"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' > $OutDir/"$Strain"_sscp_headers.txt
+cat $OutDir/"$Strain"_sscp_headers.txt $EffectorP | cut -f1 | sort | uniq -d | wc -l
+done
 ```
 
 #Genomic analysis
@@ -2464,12 +2556,12 @@ Protein sequence of previously characterised SIX genes used to BLAST against
 assemblies.
 
 ```bash
-	ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -v 'Fus2_canu_new' | grep 'ncbi'); do
-		echo $Assembly
-		Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
-		qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
-	done
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -w -v 'Fus2_canu_new' | grep 'ncbi' | grep -v 'old'); do
+echo $Assembly
+Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+done
 ```
 
 Once blast searches had completed, the BLAST hits were converted to GFF

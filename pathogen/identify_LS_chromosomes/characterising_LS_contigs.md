@@ -23,8 +23,22 @@ $ProgDir/count_Ns.py --inp_fasta $Assembly --out_txt $OutDir/N_content.txt
 
 ### 4.1.c Gene density and % content
 
+For Fus2
+
 ```bash
-/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/feature_density.py --inp_fasta repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask/Fus2_canu_contigs_hardmasked_repeatmasker_TPSI_appended.fa --inp_gff gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 --features gene
+Assembly=repeat_masked/F.oxysporum_fsp_cepae/Fus2_canu_new/edited_contigs_repmask/Fus2_canu_contigs_hardmasked_repeatmasker_TPSI_appended.fa
+Genes=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+$ProgDir/feature_density.py --inp_fasta $Assembly --inp_gff $Genes --features gene
+```
+
+For 4287
+
+```bash
+Assembly=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_Genome_parsed.fasta
+Genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff  
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+$ProgDir/feature_density.py --inp_fasta $Assembly --inp_gff $Genes --features gene
 ```
 
 

@@ -81,6 +81,27 @@ rm -r $SubFolder
 
 ```
 
+## Making a table for locus tags:
+
+locus tags were provided by ncbi when the bioproject was registered.
+
+A table detailing their relationship to the strain was made manually. This could
+be searched later to extract locus tags for particular strains.
+
+```bash
+mkdir -p genome_submission/
+printf \
+"BFJ65 SAMN05529097 FoC_Fus2
+BFJ66 SAMN05529098 FoC_125
+BFJ67 SAMN05529099 FoC_A23
+BFJ68 SAMN05529100 Fo_A28
+BFJ69 SAMN05529101 Fo_A13
+BFJ70 SAMN05529102 Fo_PG
+BFJ71 SAMN05529103 Fo_CB3
+BFJ72 SAMN05529104 Fp_A8" \
+> genome_submission/FoC_PRJNA338256_locus_tags.txt
+```
+
 # Final Submission
 
 These commands were used in the final submission of the FoC Fus2 genome:
@@ -255,20 +276,9 @@ and that runs of N's longer than 10 bp should be labelled as gaps.
   tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
   cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
 ```
+
+
 <!--
-## Additional Information
-
-During genome submission the following files were provided in response to questions:
-
-Do any sequences belong to a chromosome?
-
-printf ""
-
-Contigs were associated with FoL chromosomes  -->
-
-
-
-
 
 # Preperation of files for FoC isolates 125 and A23
 
@@ -277,6 +287,17 @@ Contigs were associated with FoL chromosomes  -->
 ```bash
 ProjDir=/home/groups/harrisonlab/project_files/fusarium
 cd $ProjDir
+LocusTags=genome_submission/FoC_PRJNA338256_locus_tags.txt
+printf \
+"BFJ65 SAMN05529097 FoC_Fus2
+BFJ66 SAMN05529098 FoC_125
+BFJ67 SAMN05529099 FoC_A23
+BFJ68 SAMN05529100 Fo_A28
+BFJ69 SAMN05529101 Fo_A13
+BFJ70 SAMN05529102 Fo_PG
+BFJ71 SAMN05529103 Fo_CB3
+BFJ72 SAMN05529104 Fp_A8" \
+> $LocusTags
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_cepae/*/filtered_contigs_repmask/*_contigs_unmasked.fa | grep -e '125' -e 'A23' | grep -v -e 'ncbi'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -297,7 +318,7 @@ GffFile=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.
 Organism="Fusarium oxysporum f. sp. cepae"
 Strain="$Strain"
 # ncbi_tbl_corrector script options:
-SubmissionID="BFJ63"
+# SubmissionID="BFJ63"
 LabID="ArmitageEMR"
 # IDSource='similar to AA sequence:UniProtKB/Swiss-Prot'
 # Final submisison file name:
@@ -309,6 +330,7 @@ SbtFile="$ProjDir/$OutDir/genome.sbt"
 SRA_metadata=$(ls genome_submission/FoC_PRJNA338256_SRA_metadata_acc.txt)
 BioProject=$(cat $SRA_metadata | sed 's/PRJNA/\nPRJNA/g' | grep "$Strain" | cut -f1 | head -n1)
 BioSample=$(cat $SRA_metadata | sed 's/PRJNA/\nPRJNA/g' | grep "$Strain" | cut -f2 | head -n1)
+SubmissionID==$(cat $LocusTags | grep "$BioSample" | cut -f1 -d' ' | head -n1)
 cat $Ref_Sbt | sed -r "s/\"PRJNA.*\"/\"$BioProject\"/g" | sed -r "s/\"SAMN.*\"/\"$BioSample\"/g" >  $SbtFile
 # Generating .tbl file (GAG)
 # Extracting annotations (Annie)
@@ -327,6 +349,7 @@ mkdir -p $OutDir/gag/edited
 $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
 # $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --add_inference "$IDSource" --edits stop pseudo unknown_UTR correct_partial --rename_genes "vAg" --out_tbl  $OutDir/gag/edited/genome.tbl
 # Generating a structured comment detailing annotation methods
+
 printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
 Annotation Provider\tHarrison Lab NIAB-EMR
 Annotation Date\tSEP-2016
@@ -340,15 +363,25 @@ mkdir $OutDir/tbl2asn/final
 tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -Z discrep -j "[organism=$Organism] [strain=$Strain]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
 cp $OutDir/tbl2asn/final/genome.sqn $OutDir/tbl2asn/final/$FinalName.sqn
 done
-```
+``` -->
 
 # Preperation of files for Fo, Fp and FoN isolates
 
 An output and working directory was made for genome submission:
 
 ```bash
-num=0
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -e 'A13_ncbi' -e 'PG'); do
+LocusTags=genome_submission/FoC_PRJNA338256_locus_tags.txt
+printf \
+"BFJ65 SAMN05529097 FoC_Fus2
+BFJ66 SAMN05529098 FoC_125
+BFJ67 SAMN05529099 FoC_A23
+BFJ68 SAMN05529100 Fo_A28
+BFJ69 SAMN05529101 Fo_A13
+BFJ70 SAMN05529102 Fo_PG
+BFJ71 SAMN05529103 Fo_CB3
+BFJ72 SAMN05529104 Fp_A8" \
+> $LocusTags
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -v 'old' | grep -v -e 'CB3' -e 'N139' | grep 'A8'); do
 # tbl2asn options:
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
@@ -375,11 +408,11 @@ SbtFile="$OutDir/template.sbt"
 SRA_metadata=$(ls genome_submission/FoC_PRJNA338256_SRA_metadata_acc.txt)
 BioProject=$(cat $SRA_metadata | sed 's/PRJNA/\nPRJNA/g' | grep "$StrainOfficial" | cut -f1 | head -n1)
 BioSample=$(cat $SRA_metadata | sed 's/PRJNA/\nPRJNA/g' | grep "$StrainOfficial" | cut -f2 | head -n1)
-
+SubmissionID=$(cat $LocusTags | grep "$BioSample" | cut -f1 -d' ' | head -n1)
 
 # ncbi_tbl_corrector script options:
-num=$(($num+1))
-SubmissionID="FXC0$num"
+# num=$(($num+1))
+# SubmissionID="FXC0$num"
 LabID="ArmitageEMR"
 # Final submisison file name:
 FinalName="$Organism"_"$Strain"_Armitage_2016

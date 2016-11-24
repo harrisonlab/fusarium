@@ -88,8 +88,7 @@ These commands were used in the final submission of the FoN genome:
 
 
 ```bash
-num=0
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e 'N139_ncbi'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e 'N139_ncbi' | grep -v 'old'); do
 # tbl2asn options:
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
@@ -118,8 +117,7 @@ BioSample=$(cat $SRA_metadata | sed 's/PRJNA/\nPRJNA/g' | grep "$StrainOfficial"
 
 
 # ncbi_tbl_corrector script options:
-num=$(($num+1))
-SubmissionID="FON0$num"
+SubmissionID="BFJ63"
 LabID="ArmitageEMR"
 # Final submisison file name:
 FinalName="$Organism"_"$Strain"_Armitage_2016

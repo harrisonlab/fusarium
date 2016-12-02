@@ -1332,7 +1332,7 @@ gene_pred/final_genes/F.proliferatum/A8_ncbi/final
 ## Identification of duplicated genes in additional CodingQuary gene models
 
 ```bash
-for AddGenes in $(ls gene_pred/codingquary/F.*/*/additional/additional_genes.gff | grep 'ncbi' | grep -v 'ncbi_braker' | grep '125'); do
+for AddGenes in $(ls gene_pred/codingquary/F.*/*/additional/additional_genes.gff | grep 'ncbi' | grep -v 'ncbi_braker' | grep 'A23'); do
 Strain=$(echo $AddGenes| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $AddGenes | rev | cut -d '/' -f4 | rev)
 OutDir=$(dirname $AddGenes)
@@ -1422,6 +1422,7 @@ Duplicated genes:
 CUFF.7204.2.14
 CUFF.7961.1.0
 CUFF.11924.2.127
+CUFF.6792.1.4
 
 ```bash
 Organism=F.oxysporum_fsp_cepae
@@ -1439,49 +1440,49 @@ cat $BrakerGff \
 | grep -w -v 'g13351' \
 | grep -v 'g16038' \
 | sed \
-'s/contig_819\tAUGUSTUS\tgene\t655\t1273\t0.65\t+\t.\tID=g16100;/contig_819\tAUGUSTUS\tgene\t655\t1189\t0.65\t+\t.\tID=g16100;/g' \
+'s/contig_819\tAUGUSTUS\tgene\t655\t1273\t0.73\t+\t.\tID=g16100;/contig_819\tAUGUSTUS\tgene\t655\t1188\t0.73\t+\t.\tID=g16100;/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\tmRNA\t655\t1273\t0.65\t+\t.\tID=g16100.t1;Parent=g16100/contig_819\tAUGUSTUS\tmRNA\t655\t1189\t0.65\t+\t.\tID=g16100.t1;Parent=g16100/g' \
+'s/contig_819\tAUGUSTUS\tmRNA\t655\t1273\t0.73\t+\t.\tID=g16100.t1;Parent=g16100/contig_819\tAUGUSTUS\tmRNA\t655\t1188\t0.73\t+\t.\tID=g16100.t1;Parent=g16100/g' \
 | sed \
 's/contig_819\tAUGUSTUS\tintron\t1002\t1057\t1\t+\t.\tParent=g16100.t1;/contig_819\tAUGUSTUS\tintron\t1002\t1050\t1\t+\t.\tParent=g16100.t1;/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\tCDS\t1058\t1273\t0.67\t+\t0\tID=g16100.t1.CDS4;Parent=g16100.t1/contig_819\tAUGUSTUS\tCDS\t1051\t1189\t0.67\t+\t0\tID=g16100.t1.CDS4;Parent=g16100.t1/g' \
+'s/contig_819\tAUGUSTUS\tCDS\t1058\t1273\t0.74\t+\t0\tID=g16100.t1.CDS4;Parent=g16100.t1/contig_819\tAUGUSTUS\tCDS\t1051\t1188\t0.74\t+\t0\tID=g16100.t1.CDS4;Parent=g16100.t1/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\texon\t1058\t1273\t.\t+\t.\tID=g16100.t1.exon4;Parent=g16100.t1;/contig_819\tAUGUSTUS\texon\t1051\t1189\t.\t+\t.\tID=g16100.t1.exon4;Parent=g16100.t1;/g' \
+'s/contig_819\tAUGUSTUS\texon\t1058\t1273\t.\t+\t.\tID=g16100.t1.exon4;Parent=g16100.t1;/contig_819\tAUGUSTUS\texon\t1051\t1188\t.\t+\t.\tID=g16100.t1.exon4;Parent=g16100.t1;/g' \
 | sed \
-'s/contig_819\tAUGUSTUS\tstop_codon\t1271\t1273\t.\t+\t0\tParent=g16100.t1;/contig_819\tAUGUSTUS\tstop_codon\t1187\t1189\t.\t+\t0\tParent=g16100.t1;/g' \
+'s/contig_819\tAUGUSTUS\tstop_codon\t1271\t1273\t.\t+\t0\tParent=g16100.t1;/contig_819\tAUGUSTUS\tstop_codon\t1186\t1188\t.\t+\t0\tParent=g16100.t1;/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tgene\t1046\t1683\t0.81\t+\t.\tID=g15699;/contig_592\tAUGUSTUS\tgene\t1046\t1544\t0.81\t+\t.\tID=g15699;/g' \
+'s/contig_592\tAUGUSTUS\tgene\t1046\t1683\t0.68\t+\t.\tID=g15699;/contig_592\tAUGUSTUS\tgene\t1046\t1543\t0.68\t+\t.\tID=g15699;/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tmRNA\t1046\t1683\t0.81\t+\t.\tID=g15699.t1;Parent=g15699/contig_592\tAUGUSTUS\tmRNA\t1046\t1544\t0.81\t+\t.\tID=g15699.t1;Parent=g15699/g' \
+'s/contig_592\tAUGUSTUS\tmRNA\t1046\t1683\t0.68\t+\t.\tID=g15699.t1;Parent=g15699/contig_592\tAUGUSTUS\tmRNA\t1046\t1543\t0.68\t+\t.\tID=g15699.t1;Parent=g15699/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\tCDS\t1046\t1539\t0.81\t+\t0\tID=g15699.t1.CDS1;Parent=g15699.t1/contig_592\tAUGUSTUS\tCDS\t1046\t1544\t0.81\t+\t0\tID=g15699.t1.CDS1;Parent=g15699.t1/g' \
+'s/contig_592\tAUGUSTUS\tCDS\t1046\t1539\t0.68\t+\t0\tID=g15699.t1.CDS1;Parent=g15699.t1/contig_592\tAUGUSTUS\tCDS\t1046\t1543\t0.68\t+\t0\tID=g15699.t1.CDS1;Parent=g15699.t1/g' \
 | sed \
-'s/contig_592\tAUGUSTUS\texon\t1046\t1539\t.\t+\t.\tID=g15699.t1.exon1;Parent=g15699.t1;/contig_592\tAUGUSTUS\texon\t1046\t1544\t.\t+\t.\tID=g15699.t1.exon1;Parent=g15699.t1;/g' \
-| grep -v 'intron\t1540\t1676\t1\t+\t.\tParent=g15699.t1;' \
+'s/contig_592\tAUGUSTUS\texon\t1046\t1539\t.\t+\t.\tID=g15699.t1.exon1;Parent=g15699.t1;/contig_592\tAUGUSTUS\texon\t1046\t1543\t.\t+\t.\tID=g15699.t1.exon1;Parent=g15699.t1;/g' \
+| grep -v 'contig_592.AUGUSTUS.intron.1540.1676.1.+...Parent=g15699.t1;' \
 | grep -v 'g15699.t1.CDS2' | grep -v 'g15699.t1.exon2' \
 | sed \
-'s/contig_592\tAUGUSTUS\tstop_codon\t1681\t1683\t.\t+\t0\tParent=g15699.t1;/contig_592\tAUGUSTUS\tstop_codon\t1542\t1544\t.\t+\t0\tParent=g15699.t1;/g' \
+'s/contig_592\tAUGUSTUS\tstop_codon\t1681\t1683\t.\t+\t0\tParent=g15699.t1;/contig_592\tAUGUSTUS\tstop_codon\t1541\t1543\t.\t+\t0\tParent=g15699.t1;/g' \
 > $OutDir/final_genes_Braker_ed.gff3
 
 
 printf \
-"contig_1792\tManual_annotation\tgene\t1\t220\t1\t+\t.\tID=man_1;
-contig_1792\tManual_annotation\tmRNA\t1\t220\t1\t+\t.\tID=man_1.t1;Parent=man_1
-contig_1792\tManual_annotation\tCDS\t1\t220\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
-contig_1792\tManual_annotation\texon\t1\t220\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;
-contig_1792\tManual_annotation\tstop_codon\t218\t220\t.\t+\t.\tParent=man_1.t1;\n" \
+"contig_1792\tManual_annotation\tgene\t1\t219\t1\t+\t.\tID=man_1;
+contig_1792\tManual_annotation\tmRNA\t1\t219\t1\t+\t.\tID=man_1.t1;Parent=man_1
+contig_1792\tManual_annotation\tCDS\t1\t219\t1.0\t+\t0\tID=man_1.t1.CDS1;Parent=man_1.t1
+contig_1792\tManual_annotation\texon\t1\t219\t.\t+\t.\tID=man_1.t1.exon1;Parent=man_1.t1;
+contig_1792\tManual_annotation\tstop_codon\t217\t219\t.\t+\t.\tParent=man_1.t1;\n" \
 >> $OutDir/final_genes_Braker_ed.gff3
 printf \
-"contig_1016\tManual_annotation\tgene\t2103\t2277\t1\t+\t.\tID=man_2;
-contig_1016\tManual_annotation\tmRNA\t2103\t2277\t1\t+\t.\tID=man_2.t1;Parent=man_2
-contig_1016\tManual_annotation\tstop_codon\t2103\t2105\t.\t+\t.\tParent=man_2.t1;
-contig_1016\tManual_annotation\tCDS\t2103\t2277\t1.0\t+\t0\tID=man_2.t1.CDS1;Parent=man_2.t1
-contig_1016\tManual_annotation\texon\t2103\t2277\t.\t+\t.\tID=man_2.t1.exon1;Parent=man_2.t1;
-contig_1016\tManual_annotation\tstop_codon\t2275\t2277\t.\t+\t.\tParent=man_2.t1;\n" \
+"contig_1016\tManual_annotation\tgene\t2103\t2276\t1\t+\t.\tID=man_2;
+contig_1016\tManual_annotation\tmRNA\t2103\t2276\t1\t+\t.\tID=man_2.t1;Parent=man_2
+contig_1016\tManual_annotation\tstart_codon\t2103\t2105\t.\t+\t.\tParent=man_2.t1;
+contig_1016\tManual_annotation\tCDS\t2103\t2276\t1.0\t+\t0\tID=man_2.t1.CDS1;Parent=man_2.t1
+contig_1016\tManual_annotation\texon\t2103\t2276\t.\t+\t.\tID=man_2.t1.exon1;Parent=man_2.t1;
+contig_1016\tManual_annotation\tstop_codon\t2274\t2276\t.\t+\t.\tParent=man_2.t1;\n" \
 >> $OutDir/final_genes_Braker_ed.gff3
 
-cat $CodingQuaryGff | grep -w -v -e 'CUFF.7204.2.14' -e 'CUFF.7961.1.0' -e 'CUFF.11924.2.127' > $OutDir/PredictedPass_ed.gff3
+cat $CodingQuaryGff | grep -w -v -e 'CUFF.7204.2.14' -e 'CUFF.7961.1.0' -e 'CUFF.11924.2.127' -e 'CUFF.6792.1.4' > $OutDir/PredictedPass_ed.gff3
 cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 ```
 
@@ -1507,17 +1508,17 @@ CUFF.7213.2.7
 	cat $BrakerGff \
 	| grep -v -w 'g16001' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tgene\t6151\t6788\t0.66\t+\t.\tID=g16002;/contig_714\tAUGUSTUS\tgene\t6151\t6649\t0.66\t+\t.\tID=g16002;/g' \
+	's/contig_714\tAUGUSTUS\tgene\t6151\t6788\t0.93\t+\t.\tID=g16002/contig_714\tAUGUSTUS\tgene\t6151\t6648\t0.93\t+\t.\tID=g16002/g' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tmRNA\t6151\t6788\t0.66\t+\t.\tID=g16002.t1;Parent=g16002/contig_714\tAUGUSTUS\tmRNA\t6151\t6649\t0.66\t+\t.\tID=g16002.t1;Parent=g16002/g' \
+	's/contig_714\tAUGUSTUS\tmRNA\t6151\t6788\t0.93\t+\t.\tID=g16002.t1;Parent=g16002/contig_714\tAUGUSTUS\tmRNA\t6151\t6648\t0.93\t+\t.\tID=g16002.t1;Parent=g16002/g' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tCDS\t6151\t6644\t0.66\t+\t0\tID=g16002.t1.CDS1;Parent=g16002.t1/contig_714\tAUGUSTUS\tCDS\t6151\t6649\t0.66\t+\t0\tID=g16002.t1.CDS1;Parent=g16002.t1/g' \
+	's/contig_714\tAUGUSTUS\tCDS\t6151\t6644\t0.93\t+\t0\tID=g16002.t1.CDS1;Parent=g16002.t1/contig_714\tAUGUSTUS\tCDS\t6151\t6648\t0.93\t+\t0\tID=g16002.t1.CDS1;Parent=g16002.t1/g' \
 	| sed \
-	's/contig_714\tAUGUSTUS\texon\t6151\t6644\t.\t+\t.\tID=g16002.t1.exon1;Parent=g16002.t1;/contig_714\tAUGUSTUS\texon\t6151\t6649\t.\t+\t.\tID=g16002.t1.exon1;Parent=g16002.t1;/g' \
+	's/contig_714\tAUGUSTUS\texon\t6151\t6644\t.\t+\t.\tID=g16002.t1.exon1;Parent=g16002.t1;/contig_714\tAUGUSTUS\texon\t6151\t6648\t.\t+\t.\tID=g16002.t1.exon1;Parent=g16002.t1;/g' \
 	| grep -v -e 'g16002.t1.CDS2' -e 'g16002.t1.exon2' \
-	| grep -v 'intron\t6645\t6781\t0.89\t+\t.\tParent=g16002.t1;' \
+	| grep -v 'contig_714.AUGUSTUS.intron.6645.6781.1.+...Parent=g16002.t1;' \
 	| sed \
-	's/contig_714\tAUGUSTUS\tstop_codon\t6786\t6788\t.\t+\t0\tParent=g16002.t1;/contig_714\tAUGUSTUS\tstop_codon\t6647\t6649\t.\t+\t0\tParent=g16002.t1;/g' \
+	's/contig_714\tAUGUSTUS\tstop_codon\t6786\t6788\t.\t+\t0\tParent=g16002.t1;/contig_714\tAUGUSTUS\tstop_codon\t6646\t6648\t.\t+\t0\tParent=g16002.t1;/g' \
 	> $OutDir/final_genes_Braker_ed.gff3
 
 	printf \
@@ -1548,6 +1549,8 @@ g16591 - SIX12 - shorten intron and final CDS
 
 Duplicated genes:
 CUFF.639.2.10
+CUFF.7442.1.80 (identified by ncbi)
+CUFF.2100.1.11 (identified by ncbi)
 
 ```bash
 	Organism=F.oxysporum_fsp_narcissi
@@ -1563,20 +1566,20 @@ CUFF.639.2.10
 	cat $BrakerGff \
 	| grep -v -w 'g16592' \
 	| sed \
-	's/contig_728\tAUGUSTUS\tgene\t3227\t3658\t0.98\t+\t.\tID=g16591;/contig_728\tAUGUSTUS\tgene\t3317\t3658\t0.98\t+\t.\tID=g16591;/g' \
+	's/contig_728\tAUGUSTUS\tgene\t3227\t3658\t0.99\t+\t.\tID=g16591;/contig_728\tAUGUSTUS\tgene\t3317\t3658\t0.99\t+\t.\tID=g16591;/g' \
 	| sed \
-	's/contig_728\tAUGUSTUS\tmRNA\t3227\t3658\t0.98\t+\t.\tID=g16591.t1;Parent=g16591/contig_728\tAUGUSTUS\tmRNA\t3317\t3658\t0.98\t+\t.\tID=g16591.t1;Parent=g16591/g' \
+	's/contig_728\tAUGUSTUS\tmRNA\t3227\t3658\t0.99\t+\t.\tID=g16591.t1;Parent=g16591/contig_728\tAUGUSTUS\tmRNA\t3317\t3658\t0.99\t+\t.\tID=g16591.t1;Parent=g16591/g' \
 	| sed \
 	's/contig_728\tAUGUSTUS\tstart_codon\t3227\t3229\t.\t+\t0\tParent=g16591.t1;/contig_728\tAUGUSTUS\tstart_codon\t3317\t3319\t.\t+\t0\tParent=g16591.t1;/g' \
 	| sed \
-	's/contig_728\tAUGUSTUS\tCDS\t3227\t3248\t0.99\t+\t0\tID=g16591.t1.CDS1;Parent=g16591.t1/contig_728\tAUGUSTUS\tCDS\t3317\t3658\t0.99\t+\t0\tID=g16591.t1.CDS1;Parent=g16591.t1/g' \
+	's/contig_728\tAUGUSTUS\tCDS\t3227\t3248\t1\t+\t0\tID=g16591.t1.CDS1;Parent=g16591.t1/contig_728\tAUGUSTUS\tCDS\t3317\t3658\t1\t+\t0\tID=g16591.t1.CDS1;Parent=g16591.t1/g' \
 	| sed \
 	's/contig_728\tAUGUSTUS\texon\t3227\t3248\t.\t+\t.\tID=g16591.t1.exon1;Parent=g16591.t1;/contig_728\tAUGUSTUS\texon\t3317\t3658\t.\t+\t.\tID=g16591.t1.exon1;Parent=g16591.t1;/g' \
-	| grep -v -e 'intron\t3249\t3299\t0.99\t+\t.\tParent=g16591.t1' \
+	| grep -v -e 'intron.3249.3299.1.+...Parent=g16591.t1;' \
 	| grep -v -e 'g16591.t1.CDS2' -e 'g16591.t1.exon2' \
 	> $OutDir/final_genes_Braker_ed.gff3
 
-	cat $CodingQuaryGff | grep -v -w -e 'CUFF.636.2.10' > $OutDir/PredictedPass_ed.gff3
+	cat $CodingQuaryGff | grep -v -w -e 'CUFF.636.2.10' -e 'CUFF.7442.1.80' -e 'CUFF.2100.2.11' > $OutDir/PredictedPass_ed.gff3
 	cp $PGNGff $OutDir/PGN_predictedPass_ed.gff3
 ```
 
@@ -1615,7 +1618,7 @@ done
 ```
 
 ```bash
-for EditDir in $(ls -d gene_pred/final_genes/*/*/edited | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'Fus2_canu_new' | grep -e '125' -e 'A23' -e 'N139'); do
+for EditDir in $(ls -d gene_pred/final_genes/*/*/edited | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'Fus2_canu_new' | grep -e '125' -e 'A23' -e 'N139' | grep 'N139'); do
 Strain=$(echo $EditDir | rev | cut -d '/' -f2 | rev)
 Organism=$(echo $EditDir | rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
@@ -1721,7 +1724,7 @@ commands:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e 'A8'); do
+for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23' -e 'N139'); do
 Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1769,7 +1772,7 @@ done
 ```
 
 ```bash
-for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_vJul2016_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep 'A8'); do
+for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_vJul2016_10_hits.tbl | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23' -e 'N139'); do
 # SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
 Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)

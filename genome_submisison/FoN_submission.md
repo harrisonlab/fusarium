@@ -136,6 +136,7 @@ tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2
 
 mkdir -p $OutDir/gag/edited
 $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
+
 printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
 Annotation Provider\tHarrison Lab NIAB-EMR
 Annotation Date\tSEP-2016
@@ -143,11 +144,15 @@ Annotation Version\tRelease 1.01
 Annotation Method\tAb initio gene prediction: Braker 1.9 and CodingQuary 2.0; Functional annotation: Swissprot (July 2016 release) and Interproscan 5.18-57.0" \
 > $OutDir/gag/edited/annotation_methods.strcmt.txt
 
+sed -i 's/_pilon//g' $OutDir/gag/edited/genome.tbl
+sed -i 's/\. subunit/kDa subunit/g' $OutDir/gag/edited/genome.tbl
+sed -i 's/, mitochondrial//g' $OutDir/gag/edited/genome.tbl
+
 cp $Assembly $OutDir/gag/edited/genome.fsa
 cp $SbtFile $OutDir/gag/edited/genome.sbt
 mkdir $OutDir/tbl2asn/final
 tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$OrganismOfficial] [strain=$StrainOfficial]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
-cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
+cat $OutDir/tbl2asn/final/genome.sqn > $OutDir/tbl2asn/final/$FinalName.sqn
 done
 ```
 

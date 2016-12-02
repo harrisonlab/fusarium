@@ -381,7 +381,7 @@ BFJ70 SAMN05529102 Fo_PG
 BFJ71 SAMN05529103 Fo_CB3
 BFJ72 SAMN05529104 Fp_A8" \
 > $LocusTags
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -v 'old' | grep -v -e 'CB3' -e 'N139' | grep 'A8'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -v 'old' | grep -v -e 'CB3' -e 'N139' | grep -e 'A23' -e '125'); do
 # tbl2asn options:
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
@@ -441,11 +441,16 @@ Annotation Version\tRelease 1.01
 Annotation Method\tAb initio gene prediction: Braker 1.9 and CodingQuary 2.0; Functional annotation: Swissprot (July 2016 release) and Interproscan 5.18-57.0" \
 > $OutDir/gag/edited/annotation_methods.strcmt.txt
 
+sed -i 's/_pilon//g' $OutDir/gag/edited/genome.tbl
+sed -i 's/\. subunit/kDa subunit/g' $OutDir/gag/edited/genome.tbl
+sed -i 's/, mitochondrial//g' $OutDir/gag/edited/genome.tbl
+
 cp $Assembly $OutDir/gag/edited/genome.fsa
 cp $SbtFile $OutDir/gag/edited/genome.sbt
 mkdir $OutDir/tbl2asn/final
 tbl2asn -p $OutDir/gag/edited/. -t $OutDir/gag/edited/genome.sbt -r $OutDir/tbl2asn/final -M n -X E -Z $OutDir/tbl2asn/final/discrep.txt -j "[organism=$OrganismOfficial] [strain=$StrainOfficial]" -l paired-ends -a r10k -w $OutDir/gag/edited/annotation_methods.strcmt.txt
-cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
+# cat $OutDir/tbl2asn/final/genome.sqn | sed 's/_pilon//g' | sed 's/\. subunit/kDa subunit/g' | sed 's/, mitochondrial//g' > $OutDir/tbl2asn/final/$FinalName.sqn
+cp $OutDir/tbl2asn/final/genome.sqn $OutDir/tbl2asn/final/$FinalName.sqn
 done
 ```
 

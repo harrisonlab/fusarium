@@ -199,7 +199,17 @@ HB17 was identified as a contaminated sequence.
 ```bash
   Taxon_code=4287
   Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta)
-  Id_field=4
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for Fp A8
+
+```bash
+  Taxon_code=A8
+  Fasta_file=$(ls gene_pred/final_genes/F.proliferatum/A8_ncbi/final/final_genes_appended.gff3)
+  Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
@@ -521,7 +531,17 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ```bash
   Taxon_code=4287
   Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta)
-  Id_field=4
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for Fp A8
+
+```bash
+  Taxon_code=A8
+  Fasta_file=$(ls gene_pred/final_genes/F.proliferatum/A8_ncbi/final/final_genes_combined.pep.fasta)
+  Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
@@ -578,20 +598,20 @@ done
 ## 4.4 Perform ortholog identification
 
 ```bash
-  Jobs=$(qstat | grep 'blast_500' | wc -l)
-  while [ $Jobs -gt 0 ]; do
-  sleep 60
-  printf "."
-  Jobs=$(qstat | grep 'blast_500' | wc -l)
-  done
-  MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
-  printf "" > $MergeHits
-  for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
-    File=$(ls $WorkDir/splitfiles/*_$Num)
-    cat $File
-  done > $MergeHits
+  # Jobs=$(qstat | grep 'blast_500' | wc -l)
+  # while [ $Jobs -gt 0 ]; do
+  # sleep 60
+  # printf "."
+  # Jobs=$(qstat | grep 'blast_500' | wc -l)
+  # done
+  # MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
+  # printf "" > $MergeHits
+  # for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
+  #   File=$(ls $WorkDir/splitfiles/*_$Num)
+  #   cat $File
+  # done > $MergeHits
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
-  MergeHits="$IsolateAbrv"_blast.tab
+  MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
   GoodProts=$WorkDir/goodProteins/goodProteins.fasta
   qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts 5
 ```

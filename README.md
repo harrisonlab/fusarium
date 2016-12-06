@@ -672,7 +672,7 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/F.*/*/ncbi_submission | grep 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v 'old' | grep -e 'N139'); do
+for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'canu_new' -e 'ncbi' | grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v 'old' | grep 'Fus2'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -719,15 +719,15 @@ F.oxysporum_fsp_cepae	PG_ncbi
 865813
 3070545
 
-F.proliferatum	A8_ncbi
-1025299
-258296
-1209471
-
 F.oxysporum_fsp_narcissi	N139_ncbi
 5387901
 1641842
 5689747
+
+F.proliferatum	A8_ncbi
+1025299
+258296
+1209471
 ``` -->
 
 # Gene Prediction
@@ -1278,7 +1278,7 @@ done
 
 The final number of genes per isolate was observed using:
 ```bash
-for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi' | grep 'N139'); do
+for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139'  | grep -e 'ncbi'); do
 echo $DirPath;
 cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
 cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
@@ -1288,9 +1288,9 @@ done
 ```
 ```
 gene_pred/final_genes/F.oxysporum_fsp_cepae/125_ncbi/final
-17196
-1548
-18744
+17197
+1546
+18743
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A13_ncbi/final
 17986
@@ -1298,35 +1298,65 @@ gene_pred/final_genes/F.oxysporum_fsp_cepae/A13_ncbi/final
 18934
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A23_ncbi/final
-17007
-1550
+17006
+1551
 18557
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/A28_ncbi/final
 17426
-1449
-18875
+1448
+18874
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3_ncbi/final
 16833
-1346
-18179
+1345
+18178
 
 gene_pred/final_genes/F.oxysporum_fsp_cepae/PG_ncbi/final
 16811
-1292
-18103
+1290
+18101
 
 gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/final
-19060
-1643
-20703
+19059
+1642
+20701
 
 gene_pred/final_genes/F.proliferatum/A8_ncbi/final
 15421
 37
 15458
+```
 
+
+```bash
+for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -e 'canu_new' -e 'ncbi'); do
+	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
+	echo "$Strain - $Organism"
+	cat $Gff | grep -w 'gene' | wc -l
+done
+```
+
+```
+125_ncbi - F.oxysporum_fsp_cepae
+18505
+A13_ncbi - F.oxysporum_fsp_cepae
+18790
+A23_ncbi - F.oxysporum_fsp_cepae
+18323
+A28_ncbi - F.oxysporum_fsp_cepae
+18629
+CB3_ncbi - F.oxysporum_fsp_cepae
+17943
+Fus2_canu_new - F.oxysporum_fsp_cepae
+18855
+PG_ncbi - F.oxysporum_fsp_cepae
+17830
+N139_ncbi - F.oxysporum_fsp_narcissi
+20493
+A8_ncbi - F.proliferatum
+15418
 ```
 
 ## Identification of duplicated genes in additional CodingQuary gene models
@@ -1790,7 +1820,7 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/CAZY/$Organism/$Strain
@@ -1802,13 +1832,13 @@ qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
 done
 ```
 
-The Hmm parser was used to filter hits by an E-value of E1x10-5 or E 1x10-e3 if they had a hit over a length of X %.
+The Hmm parser was used to filter hits by an E-value of E1x10-5 or E1x10-e3 if they had a hit over a length of X %.
 
 Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -e '125' -e 'A23' -e 'N139'); do
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 OutDir=$(dirname $File)
@@ -1817,71 +1847,112 @@ ProgDir=/home/groups/harrisonlab/dbCAN
 $ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
 CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
 cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
-echo "number of CAZY genes identified:"
+echo "number of CAZY proteins identified:"
 cat $CazyHeaders | wc -l
 # Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
 Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
 CazyGff=$OutDir/"$Strain"_CAZY.gff
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
+echo "number of CAZY genes identified:"
+cat $CazyGff | grep -w 'gene' | wc -l
 
 SecretedProts=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
 SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
 cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
 CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
 $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
-echo "number of Secreted CAZY genes identified:"
+echo "number of Secreted CAZY proteins identified:"
 cat $CazyGffSecreted | grep -w 'mRNA' | cut -f9 | tr -d 'ID=' | cut -f1 -d ';' > $OutDir/"$Strain"_CAZY_secreted_headers.txt
 cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l
+echo "number of Secreted CAZY genes identified:"
+cat $CazyGffSecreted | grep -w 'gene' | wc -l
+# cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
 done > tmp.txt
 ```
 
 ```
 F.oxysporum_fsp_cepae - 125_ncbi
-number of CAZY genes identified:
-924
-number of Secreted CAZY genes identified:
-389
-F.oxysporum_fsp_cepae - A13_ncbi
-number of CAZY genes identified:
-970
-number of Secreted CAZY genes identified:
-403
-F.oxysporum_fsp_cepae - A23_ncbi
-number of CAZY genes identified:
-920
-number of Secreted CAZY genes identified:
-370
-F.oxysporum_fsp_cepae - A28_ncbi
+number of CAZY proteins identified:
+925
 number of CAZY genes identified:
 925
+number of Secreted CAZY proteins identified:
+386
+number of Secreted CAZY genes identified:
+386
+F.oxysporum_fsp_cepae - A13_ncbi
+number of CAZY proteins identified:
+965
+number of CAZY genes identified:
+965
+number of Secreted CAZY proteins identified:
+397
+number of Secreted CAZY genes identified:
+397
+F.oxysporum_fsp_cepae - A23_ncbi
+number of CAZY proteins identified:
+930
+number of CAZY genes identified:
+930
+number of Secreted CAZY proteins identified:
+387
 number of Secreted CAZY genes identified:
 387
-F.oxysporum_fsp_cepae - CB3_ncbi
+F.oxysporum_fsp_cepae - A28_ncbi
+number of CAZY proteins identified:
+919
 number of CAZY genes identified:
-911
+919
+number of Secreted CAZY proteins identified:
+376
+number of Secreted CAZY genes identified:
+376
+F.oxysporum_fsp_cepae - CB3_ncbi
+number of CAZY proteins identified:
+909
+number of CAZY genes identified:
+909
+number of Secreted CAZY proteins identified:
+383
 number of Secreted CAZY genes identified:
 383
 F.oxysporum_fsp_cepae - Fus2_canu_new
+number of CAZY proteins identified:
+940
 number of CAZY genes identified:
 940
+number of Secreted CAZY proteins identified:
+386
 number of Secreted CAZY genes identified:
 386
 F.oxysporum_fsp_cepae - PG_ncbi
+number of CAZY proteins identified:
+914
 number of CAZY genes identified:
-915
+914
+number of Secreted CAZY proteins identified:
+381
 number of Secreted CAZY genes identified:
-383
+381
 F.oxysporum_fsp_narcissi - N139_ncbi
+number of CAZY proteins identified:
+961
 number of CAZY genes identified:
 961
+number of Secreted CAZY proteins identified:
+399
 number of Secreted CAZY genes identified:
-400
+399
 F.proliferatum - A8_ncbi
+number of CAZY proteins identified:
+819
 number of CAZY genes identified:
-825
+819
+number of Secreted CAZY proteins identified:
+341
 number of Secreted CAZY genes identified:
-343
+341
 ```
 
 Note - the CAZY genes identified may need further filtering based on e value and
@@ -1972,7 +2043,7 @@ done
 ```
 
 ```bash
-for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e 'A8' -e 'N139'); do
+for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e 'ncbi'); do
 OutDir=$(dirname $Zip)
 unzip -d $OutDir $Zip
 done
@@ -1980,7 +2051,7 @@ done
 
 ```bash
 # AntiSmash=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/contig_1_pilon.final.gbk
-for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
 Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -1993,42 +2064,53 @@ cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster
 GeneGff=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3
 bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
 cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > $OutDir/metabolite_cluster_gene_headers.txt
-printf "Number of predicted genes in clusters:\t"
+printf "Number of predicted proteins in clusters:\t"
 cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'gene' | wc -l
 done
 ```
 
-These clusters represenyed the following genes. Note that these numbers just
+These clusters represented the following genes. Note that these numbers just
 show the number of intersected genes with gff clusters and are not confirmed by
 function
 ```
-F.oxysporum_fsp_cepae - Fus2_canu_new
-Number of clusters detected:	50
-Number of predicted genes in clusters:	720
 F.oxysporum_fsp_cepae - 125_ncbi
 Number of clusters detected:	46
-Number of predicted genes in clusters:	570
+Number of predicted proteins in clusters:	568
+Number of predicted genes in clusters:	559
 F.oxysporum_fsp_cepae - A13_ncbi
 Number of clusters detected:	49
-Number of predicted genes in clusters:	624
+Number of predicted proteins in clusters:	626
+Number of predicted genes in clusters:	620
 F.oxysporum_fsp_cepae - A23_ncbi
-Number of clusters detected:	46
-Number of predicted genes in clusters:	564
+Number of clusters detected:	35
+Number of predicted proteins in clusters:	436
+Number of predicted genes in clusters:	432
 F.oxysporum_fsp_cepae - A28_ncbi
 Number of clusters detected:	46
-Number of predicted genes in clusters:	667
+Number of predicted proteins in clusters:	668
+Number of predicted genes in clusters:	656
 F.oxysporum_fsp_cepae - CB3_ncbi
 Number of clusters detected:	44
-Number of predicted genes in clusters:	611
+Number of predicted proteins in clusters:	613
+Number of predicted genes in clusters:	604
+F.oxysporum_fsp_cepae - Fus2_canu_new
+Number of clusters detected:	50
+Number of predicted proteins in clusters:	720
+Number of predicted genes in clusters:	703
 F.oxysporum_fsp_cepae - PG_ncbi
 Number of clusters detected:	45
-Number of predicted genes in clusters:	643
+Number of predicted proteins in clusters:	646
+Number of predicted genes in clusters:	638
 F.oxysporum_fsp_narcissi - N139_ncbi
 Number of clusters detected:	46
-Number of predicted genes in clusters:	608
+Number of predicted proteins in clusters:	606
+Number of predicted genes in clusters:	601
 F.proliferatum - A8_ncbi
 Number of clusters detected:	58
-Number of predicted genes in clusters:	770
+Number of predicted proteins in clusters:	762
+Number of predicted genes in clusters:	762
 ```
 
 ## E) SSCP
@@ -2132,7 +2214,7 @@ the following commands:
 SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 CurPath=$PWD
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -2157,7 +2239,7 @@ done
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
 Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
 InStringAA=''
@@ -2185,7 +2267,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -2197,7 +2279,7 @@ Those proteins with transmembrane domains were removed from lists of Signal
 peptide containing proteins
 
 ```bash
-for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' ); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -2207,27 +2289,56 @@ SigP=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.aa)
 OutDir=$(dirname $SigP)
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_from_fasta.py --fasta $SigP --headers $TmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
+echo "Number of SigP proteins:"
+cat $SigP | grep '>' | wc -l
+echo "Number without transmembrane domains:"
 cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l
+echo "Number of gene models:"
+cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d't' | sort | uniq |wc -l
 done
 ```
 
 ```
-	F.oxysporum_fsp_cepae - 125_ncbi
-	1430
-	F.oxysporum_fsp_cepae - A13_ncbi
-	1515
-	F.oxysporum_fsp_cepae - A23_ncbi
-	1430
-	F.oxysporum_fsp_cepae - A28_ncbi
-	1454
-	F.oxysporum_fsp_cepae - CB3_ncbi
-	1439
-	F.oxysporum_fsp_cepae - PG_ncbi
-	1447
-	F.oxysporum_fsp_narcissi - N139_ncbi
-	1564
-	F.proliferatum - A8_ncbi
-	1275
+F.oxysporum_fsp_cepae - 125_ncbi
+Number of SigP proteins:
+1762
+Number without transmembrane domains:
+1444
+F.oxysporum_fsp_cepae - A13_ncbi
+Number of SigP proteins:
+1826
+Number without transmembrane domains:
+1508
+F.oxysporum_fsp_cepae - A23_ncbi
+Number of SigP proteins:
+1752
+Number without transmembrane domains:
+1439
+F.oxysporum_fsp_cepae - A28_ncbi
+Number of SigP proteins:
+1772
+Number without transmembrane domains:
+1450
+F.oxysporum_fsp_cepae - CB3_ncbi
+Number of SigP proteins:
+1763
+Number without transmembrane domains:
+1439
+F.oxysporum_fsp_cepae - PG_ncbi
+Number of SigP proteins:
+1760
+Number without transmembrane domains:
+1440
+F.oxysporum_fsp_narcissi - N139_ncbi
+Number of SigP proteins:
+1901
+Number without transmembrane domains:
+1566
+F.proliferatum - A8_ncbi
+Number of SigP proteins:
+1553
+Number without transmembrane domains:
+1254
 ```
 
 
@@ -2237,7 +2348,7 @@ Required programs:
  * EffectorP.py
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 BaseName="$Organism"_"$Strain"_EffectorP
@@ -2251,7 +2362,7 @@ Those genes that were predicted as secreted and tested positive by effectorP
 were identified:
 
 ```bash
-for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' | grep -e '125' -e 'A23'); do
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'ncbi'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -2268,32 +2379,41 @@ Gff=$(ls gene_pred/final_genes/$Organism/$Strain/*/final_genes_appended.gff3)
 EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+cat $EffectorP_Gff | grep -w 'gene' | wc -l
 done > tmp.txt
 ```
 
 ```
 F.oxysporum_fsp_cepae - 125_ncbi
-347
+357
+357
 F.oxysporum_fsp_cepae - A13_ncbi
-365
+364
+364
 F.oxysporum_fsp_cepae - A23_ncbi
-354
+355
+355
 F.oxysporum_fsp_cepae - A28_ncbi
 346
+346
 F.oxysporum_fsp_cepae - CB3_ncbi
-351
+357
+357
 F.oxysporum_fsp_cepae - PG_ncbi
-342
+337
+337
 F.oxysporum_fsp_narcissi - N139_ncbi
-399
+407
+407
 F.proliferatum - A8_ncbi
-266
+258
+258
 ```
 
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' ); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep 'ncbi' ); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 BrakerGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
@@ -2309,90 +2429,103 @@ cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
 bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
 bedtools intersect -u -a $QuaryGff -b $OutDir/"$Strain"_mimps_exp.gff >> $OutDir/"$Strain"_genes_in_2kb_mimp.gff
 echo "The following transcripts intersect mimps:"
+MimpProtsTxt=$OutDir/"$Strain"_prots_in_2kb_mimp.txt
 MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpGenesTxt
+cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpProtsTxt
+cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | cut -f1 -d '.'| sort | uniq > $MimpGenesTxt
+cat $MimpProtsTxt | wc -l
 cat $MimpGenesTxt | wc -l
 echo ""
 done > tmp.txt
 ```
 
 ```
-	F.oxysporum_fsp_cepae - Fus2
+	F.oxysporum_fsp_cepae - Fus2_canu_new
 	The number of mimps identified:
 	153
 	The following transcripts intersect mimps:
 	157
+	155
 
 	F.oxysporum_fsp_cepae - 125_ncbi
 	The number of mimps identified:
 	140
 	The following transcripts intersect mimps:
-	101
+	95
+	95
 
-F.oxysporum_fsp_cepae - A13_ncbi
-The number of mimps identified:
-55
-The following transcripts intersect mimps:
-52
+	F.oxysporum_fsp_cepae - A13_ncbi
+	The number of mimps identified:
+	55
+	The following transcripts intersect mimps:
+	49
+	49
 
-F.oxysporum_fsp_cepae - A23_ncbi
-The number of mimps identified:
-136
-The following transcripts intersect mimps:
-88
+	F.oxysporum_fsp_cepae - A23_ncbi
+	The number of mimps identified:
+	136
+	The following transcripts intersect mimps:
+	88
+	88
 
-F.oxysporum_fsp_cepae - A28_ncbi
-The number of mimps identified:
-35
-The following transcripts intersect mimps:
-35
+	F.oxysporum_fsp_cepae - A28_ncbi
+	The number of mimps identified:
+	35
+	The following transcripts intersect mimps:
+	36
+	36
 
-F.oxysporum_fsp_cepae - CB3_ncbi
-The number of mimps identified:
-30
-The following transcripts intersect mimps:
-33
+	F.oxysporum_fsp_cepae - CB3_ncbi
+	The number of mimps identified:
+	30
+	The following transcripts intersect mimps:
+	32
+	32
 
-F.oxysporum_fsp_cepae - PG_ncbi
-The number of mimps identified:
-51
-The following transcripts intersect mimps:
-46
+	F.oxysporum_fsp_cepae - PG_ncbi
+	The number of mimps identified:
+	51
+	The following transcripts intersect mimps:
+	43
+	43
 
-F.oxysporum_fsp_narcissi - N139_ncbi
-The number of mimps identified:
-207
-The following transcripts intersect mimps:
-119
+	F.oxysporum_fsp_narcissi - N139_ncbi
+	The number of mimps identified:
+	207
+	The following transcripts intersect mimps:
+	120
+	119
 
-F.proliferatum - A8_ncbi
-The number of mimps identified:
-6
-The following transcripts intersect mimps:
-11
-
+	F.proliferatum - A8_ncbi
+	The number of mimps identified:
+	6
+	The following transcripts intersect mimps:
+	11
+	11
 ```
-
+<!--
 ```bash
 	cat gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_final_sp.aa | grep '>' | sed 's/>//g' | cut -f1 -d '-' | sed -r 's/\s//g' > gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_final_sp_headers.txt
 	cat analysis/effectorP/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_EffectorP.txt | grep 'Effector' | cut -f1 | sed 's/|//g' > analysis/effectorP/F.oxysporum_fsp_cepae/Fus2/F.oxysporum_fsp_cepae_Fus2_EffectorP_headers.txt
 	cat gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_TM_genes_pos.txt | cut -f1 > gene_pred/trans_mem/F.oxysporum_fsp_cepae/Fus2_edited_v2/Fus2_edited_v2_TM_genes_pos_headers.txt
-```
+``` -->
 
 
 Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_v2' -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' -e 'Fus2_canu_new' | grep -v -e 'PG8' -e 'PG18' -e 'PG3'); do
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep 'ncbi' ); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
+ProtsFile=$(echo $File | sed 's/genes/prots/g')
 Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
 OutFile=$(echo "$File" | sed 's/.gff/_secreted.gff/g')
 SecretedHeaders=$(echo "$Secretome" | sed 's/.aa/_headers.txt/g')
 cat $Secretome | grep '>' | tr -d '>' | sed 's/-p.//g' > $SecretedHeaders
-cat $File $SecretedHeaders | cut -f1 | sed -r 's/T.$//g' | uniq | sort | uniq -d | wc -l
+cat $ProtsFile $SecretedHeaders | cut -f1 | sort | uniq -d | wc -l
+cat $SecretedHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $File | wc -l
 # ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 # $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
 # cat $OutFile | grep -w 'mRNA' | wc -l
@@ -2400,27 +2533,32 @@ done
 ```
 
 ```
-F.oxysporum - fo47
-3
+F.oxysporum_fsp_cepae - Fus2_canu_new
+31
+31
 F.oxysporum_fsp_cepae - 125_ncbi
+24
 26
 F.oxysporum_fsp_cepae - A13_ncbi
-10
+9
+9
 F.oxysporum_fsp_cepae - A23_ncbi
-22
+20
+20
 F.oxysporum_fsp_cepae - A28_ncbi
+5
 5
 F.oxysporum_fsp_cepae - CB3_ncbi
 1
-F.oxysporum_fsp_cepae - Fus2_canu_new
-31
+1
 F.oxysporum_fsp_cepae - PG_ncbi
 3
-F.oxysporum_fsp_lycopersici - 4287_v2
-23
+3
 F.oxysporum_fsp_narcissi - N139_ncbi
 31
+31
 F.proliferatum - A8_ncbi
+1
 1
 ```
 

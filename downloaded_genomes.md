@@ -244,8 +244,23 @@ Outputs were summarised using the commands:
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
 
+```bash
+FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+  echo "$Organism - $Strain"
+    cat $Proteome | grep '>' | wc -l
+  if [ $Strain == 'fo47' ]; then
+    cat $Proteome | grep '>' | cut -f1 -d 'T' | sort | uniq | wc -l
+  elif [ $Strain == '4287_v2' ]; then
+    cat $Proteome | grep '>' | cut -f1 -d '-' | sort | uniq | wc -l
+  fi
+done
+```
 
-### A) From Augustus gene models - Identifying secreted proteins
+### A) From Predicted gene models - Identifying secreted proteins
 
 Required programs:
  * SignalP-4.1
@@ -338,6 +353,11 @@ OutDir=$(dirname $SigP)
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_from_fasta.py --fasta $SigP --headers $TmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
 cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l
+if [ $Strain == 'fo47' ]; then
+  cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d 'T' | sort | uniq | wc -l
+elif [ $Strain == '4287_v2' ]; then
+  cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d '-' | sort | uniq | wc -l
+fi
 done
 ```
 ```
@@ -373,7 +393,7 @@ Those genes that were predicted as secreted and tested positive by effectorP
 were identified:
 
 ```bash
-for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287_v2' | grep '4287'); do
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287_v2' ); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -386,6 +406,11 @@ $ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
 OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
 cat $OutFile | grep '>' | tr -d '>' | cut -f1 > $OutFileHeaders
 cat $OutFileHeaders | wc -l
+if [ $Strain == 'fo47' ]; then
+  cat $OutFileHeaders | cut -f1 -d 'T' | sort | uniq | wc -l
+elif [ $Strain == '4287_v2' ]; then
+  cat $OutFileHeaders | cut -f1 -d '-' | sort | uniq | wc -l
+fi
 # Gff=$(ls gene_pred/final_genes/$Organism/$Strain/*/final_genes_appended.gff3)
 # EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
 # ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
@@ -396,7 +421,7 @@ done
 F.oxysporum - fo47
 319
 F.oxysporum_fsp_lycopersici - 4287
-294
+384
 ```
 
 ### C) Identification of MIMP-flanking genes
@@ -433,12 +458,16 @@ echo "The number of mimps identified:"
 cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
 bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
 echo "The following transcripts intersect mimps:"
+MimpProtsTxt=$OutDir/"$Strain"_prots_in_2kb_mimp.txt
 MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
 if [ $Strain == 'fo47' ]; then
-  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpGenesTxt
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | sort | uniq > $MimpProtsTxt
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'exon' | cut -f9 | cut -f4 -d'"' | cut -f1 -d 'T' | sort | uniq > $MimpGenesTxt
 elif [ $Strain == '4287_v2' ]; then
-  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpGenesTxt
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpProtsTxt
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | cut -f1 -d '-' | sort | uniq > $MimpGenesTxt
 fi
+cat $MimpProtsTxt | wc -l
 cat $MimpGenesTxt | wc -l
 echo ""
 done
@@ -456,6 +485,7 @@ were identified:
 
 ```bash
 for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_v2' -e 'ncbi' -e 'Fus2_canu_new' | grep -e 'fo47' -e '4287_v2'); do
+  ProtsFile=$(echo $File | sed 's/genes/prots/g')
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -463,7 +493,13 @@ Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no
 OutFile=$(echo "$File" | sed 's/.gff/_secreted.gff/g')
 SecretedHeaders=$(echo "$Secretome" | sed 's/.aa/_headers.txt/g')
 cat $Secretome | grep '>' | tr -d '>' | sed 's/-p.//g' > $SecretedHeaders
-cat $File $SecretedHeaders | cut -f1 | sed -r 's/T.$//g' | uniq | sort | uniq -d | wc -l
+# cat $Secretome | grep '>' | tr -d '>' | sed 's/-p.//g' > $SecretedUniqHeaders
+cat $ProtsFile $SecretedHeaders | cut -f1 | sort | uniq -d | wc -l
+if [ $Strain == 'fo47' ]; then
+cat $SecretedHeaders | cut -f1 | cut -f1 -d 'T' | sort | uniq | grep -f $File | wc -l
+elif [ $Strain == '4287_v2' ]; then
+cat $SecretedHeaders | cut -f1 | cut -f1 -d '-' | sort | uniq | grep -f $File | wc -l
+fi
 # ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 # $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
 # cat $OutFile | grep -w 'mRNA' | wc -l
@@ -505,7 +541,7 @@ commands:
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
-  # Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
   for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
     Strain=$(echo $Proteome | rev | cut -d '/' -f3 | rev)
     Organism=$(echo $Proteome | rev | cut -d '/' -f4 | rev)
@@ -533,7 +569,7 @@ commands:
 ```
 
 ```bash
-  for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl); do
+  for SwissTable in $(ls gene_pred/swissprot/*/*/swissprot_v2015_10_hits.tbl | grep '4287_v2'); do
   # SwissTable=gene_pred/swissprot/Fus2/swissprot_v2015_10_hits.tbl
     Strain=$(echo $SwissTable | rev | cut -f2 -d '/' | rev)
     Organism=$(echo $SwissTable | rev | cut -f3 -d '/' | rev)
@@ -552,18 +588,18 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-  FoL_4287_genes_parsed=gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa
-  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+  FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
+  # Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
   for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
-  		Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-  		Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-  		OutDir=gene_pred/CAZY/$Organism/$Strain
-  		mkdir -p $OutDir
-  		Prefix="$Strain"_CAZY
-  		CazyHmm=../../dbCAN/dbCAN-fam-HMMs.txt
-  		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
-  		qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
-  	done
+    Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+    OutDir=gene_pred/CAZY/$Organism/$Strain
+    mkdir -p $OutDir
+    Prefix="$Strain"_CAZY
+    CazyHmm=../../dbCAN/dbCAN-fam-HMMs.txt
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
+    qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+  done
 ```
 
 The Hmm parser was used to filter hits by an E-value of E1x10-5 or E 1x10-e3 if they had a hit over a length of X %.
@@ -572,7 +608,7 @@ Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'fo47' -e '4287'); do
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'fo47' -e '4287_v2' | grep 'fo47'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 OutDir=$(dirname $File)
@@ -583,6 +619,11 @@ CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
 cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
 echo "number of CAZY genes identified:"
 cat $CazyHeaders | wc -l
+if [ $Strain == 'fo47' ]; then
+cat $CazyHeaders | cut -f1 -d 'T' | sort | uniq | wc -l
+elif [ $Strain == '4287_v2' ]; then
+cat $CazyHeaders | cut -f1 -d '-' | sort | uniq | wc -l
+fi
 # if [ $Strain == 'fo47' ]; then
 #   Gff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
 # elif [ $Strain == '4287_chromosomal' ]; then
@@ -601,19 +642,24 @@ echo "number of Secreted CAZY genes identified:"
 # cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
 cat $CazyHeaders $SecretedHeaders | cut -f1 | sort | uniq -d > $OutDir/"$Strain"_CAZY_secreted_headers.txt
 cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l
+if [ $Strain == 'fo47' ]; then
+cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d 'T' | sort | uniq | wc -l
+elif [ $Strain == '4287_v2' ]; then
+cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '-' | sort | uniq | wc -l
+fi
 done
 ```
 ```
   F.oxysporum - fo47
   number of CAZY genes identified:
-  1108
+  1108 (928)
   number of Secreted CAZY genes identified:
-  411
-  F.oxysporum_fsp_lycopersici - 4287
+  411 (382)
+  F.oxysporum_fsp_lycopersici - 4287_v2
   number of CAZY genes identified:
-  880
+  1156 (977)
   number of Secreted CAZY genes identified:
-  346
+  419 (386)
 ```
 Note - the CAZY genes identified may need further filtering based on e value and
 cuttoff length - see below:
@@ -673,9 +719,11 @@ printf "Number of clusters detected:\t"
 cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
 GeneGff=$(ls assembly/external_group/$Organism/$Strain/*/*.gtf | grep -e 'fungidb' -e 'broad' | grep -v -e 'FungiDB-29_Foxysporum4287_parsed' -e 'fo47_1_transcripts_parsed')
 bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
-cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f2 -d '"' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
-printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f4 -d '"' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+printf "Number of predicted proteins in clusters:\t"
 cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_genes.gff |  grep -w 'exon' | cut -f9 | cut -f2 -d '"' | sort | uniq | wc -l
 done
 
 for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -e '4287_v2'); do
@@ -689,9 +737,11 @@ printf "Number of clusters detected:\t"
 cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
 GeneGff=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff)
 bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
-cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > $OutDir/metabolite_cluster_gene_headers.txt
-printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+printf "Number of predicted proteins in clusters:\t"
 cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_genes.gff |  grep -w 'mRNA' | cut -f9 | cut -f3 -d '=' | sort | uniq | wc -l
 done
 ```
 

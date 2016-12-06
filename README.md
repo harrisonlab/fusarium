@@ -2121,7 +2121,7 @@ over what constitutes a SSCP.
 
 ```bash
 
-for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi'); do
 Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
 Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -2130,13 +2130,89 @@ mkdir -p $OutDir
 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
 $ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
 cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
-echo "Number of effectors predicted by EffectorP:"
+printf "number of SSC-rich genes:\t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
+printf "Number of effectors predicted by EffectorP:\t"
 EffectorP=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP_secreted_headers.txt)
 cat $EffectorP | wc -l
-echo "Number of SSCPs predicted by both effectorP and this approach"
+printf "Number of SSCPs predicted by both effectorP and this approach: \t"
 cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' > $OutDir/"$Strain"_sscp_headers.txt
 cat $OutDir/"$Strain"_sscp_headers.txt $EffectorP | cut -f1 | sort | uniq -d | wc -l
-done
+echo ""
+done > tmp.txt
+```
+
+```
+F.oxysporum_fsp_cepae - 125_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        289
+number of SSC-rich genes:       287
+Number of effectors predicted by EffectorP:     357
+Number of SSCPs predicted by both effectorP and this approach:  221
+
+F.oxysporum_fsp_cepae - A13_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        318
+number of SSC-rich genes:       316
+Number of effectors predicted by EffectorP:     364
+Number of SSCPs predicted by both effectorP and this approach:  237
+
+F.oxysporum_fsp_cepae - A23_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        286
+number of SSC-rich genes:       284
+Number of effectors predicted by EffectorP:     355
+Number of SSCPs predicted by both effectorP and this approach:  218
+
+F.oxysporum_fsp_cepae - A28_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        283
+number of SSC-rich genes:       281
+Number of effectors predicted by EffectorP:     346
+Number of SSCPs predicted by both effectorP and this approach:  214
+
+F.oxysporum_fsp_cepae - CB3_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        279
+number of SSC-rich genes:       277
+Number of effectors predicted by EffectorP:     357
+Number of SSCPs predicted by both effectorP and this approach:  213
+F.oxysporum_fsp_cepae - Fus2_canu_new
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        288
+number of SSC-rich genes:       286
+Number of effectors predicted by EffectorP:     355
+Number of SSCPs predicted by both effectorP and this approach:  218
+
+F.oxysporum_fsp_cepae - PG_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        287
+number of SSC-rich genes:       285
+Number of effectors predicted by EffectorP:     337
+Number of SSCPs predicted by both effectorP and this approach:  214
+
+F.oxysporum_fsp_narcissi - N139_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        344
+number of SSC-rich genes:       342
+Number of effectors predicted by EffectorP:     407
+Number of SSCPs predicted by both effectorP and this approach:  263
+
+F.proliferatum - A8_ncbi
+% cysteine content threshold set to:    3
+maximum length set to:  300
+No. short-cysteine rich proteins in input fasta:        197
+number of SSC-rich genes:       197
+Number of effectors predicted by EffectorP:     258
+Number of SSCPs predicted by both effectorP and this approach:  147
 ```
 
 #Genomic analysis

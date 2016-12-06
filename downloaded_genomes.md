@@ -393,7 +393,7 @@ Those genes that were predicted as secreted and tested positive by effectorP
 were identified:
 
 ```bash
-for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287_v2' ); do
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287_v2' | grep 'fo47'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -420,8 +420,10 @@ done
 ```
 F.oxysporum - fo47
 319
-F.oxysporum_fsp_lycopersici - 4287
+291
+F.oxysporum_fsp_lycopersici - 4287_v2
 384
+351
 ```
 
 ### C) Identification of MIMP-flanking genes
@@ -756,6 +758,47 @@ Number of predicted genes in clusters:	705
 F.oxysporum_fsp_lycopersici - 4287_v2
 Number of clusters detected:	49
 Number of predicted genes in clusters:	861
+```
+
+
+## E) SSCP
+
+Small secreted cysteine rich proteins were identified within secretomes. These
+proteins may be identified by EffectorP, but this approach allows direct control
+over what constitutes a SSCP.
+
+```bash
+
+for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -e 'fo47' -e '4287_v2'); do
+Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/sscp/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+$ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
+cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
+printf "number of SSC-rich genes:\t"
+if [ $Strain == "4287_v2" ]; then
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | cut -f1 | tr -d '>' | cut -f1 -d '-' | sort | uniq | wc -l
+elif [ $Strain == "fo47" ]; then
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | cut -f1 | tr -d '>' | cut -f1 -d 'T' | sort | uniq | wc -l
+fi
+printf "Number of effectors predicted by EffectorP:\t"
+EffectorP=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP_secreted_headers.txt)
+if [ $Strain == "4287_v2" ]; then
+cat $EffectorP | cut -f1 -d '-' | sort | uniq | wc -l
+printf "Number of SSCPs predicted by both effectorP and this approach: \t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '-' > $OutDir/"$Strain"_sscp_headers.txt
+cat $EffectorP | cut -f1 | cut -f1 -d '-' | sort | uniq | grep -f $OutDir/"$Strain"_sscp_headers.txt |  wc -l
+elif [ $Strain == "fo47" ]; then
+cat $EffectorP | cut -f1 -d 'T' | sort | uniq | wc -l
+printf "Number of SSCPs predicted by both effectorP and this approach: \t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>'| cut -f1 -d 'T' > $OutDir/"$Strain"_sscp_headers.txt
+cat $EffectorP | cut -f1 | sort | uniq | cut -f1 -d 'T' | sort | uniq | grep -f $OutDir/"$Strain"_sscp_headers.txt | wc -l
+fi
+echo ""
+done > tmp.txt
 ```
 
 #Genomic analysis

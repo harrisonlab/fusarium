@@ -453,7 +453,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC 125
 ```bash
   Taxon_code=125
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/125/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/125_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -462,7 +462,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A23
 ```bash
   Taxon_code=A23
-  Fasta_file=$(ls  gene_pred/final_genes/F.oxysporum_fsp_cepae/A23/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls  gene_pred/final_genes/F.oxysporum_fsp_cepae/A23_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -482,7 +482,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A13
 ```bash
   Taxon_code=A13
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A13/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A13_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -491,7 +491,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC A28
 ```bash
   Taxon_code=A28
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A28/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/A28_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -500,7 +500,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC CB3
 ```bash
   Taxon_code=CB3
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/CB3_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -509,7 +509,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 ### for FoC PG
 ```bash
   Taxon_code=PG
-  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/PG/*/final_genes_combined.pep.fasta)
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/PG_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -530,7 +530,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
 
 ```bash
   Taxon_code=4287
-  Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta)
+  Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -626,13 +626,13 @@ done
     echo "The number of ortholog groups unique to pathogens are:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | wc -l
     echo "This represents the following number of genes:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -o '|' | wc -l
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | sed 's/4287|//g' | sed 's/A8|//g' |  grep -o '|' | wc -l
     echo "This represents the following number of genes from Fus2:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -o 'Fus2|' | wc -l
     echo "The number of genes in the largest orthogroup is:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | head -n1 | grep -o '|' | wc -l
     echo "The number of ortholog groups unique to non-pathogens are:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' | wc -l
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' |  sed 's/4287|//g' | sed 's/A8|//g' | wc -l
     echo "The number of ortholog groups common to all F. oxysporum isolates are:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' |wc -l
   done
@@ -640,13 +640,19 @@ done
 
 ```
 The number of ortholog groups found in pathogen but absent in non-pathogens is:
-255
+292
 The number of ortholog groups unique to pathogens are:
-255
+292
+This represents the following number of genes:
+975
+This represents the following number of genes from Fus2:
+341
+The number of genes in the largest orthogroup is:
+35
 The number of ortholog groups unique to non-pathogens are:
 61
 The number of ortholog groups common to all F. oxysporum isolates are:
-10391
+10877
 ```
 
 The number of ortholog groups shared between FoC and FoL was identified:
@@ -659,8 +665,8 @@ The number of ortholog groups shared between FoC and FoL was identified:
 
 ```
   The number of ortholog groups common to FoC and FoL are:
-  10916
-  43
+  11650
+  73
 ```
 
 ## 4.5.b Plot venn diagrams:
@@ -683,27 +689,38 @@ number of unique groups of inparalogs
 ```
   [1]  <- non-pathogen orthogroups (5 non-pathogens)
   [1]  <- pathogen orthogroups (3 pathogens)
-  [1] "Fus2"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  13846"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2412"
-  [1] "The total number of singleton genes not in the venn diagram:  293"
-  [1] "125"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  13975"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2541"
-  [1] "The total number of singleton genes not in the venn diagram:  342"
-  [1] "A23"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  13616"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2182"
-  [1] "The total number of singleton genes not in the venn diagram:  256"
-  [1] "A13"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  13333"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  1705"
-  [1] "The total number of singleton genes not in the venn diagram:  647"
-  [1] "fo47"
-  [1] "The total number of orthogroups and singleton genes in this isolate:  14272"
-  [1] "The total number of orthogroups and singleton genes not in the venn diagram:  2644"
-  [1] "The total number of singleton genes not in the venn diagram:  1363"
-  NULL
+  [1] "A28"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13514"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1973"
+[1] "The total number of singleton genes not in the venn diagram:  372"
+[1] "CB3"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13377"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1836"
+[1] "The total number of singleton genes not in the venn diagram:  342"
+[1] "PG"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13400"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1859"
+[1] "The total number of singleton genes not in the venn diagram:  460"
+[1] "Fus2"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13653"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2343"
+[1] "The total number of singleton genes not in the venn diagram:  285"
+[1] "125"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13749"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2439"
+[1] "The total number of singleton genes not in the venn diagram:  318"
+[1] "A23"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13704"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2394"
+[1] "The total number of singleton genes not in the venn diagram:  330"
+[1] "A13"
+[1] "The total number of orthogroups and singleton genes in this isolate:  13138"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  1597"
+[1] "The total number of singleton genes not in the venn diagram:  551"
+[1] "fo47"
+[1] "The total number of orthogroups and singleton genes in this isolate:  14100"
+[1] "The total number of orthogroups and singleton genes not in the venn diagram:  2559"
+[1] "The total number of singleton genes not in the venn diagram:  943"
 ```
 
 
@@ -717,11 +734,11 @@ number of unique groups of inparalogs
   $ProgDir/orthoMCLgroups2fasta.py --orthogroups $OrthogroupTxt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
 ```
 
-A combined dataset for nucleotide data was made for all gene models:
+<!-- A combined dataset for nucleotide data was made for all gene models:
 
 ```bash
 
-for nuc_file in $(ls gene_pred/final_genes/F.*/*/final/final_genes_combined.gene.fasta | grep -e 'Fus2' -e '125' -e 'A23' -e 'PG' -e 'A28' -e 'CB3' -e 'A13' -e 'PG'); do
+for nuc_file in $(ls gene_pred/final_genes/F.*/*/final/final_genes_combined.gene.fasta | grep -e 'ncbi' -e 'canu_new' | grep -e 'Fus2' -e '125' -e 'A23' -e 'PG' -e 'A28' -e 'CB3' -e 'A13' -e 'PG'-e 'A8'); do
   Strain=$(echo $nuc_file | rev | cut -f3 -d '/' | rev)
   cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t' | sed 's/ /\n/g' | grep -v 'orthogroup' | sed 's/\.t*//g' | sed 's/T0//g' | grep "$Strain" | cut -f2 -d '|' > tmp.txt
   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
@@ -743,7 +760,7 @@ extracted from the nucleotide file:
 	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t' | sed 's/ /\n/g' | grep -v 'orthogroup' | sed 's/\.t*//g' | sed 's/T0//g' > $WorkDir/FTF/FTF_list.txt
   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
   $ProgDir/extract_from_fasta.py --fasta $WorkDir/goodProteins/nucleotide_seq.fa --headers $WorkDir/FTF/FTF_list.txt > $WorkDir/FTF/orthogroup506_nuc.fa
-```
+``` -->
 
 
 <!-- #### 6.3) Extracting fasta files for all orthogroups

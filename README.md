@@ -2043,7 +2043,7 @@ done
 ```
 
 ```bash
-for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e 'ncbi'); do
+for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e 'ncbi' | grep 'A23'); do
 OutDir=$(dirname $Zip)
 unzip -d $OutDir $Zip
 done
@@ -2051,7 +2051,7 @@ done
 
 ```bash
 # AntiSmash=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/contig_1_pilon.final.gbk
-for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'A23'); do
 Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"

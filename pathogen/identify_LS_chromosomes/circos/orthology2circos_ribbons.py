@@ -81,7 +81,7 @@ for line in gff2_lines:
             ID = ID_part[0]
             ID_split = ID.split('=')
             genename = ID_split[-1]
-            genename = genename.replace('transcript:','').replace('T0','')
+            genename = genename.replace('transcript:','')
             # print genename
             gff2_dict[genename] = [splitline[0], splitline[3], splitline[4]]
 
@@ -122,7 +122,8 @@ for line in orthology_lines:
                 outline_part1[0] = strain1 + "_" + outline_part1[0]
             elif strain2 + "|" in gene:
                 # print gene
-                gene = gene.replace(strain2 + "|",'')
+                gene = gene.replace(strain2 + "|",'').replace("-p1", "")
+                # print gene
                 # print gff2_dict[gene]
                 outline_part2 = gff2_dict[gene]
                 # print outline_part2

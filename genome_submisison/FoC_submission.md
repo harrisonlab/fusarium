@@ -48,7 +48,10 @@ bioproject. The file was downloaded in excel format and edited manually. A copy
 of the edited file and the final .tsv file is present at:
 
 ```bash
+  # For genmic reads:
   ls genome_submission/SRA_metadata_acc.txt genome_submission/SRA_metadata_acc.xlsx
+  # For RNAseq reads:
+  ls genome_submission/SRA_metadata_acc.txt genome_submission/RNAseq_SRA_metadata_acc.txt
 ```
 
 As these files included a file > 500 Mb, a presubmission folder was requested.
@@ -57,28 +60,48 @@ at ftp-private.ncbi.nlm.nih.gov, with a private folder named
 uploads/andrew.armitage@emr.ac.uk_6L2oakBI. Ncbi provided a username a password.
 Files were uploaded into a folder created within my preload folder using ftp.
 
+For genomic reads:
 ```bash
-# Bioproject="PRJNA338236"
-SubFolder="FoC_PRJNA338256"
-mkdir $SubFolder
-for Read in $(ls raw_dna/paired/F.*/*/*/*.fastq.gz | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'Fus2' | grep -v s_6_*_sequence.fastq.gz); do
-  echo $Read;
-  cp $Read $SubFolder/.
-done
-cp raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq $SubFolder/.
-cd $SubFolder
-gzip concatenated_pacbio.fastq
-ftp ftp-private.ncbi.nlm.nih.gov
-cd uploads/andrew.armitage@emr.ac.uk_6L2oakBI
-mkdir FoC_PRJNA338256_2
-cd FoC_PRJNA338256_2
-# put FoN_PRJNA338236
-prompt
-mput *
-bye
-cd ../
-rm -r $SubFolder
+  # Bioproject="PRJNA338236"
+  SubFolder="FoC_PRJNA338256"
+  mkdir $SubFolder
+  for Read in $(ls raw_dna/paired/F.*/*/*/*.fastq.gz | grep -w -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'Fus2' | grep -v s_6_*_sequence.fastq.gz); do
+    echo $Read;
+    cp $Read $SubFolder/.
+  done
+  cp raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq $SubFolder/.
+  cd $SubFolder
+  gzip concatenated_pacbio.fastq
+  ftp ftp-private.ncbi.nlm.nih.gov
+  cd uploads/andrew.armitage@emr.ac.uk_6L2oakBI
+  mkdir FoC_PRJNA338256_2
+  cd FoC_PRJNA338256_2
+  # put FoN_PRJNA338236
+  prompt
+  mput *
+  bye
+  cd ../
+  rm -r $SubFolder
+```
 
+For RNAseq Reads:
+```bash
+  SubFolder="FoC_RNAseq_PRJNA338256"
+  mkdir $SubFolder
+  for Read in $(ls qc_rna/paired/F.*/*/*/*_trim.fq.gz); do
+    echo $Read;
+    cp $Read $SubFolder/.
+  done
+  cd $SubFolder
+  ftp ftp-private.ncbi.nlm.nih.gov
+  cd uploads/andrew.armitage@emr.ac.uk_6L2oakBI
+  mkdir FoC_RNAseq_PRJNA338256
+  cd FoC_RNAseq_PRJNA338256
+  prompt
+  mput *
+  bye
+  cd ../
+  rm -r $SubFolder
 ```
 
 ## Making a table for locus tags:

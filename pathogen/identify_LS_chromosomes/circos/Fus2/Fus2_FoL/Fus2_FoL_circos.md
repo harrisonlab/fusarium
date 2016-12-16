@@ -67,6 +67,31 @@ for Num in $(seq 1 22); do
   mv $OutDir/circos.svg $OutDir/by_FoC_chr/Fus2_FoL_LS_"$Chr"_circos.svg
 done
 ```
+
+The frequency of gene duplications within and between chromosomes was investigated:
+
+```bash
+OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL
+for Num in $(seq 1 22); do
+Chr="contig_"$Num"_pilon"
+ChrList="$ChrList $Chr"
+done
+echo "$ChrList"
+OrthologyTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt
+ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+$ProgDir/orthology2ribbons_internal.py \
+--chr1 $ChrList \
+--orthology $OrthologyTxt \
+--name1 Fus2 \
+--gff1 gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 \
+| sort | uniq > $OutDir/Fus2_all_Fus2_links.txt
+cat $OutDir/Fus2_all_Fus2_links.txt | cut -f1,4 | sort | uniq -c > $OutDir/Fus2_all_Fus2_links_occurence.txt
+
+```
+
+
+
+
 <!--
 ```bash
 OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL

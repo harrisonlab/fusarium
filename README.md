@@ -1820,7 +1820,7 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/CAZY/$Organism/$Strain
@@ -2290,7 +2290,7 @@ the following commands:
 SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 CurPath=$PWD
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -2315,7 +2315,7 @@ done
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'ncbi'); do
 Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
 Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
 InStringAA=''
@@ -2343,7 +2343,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -2355,7 +2355,7 @@ Those proteins with transmembrane domains were removed from lists of Signal
 peptide containing proteins
 
 ```bash
-for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi' ); do
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'ncbi' ); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -2375,11 +2375,13 @@ done
 ```
 
 ```
-F.oxysporum_fsp_cepae - 125_ncbi
+F.oxysporum_fsp_cepae - Fus2_canu_new
 Number of SigP proteins:
-1762
+1793
 Number without transmembrane domains:
-1444
+1475
+Number of gene models:
+1449
 F.oxysporum_fsp_cepae - A13_ncbi
 Number of SigP proteins:
 1826
@@ -2424,7 +2426,7 @@ Required programs:
  * EffectorP.py
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'ncbi'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'Fus2_canu_new'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 BaseName="$Organism"_"$Strain"_EffectorP
@@ -2460,9 +2462,9 @@ done > tmp.txt
 ```
 
 ```
-F.oxysporum_fsp_cepae - 125_ncbi
-357
-357
+F.oxysporum_fsp_cepae - Fus2_canu_new
+355
+355
 F.oxysporum_fsp_cepae - A13_ncbi
 364
 364
@@ -2489,7 +2491,7 @@ F.proliferatum - A8_ncbi
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep 'ncbi' ); do
+for Genome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep -v 'ncbi' ); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 BrakerGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
@@ -2591,7 +2593,7 @@ Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep 'ncbi' ); do
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep -v 'ncbi' ); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -2833,43 +2835,43 @@ done | tr -d ';' | tr -d '"' | sed 's/ID=//g'> analysis/blast_homology/Fo_path_g
 
 ```
 F.oxysporum_fsp_cepae - Fus2_canu_new
-C5_Seq45_BlastHit_1	g13425
-CRX1_Seq49_BlastHit_1	g15739
-CRX1_Seq49_BlastHit_2	g11056
-CRX1_Seq49_BlastHit_3	g59
-CRX1_Seq49_BlastHit_4	g16971
-CRX2_Seq50_BlastHit_1	g11056
-CRX2_Seq50_BlastHit_2	g15739
-CRX2_Seq50_BlastHit_3	g59
-MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_1	g15724
-MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_2	g17045
-MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_3	CUFF_4289_1_31
-MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_4	CUFF_327_1_65
-MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_5	g12255
-MIMP_g29_ex.19GJ26_H12-1.seq_BlastHit_1	g16905
-MIMP_g16_ex.19GJ26_B07-1.seq_BlastHit_1	g16179
-MIMP_g41_ex.45DG31-1.seq_BlastHit_1	g17144
-MIMP_g41_ex.45DG31-1.seq_BlastHit_2	NS_02766
-Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds_BlastHit_1	g16847
-Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds_BlastHit_2	g16190
-Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds_BlastHit_1	g16849
-Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds_BlastHit_1	CUFF_4344_1_33
-Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds_BlastHit_1	g16273
-Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds_BlastHit_2	g13574
-Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds_BlastHit_1	g17153
-Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds_BlastHit_1	PGN_CUFF_4345_1_2
-Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six14_(SIX14)_mRNA,_complete_cds_BlastHit_1	man_1
+C5_Seq45_BlastHit_1     g13425
+CRX1_Seq49_BlastHit_1   g15739
+CRX1_Seq49_BlastHit_2   g11056
+CRX1_Seq49_BlastHit_3   g59
+CRX1_Seq49_BlastHit_4   g16971
+CRX2_Seq50_BlastHit_1   g11056
+CRX2_Seq50_BlastHit_2   g15739
+CRX2_Seq50_BlastHit_3   g59
+MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_1  g15724
+MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_2  g17045
+MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_3  CUFF_4289_1_31
+MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_4  CUFF_327_1_65
+MIMP_39_ex.19GJ26_B10-1.seq_BlastHit_5  g12255
+MIMP_g29_ex.19GJ26_H12-1.seq_BlastHit_1 g16905
+MIMP_g16_ex.19GJ26_B07-1.seq_BlastHit_1 g16179
+MIMP_g41_ex.45DG31-1.seq_BlastHit_1     g17144
+MIMP_g41_ex.45DG31-1.seq_BlastHit_2     NS_02766
+Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds_BlastHit_1 g16847
+Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds_BlastHit_2 g16190
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds_BlastHit_1   g16849
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds_BlastHit_1       CUFF_4344_1_33
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds_BlastHit_1   g16273
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds_BlastHit_2   g13574
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds_BlastHit_1 g17153
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds_BlastHit_1 PGN_CUFF_4345_1_2
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six14_(SIX14)_mRNA,_complete_cds_BlastHit_1 man_1
 ```
 
-The orthogroups that these genes belonged to were identified:
+<!-- The orthogroups that these genes belonged to were identified:
 
 ```bash
 for Gene in $(cat analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX_hit_genes_summary.tab | cut -f2 | tail -n+3 | grep -v -w '.'); do
 printf "$Gene - ";
-Orthogroup=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt);
+Orthogroup=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt);
 cat $Orthogroup | grep "Fus2|$Gene.t" | cut -f1 -d ':';
 done | cut -f3 -d ' ' | sort | uniq > tmp.txt
-```
+``` -->
 
 
 ## 5.1.B) Identifying FTF genes
@@ -2917,14 +2919,14 @@ cat $OutDir/"$Strain"_FTF_hits_intersected.bed | grep -w 'gene' | cut -f18 | cut
 The orthogorups that these genes belonged to was identified:
 
 ```bash
-	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t'
+	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t'
 ```
 
 ```
-orthogroup506: A13|g9378.t1 4287|FOXG_09390 A28|g1083.t1 fo47|FOZG_12687T0 PG|g9446.t1 CB3|g6561.t1 Fus2|g10474.t1 A23|g3047.t1 fo47|FOZG_18011T0 Fus2|g13345.t1 PG|g14951.t1 125|g2615.t1 125|g16343.t1 Fus2|g16859.t1 Fus2|NS_02884.t1 A23|g16443.t1 4287|FOXG_14257 4287|FOXG_15059 4287|FOXG_14422 A13|g15293.t1 4287|FOXG_17458 4287|FOXG_14000 Fus2|g13345.t2 4287|FOXG_17084 4287|FOXG_12589 4287|FOXG_12539 4287|FOXG_17123 4287|FOXG_16414
+orthogroup763: 4287|FOXG_17458-t26_1-p1 4287|FOXG_14422-t26_1-p1 4287|FOXG_15059-t26_1-p1 A13|g9338.t1 4287|FOXG_09390-t26_1-p1 A8|g13204.t1 A28|g1088.t1 fo47|FOZG_12687T0 PG|g9482.t1 CB3|g6501.t1 Fus2|g10474.t1 A23|g3017.t1 fo47|FOZG_18011T0 PG|g14993.t1 125|g2599.t1 125|g16201.t1 Fus2|g16859.t1 Fus2|NS_02884.t1 A23|g16099.t1 4287|FOXG_17123-t26_1-p1 4287|FOXG_17084-t26_1-p1 4287|FOXG_14000-t26_1-p1 4287|FOXG_12589-t26_1-p1 4287|FOXG_12539-t26_1-p1 4287|FOXG_16414-t26_1-p1 4287|FOXG_14257-t26_1-p1 A13|g15237.t1
 ```
 
-This identified orthogroup441 as containing FTF1 & FTF2.
+This identified orthogroup763 as containing FTF1 & FTF2.
 
 for Strain in Fus2 A13 4287 A28 fo47 PG
 
@@ -2979,10 +2981,10 @@ done
 The PHIbase database was searched against the assembled genomes using tBLASTx.
 
 ```bash
-	for Assembly in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		qsub $ProgDir/blast_pipe.sh analysis/blast_homology/PHIbase/PHI_36_accessions.fa protein $Assembly
-	done
+for Assembly in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa| grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old'); do
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/blast_pipe.sh analysis/blast_homology/PHIbase/PHI_36_accessions.fa protein $Assembly
+done
 ```
 
 following blasting PHIbase to the genome, the hits were filtered by effect on
@@ -3275,19 +3277,45 @@ Fus2 contigs 10, 14, 16, 17, 19, 20 were identified as lineage specific.
 As such interproscan annotation were extracted for these contigs and Functional
 enrichments were compared to the entire genome.
 
+#### Enrichment of effector families by contig
 
 ```bash
+GffGenes=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+cat $GffGenes | grep 'mRNA' | cut -f1 | sort | uniq -c | sort -n -k2 -t '_'
+GffEffP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted.gff
+cat $GffEffP | grep 'mRNA' | cut -f1 | sort | uniq -c | sort -n -k2 -t '_'
+GffCAZY=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted.gff
+cat $GffCAZY | grep 'mRNA' | cut -f1 | sort | uniq -c | sort -n -k2 -t '_'
+GffSecMet=analysis/antismash/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_secondary_metabolite_regions.gff
+cat $GffSecMet | cut -f1 | sort | uniq -c | sort -n -k2 -t '_'
+GffMimp=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp.gff
+cat $GffMimp | grep 'mRNA' | cut -f1 | sort | uniq -c | sort -n -k2 -t '_'
+GffMimpSec=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp_secreted.gff
+cat $GffMimpSec | grep 'mRNA' | cut -f1 | sort | uniq -c | sort -n -k2 -t '_'
+```
+From this it was clear that the genes within 2kb of a mimp were primarily associated
+with the pathogen specific contigs. INterproscan information on these genes
+was extracted
 
-OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new
-mkdir -p $OutDir
-Gff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
-GeneList=$OutDir/Fus2_canu_new_LS_genes_interproscan.txt
-cat $Gff | grep -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_17_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' | grep 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d '='  > $GeneList
-InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv
-InterPro_LS=$OutDir/Fus2_canu_new_LS_genes_interproscan.tsv
-
+```bash
+MimpGeneHeaders=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_prots_in_2kb_mimp.txt
+MimpInterpro=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_prots_in_2kb_mimp_interpro.txt
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
-$ProgDir/filter_by_gene.py --inp_interpro $InterPro --inp_txt $GeneList > $InterPro_LS
+$ProgDir/filter_by_gene.py --inp_interpro $InterPro --inp_txt $MimpGeneHeaders > $MimpInterpro
+```
+
+
+<!-- ```bash
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new
+	mkdir -p $OutDir
+	Gff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+	GeneList=$OutDir/Fus2_canu_new_LS_genes_interproscan.txt
+	cat $Gff | grep -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_17_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' | grep 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d '='  > $GeneList
+	InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv
+	InterPro_LS=$OutDir/Fus2_canu_new_LS_genes_interproscan.tsv
+
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+	$ProgDir/filter_by_gene.py --inp_interpro $InterPro --inp_txt $GeneList > $InterPro_LS
 ```
 
 Interproscan tsv files for the entire genome and the LS regions were converted
@@ -3304,7 +3332,390 @@ wego format for analysis by WEGO
 	$ProgDir/interpro2wego.py --inp_interpro $InterPro_LS > $OutDir/Fus2_canu_new_LS_GO_WEGO.txt
 ```
 
+The WEGO wesite was used to generate summaries of genes on core and LS regions. -->
+
+Enrichment was performed for each contig:
+
+```bash
+for num in $(seq 1 34); do
+Contig="contig_"$num"_pilon"
+echo $Contig
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+Gff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
+GeneList=$OutDir/"$Contig"_interproscan.txt
+cat $Gff | grep "$Contig" | grep 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d '='  > $GeneList
+InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv
+InterPro_contig=$OutDir/"$Contig"_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/filter_by_gene.py --inp_interpro $InterPro --inp_txt $GeneList > $InterPro_contig
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $InterPro_contig > $OutDir/"$Contig"_GO_WEGO.txt
+done
+```
 The WEGO wesite was used to generate summaries of genes on core and LS regions.
+
+
+A similar process was then repeated for duplicated genes:
+```bash
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes
+mkdir -p $OutDir
+DupGenesTab=/home/sobczm/popgen/codon/blast/dagchainer/testing/no_transposon/non-transposon_duplications_summaryf_ann
+cat $DupGenesTab | tail -n+2 | cut -f1,3,5 | sed 's/\t/\n/g' | sed 's/,/\n/g' | grep -v "^$" | grep 'Fus2' | sed 's/Fus2_//g' | sort | uniq > $OutDir/duplicated_genes.txt
+InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv
+InterPro_dups=$OutDir/duplicated_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/filter_by_gene.py --inp_interpro $InterPro --inp_txt $OutDir/duplicated_genes.txt > $InterPro_dups
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $InterPro_dups > $OutDir/duplicated_genes_GO_WEGO.txt
+```
+
+Annotations by contig were grouped by chromosome:
+
+```bash
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+	Chr=Chr1
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+	mkdir -p $OutDir
+	printf "" > $OutDir/"$Chr"_interproscan.tsv
+	echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+	for num in 1; do
+	Contig="contig_"$num"_pilon"
+	echo $Contig
+	ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+	mkdir -p $OutDir
+	cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+	cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+	done
+	DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+	cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+	$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+	Chr=Chr2
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+	mkdir -p $OutDir
+	printf "" > $OutDir/"$Chr"_interproscan.tsv
+	echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+	for num in 17 5; do
+	Contig="contig_"$num"_pilon"
+	echo $Contig
+	ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+	mkdir -p $OutDir
+	cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+	cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+	done
+	DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+	cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+	$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+	Chr=Chr4
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+	mkdir -p $OutDir
+	printf "" > $OutDir/"$Chr"_interproscan.tsv
+	echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+	for num in 2; do
+	Contig="contig_"$num"_pilon"
+	echo $Contig
+	ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+	mkdir -p $OutDir
+	cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+	cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+	done
+	DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+	cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+	$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+	Chr=Chr5
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+	mkdir -p $OutDir
+	printf "" > $OutDir/"$Chr"_interproscan.tsv
+	echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+	for num in 3; do
+	Contig="contig_"$num"_pilon"
+	echo $Contig
+	ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+	mkdir -p $OutDir
+	cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+	cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+	done
+	DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+	cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+	$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+	Chr=Chr7
+	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+	mkdir -p $OutDir
+	printf "" > $OutDir/"$Chr"_interproscan.tsv
+	echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+	for num in 4; do
+	Contig="contig_"$num"_pilon"
+	echo $Contig
+	ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+	mkdir -p $OutDir
+	cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+	cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+	done
+	DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+	cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+	$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=Chr8
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 6; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=Chr9
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 7; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=Chr10
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 8; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=Chr11
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 9; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=Chr12
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 13 15 18; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=Chr13
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 12 11; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS14
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 14; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS10
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 10; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS16
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 16; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS19
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 19; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS20
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 20; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS21
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 21; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome
+Chr=LS22
+OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_chromosome/$Chr
+mkdir -p $OutDir
+printf "" > $OutDir/"$Chr"_interproscan.tsv
+echo "!interpro2wego_output" > $OutDir/"$Chr"_GO_WEGO.txt
+for num in 22; do
+Contig="contig_"$num"_pilon"
+echo $Contig
+ContigDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/by_contig/$Contig
+mkdir -p $OutDir
+cat $ContigDir/"$Contig"_interproscan.tsv >> $OutDir/"$Chr"_interproscan.tsv
+cat $ContigDir/"$Contig"_GO_WEGO.txt | tail -n+2 >> $OutDir/"$Chr"_GO_WEGO.txt
+done
+DupGenes=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new/duplicated_genes/duplicated_genes.txt
+cat $OutDir/"$Chr"_interproscan.tsv | grep -f $DupGenes > $OutDir/"$Chr"_dup_genes_interproscan.tsv
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan/feature_extraction
+$ProgDir/interpro2wego.py --inp_interpro $OutDir/"$Chr"_dup_genes_interproscan.tsv > $OutDir/"$Chr"_dup_genes_GO_WEGO.txt
+```
+
 
 ## 6. Summarising the Fusarium Proteome
 

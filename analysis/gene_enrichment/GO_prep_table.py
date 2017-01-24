@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 '''
-This program extracts all the GO annotations for each gene
+This program extracts all the GO annotations for each gene.
 '''
 
 
@@ -38,19 +38,19 @@ for line in interpro_lines:
     if m:
         annot_dict[gene_id].extend(m)
 
-max_annots = 0
+# max_annots = 0
+# for gene_id in annot_dict.keys():
+#     annotation_set = set(annot_dict[gene_id])
+#     #count number of terms in list
+#     num_annots = len(annotation_set)
+#     if num_annots >= max_annots:
+#         max_annots = num_annots
+
+# additional_columns = [""] * max_annots
+
 for gene_id in annot_dict.keys():
     annotation_set = set(annot_dict[gene_id])
-    #count number of terms in list
-    num_annots = len(annotation_set)
-    if num_annots >= max_annots:
-        max_annots = num_annots
-
-additional_columns = [""] * max_annots
-
-for gene_id in annot_dict.keys():
-    annotation_set = set(annot_dict[gene_id])
-    num_annots = len(annotation_set)
-    print gene_id + "\t" + "\t".join(annotation_set) + "\t" + "\t".join(additional_columns[num_annots:])
-
+    # num_annots = len(annotation_set)
+    # print gene_id + "\t" + "\t".join(annotation_set) + "\t" + "\t".join(additional_columns[num_annots:])
+    print gene_id + "\t" + ", ".join(annotation_set)
 # print annot_dict

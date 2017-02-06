@@ -37,7 +37,7 @@ with open(conf.interpro) as f:
 
 set1_name = conf.set1_name
 set1_contigs = set(conf.contig_set1)
-set2_name = conf.set1_name
+set2_name = conf.set2_name
 set2_contigs = set(conf.contig_set2)
 
 print set1_name

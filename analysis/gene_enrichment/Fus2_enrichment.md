@@ -440,7 +440,6 @@ for IPR in $SigIPR; do
   # echo $IPR
   cat $OutDir/tables/"$IPR"_fischertable.txt | grep "$IPR"
 done
-
 ```
 
 Taken from: http://www.cs.tau.ac.il/~rshamir/ge/09/scribe/lec14a.pdf

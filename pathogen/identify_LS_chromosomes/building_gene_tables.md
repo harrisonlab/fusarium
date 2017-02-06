@@ -21,7 +21,8 @@ $ProgDir/diff_expressed_orthogroups.py \
 
 ```bash
   # for Strain in 125 A23 Fus2_canu_new 55 A1-2 CB3 HB6 A13 A28 D2 PG; do
-for Strain in 125 A23 Fus2_canu_new CB3 A13 A28 PG; do
+# for Strain in 125 A23 Fus2_canu_new CB3 A13 A28 PG; do
+for Strain in 125_ncbi A23_ncbi Fus2_canu_new CB3_ncbi A13_ncbi A28_ncbi PG_ncbi; do
 # for Strain in Fus2_canu_new; do
 for GeneGff in $(ls gene_pred/final_genes/*/$Strain/final/final_genes_appended.gff3); do
 Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
@@ -35,7 +36,7 @@ SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
 TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
 MimpTxt=$(ls analysis/mimps/$Organism/$Strain/*_genes_in_2kb_mimp.txt)
 EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
-OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt)
+OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt)
 InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
 SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl)
 # DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
@@ -98,7 +99,7 @@ SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain*/*_final_sp.tab
 TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain*/*_tmhmm_out.txt)
 MimpTxt=$(ls analysis/mimps/$Organism/$Strain*/*_genes_in_2kb_mimp.txt)
 EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain*/*_EffectorP.txt)
-OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt)
+OrthogroupsTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt)
 InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain*/*_interproscan.tsv)
 SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain*/swissprot_vJul2016_tophit_parsed.tbl)
 # DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
@@ -245,3 +246,6 @@ cat analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_fact
   These are present in the following number of orthogroups:
   31
 ```
+
+locations of LS specific transcription factors were intersected with
+antismash gene clusters

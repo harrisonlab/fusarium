@@ -2224,7 +2224,7 @@ chromosomes of the Fusarium lycopersici genome.
 
 ```bash
 FoLGenomeFa=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep 'ncbi'); do
 # for Proteome in $(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_proteins.fasta); do
 # for Proteome in $(ls gene_pred/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522_parsed.fa); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
@@ -2239,7 +2239,7 @@ done
 Convert top blast hits into gff annotations
 
 ```bash
-for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for BlastHitsCsv in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep 'ncbi'); do
 Organism=$(echo $BlastHitsCsv | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $BlastHitsCsv | rev | cut -f2 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -2254,7 +2254,7 @@ done
 #### Intersecting blast hits with genes from FoL
 
 ```bash
-for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e '125' -e 'A23'); do
+for HitsGff in $(ls analysis/blast_homology/F.*/*/4287_chromosomal_final_genes_combined.pep.fasta_hits.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep 'ncbi'); do
 Organism=$(echo $HitsGff | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $HitsGff| rev | cut -f2 -d '/' | rev)
 echo "$Organism - $Strain"

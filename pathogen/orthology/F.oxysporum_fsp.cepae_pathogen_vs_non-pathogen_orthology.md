@@ -536,7 +536,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### for Fp A8
+<!-- ### for Fp A8
 
 ```bash
   Taxon_code=A8
@@ -544,7 +544,7 @@ Genes in orthogroups found in pathogens but not in nonpathogens were extracted:
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
-```
+``` -->
 
 
 ## 4.2 Filter proteins into good and poor sets.
@@ -621,40 +621,50 @@ done
 
 ```bash
   for num in 1; do
+    echo "The number of genes input to orthomcl:"
+    cat $GoodProts| grep '>' | wc -l
+    echo "The number of clustered genes:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -o '|' | wc -l
+    echo "Clustered into the following number of orthogroups:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | wc -l
     echo "The number of ortholog groups found in pathogen but absent in non-pathogens is:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
     echo "The number of ortholog groups unique to pathogens are:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | wc -l
     echo "This represents the following number of genes:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | sed 's/4287|//g' | sed 's/A8|//g' |  grep -o '|' | wc -l
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | sed 's/4287|//g' |  grep -o '|' | wc -l
     echo "This represents the following number of genes from Fus2:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep -o 'Fus2|' | wc -l
     echo "The number of genes in the largest orthogroup is:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | head -n1 | grep -o '|' | wc -l
     echo "The number of ortholog groups unique to non-pathogens are:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' |  sed 's/4287|//g' | sed 's/A8|//g' | wc -l
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' |  sed 's/4287|//g' | wc -l
     echo "The number of ortholog groups common to all F. oxysporum isolates are:"
     cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' |wc -l
     echo "The number of ortholog groups common to all isolates in the analysis:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' | grep 'A8|' |wc -l
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' | wc -l
+    echo "Representing the following number of genes:"
+    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' | grep -o '|' | wc -l
   done
 ```
 
 ```
 The number of ortholog groups found in pathogen but absent in non-pathogens is:
-292
+295
 The number of ortholog groups unique to pathogens are:
-292
+295
 This represents the following number of genes:
-975
+979
 This represents the following number of genes from Fus2:
-341
+343
 The number of genes in the largest orthogroup is:
-35
+34
 The number of ortholog groups unique to non-pathogens are:
-61
+63
 The number of ortholog groups common to all F. oxysporum isolates are:
-10877
+10891
+The number of ortholog groups common to all isolates in the analysis:
+10891
 ```
 
 The number of ortholog groups shared between FoC and FoL was identified:

@@ -22,7 +22,7 @@ from collections import defaultdict
 from operator import itemgetter
 
 ap = argparse.ArgumentParser()
-ap.add_argument('--interpro',required=True,type=str,help='The genome assembly')
+ap.add_argument('--interpro',required=True,type=str,help='Interproscan annotations in tsv')
 ap.add_argument('--set1_name',required=True,type=str,help='Name for contigs in set 1')
 ap.add_argument('--contig_set1',required=True,nargs='+',type=str,help='List of contigs in set 1')
 ap.add_argument('--set2_name',required=True,type=str,help='Name for contigs in set 2')
@@ -66,17 +66,21 @@ for line in interpro_lines:
     m = re.findall("IPR......", line)
     # print line
     # print m
-    IPR_set = set(m)
+    if m:
+        IPR_set = set(m)
+    else:
+        IPR_set = set(["no_annotation"])
     # print IPR_set
     if split_line[1] in set1_contigs:
         for IPR in IPR_set:
             set1_dict[IPR] += 1
         set1_count += 1
+        [seen_IPR_set.add(x) for x in IPR_set]
     elif split_line[1] in set2_contigs:
         for IPR in IPR_set:
             set2_dict[IPR] += 1
         set2_count += 1
-    [seen_IPR_set.add(x) for x in IPR_set]
+        [seen_IPR_set.add(x) for x in IPR_set]
 
 print set1_count
 print set2_count

@@ -3158,7 +3158,7 @@ The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 As a preliminary analysis of the RNAseq data, highly expressed genes at 72hrs
 post infection were identified in Fus2.
 
-This process is described in RNAseq/fpkm_analysis.md
+This process is described in RNAseq/Fus2_expressed_path_genes.md and RNAseq/fpkm_analysis.md
 
 <!--
 Note - cufflinks doesn't always predict direction of a transcript and

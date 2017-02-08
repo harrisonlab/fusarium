@@ -3158,10 +3158,13 @@ The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 As a preliminary analysis of the RNAseq data, highly expressed genes at 72hrs
 post infection were identified in Fus2.
 
+This process is described in RNAseq/fpkm_analysis.md
+
+<!--
 Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
-```bash
+ ```bash
 	# samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
 	for AcceptedHits in $(ls alignment/*/*/concatenated/concatenated.bam | grep -v -e 'Fus2_edited_v2'); do
 		Strain=$(echo $AcceptedHits | rev | cut -f3 -d '/' | rev)
@@ -3182,93 +3185,9 @@ therefore features can not be restricted by strand when they are intersected.
 		ExpressedGenes=alignment/$Organism/$Strain/concatenated/expressed_genes.bed
 		bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
 	done
-```
-
-
-<!--
-```bash
-	Organism=F.oxysporum_fsp_cepae
-	Strain=Fus2
-	samtools merge -f alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam
-
-	cufflinks -o timecourse/2016_genes/Fus2/72hrs/cufflinks -p 16 --max-intron-length 4000 alignment/$Organism/$Strain/concatenated/Fus2_72hpi.bam
-
-	Transcripts=timecourse/2016_genes/Fus2/72hrs/cufflinks/transcripts.gtf
-	GeneGff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_edited_v2/final/final_genes_appended.gff3
-	ExpressedGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes.gff
-	bedtools intersect -wao -a $Transcripts -b $GeneGff > $ExpressedGenes
-```
--->
-
-<!--
-It was noted that not all the top expressed transcripts had gene models. The
-transcripts without gene models were identified:
-
-```bash
-	ExpressedTranscriptsTxt=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts.txt
-	cat $ExpressedGenes | sort -r -n -t'"' -k6 | cut -f2 -d'"' | uniq | head -n20 > $ExpressedTranscriptsTxt
-	ExpressedTranscriptsInter=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts_intersect.gff
-	cat $ExpressedGenes | grep -v -P "\ttranscript_id" | sort -r -n -t'"' -k6 | grep -w -f $ExpressedTranscriptsTxt > $ExpressedTranscriptsInter
-	ExpressedTranscriptsGff=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_transcripts.gff
-	cat $ExpressedTranscriptsInter | cut -f1-9 | uniq> $ExpressedTranscriptsGff
-	cat $ExpressedTranscriptsInter | grep -v -w 'exon' | cut -f2,18 -d'"' --output-delimiter " - " | uniq | less
-```
-
-The top 20 expressed transcripts are shown below with genes they correspond to.
-9 of the 20 top expressed transcripts have not been predicted as genes. This was
-determined, in large, to be a result of transposon being expressed. It was also
-noted that cufflinks doesn't always predict direction of a transcript and
-therefore when features are intersected, they can not be restricted by strand.
-
-```
-	CUFF.4396 - 33 bp - A-rich
-	CUFF.2444 - 69 bp - T-rich - repmasked
-	CUFF.540 - 60 bp - C-Rich - repmasked
-	CUFF.11337 - 92 bp - T-rich - repmasked
-	CUFF.14001 - g11792 - Six5
-	CUFF.5007 - repmasked
-	CUFF.4291 - repmasked
-	CUFF.12587 - g11716 - Six3
-	CUFF.4090 - repmasked
-	CUFF.12214 - g4762
-	CUFF.8542 - 103 bp - A-rich - repmasked
-	CUFF.13998 - g12630
-	CUFF.13635 - g10978
-	CUFF.4290 - no gene - Six9
-	CUFF.2922 - g12344
-	CUFF.9876 - g10974
-	CUFF.13435 - g10975
-	CUFF.9559 - g10973
-	CUFF.12530 - g4720
-	CUFF.6539 - g10346
-```
--->
-
-
-<!--
-```bash
-	TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
-	cat $ExpressedGenes | sort -r -n -t'"' -k6 | grep -w 'gene' | head -n 20 | cut -f18 > $TopGenes
-	InterPro=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2/Fus2_interproscan.tsv
-	TopFunctions=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.tsv
-	cat $InterPro | grep -w -f $TopGenes > $TopFunctions
-
-	IsolateAbrv=FoC_path_vs_non_path
-	WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
-	Orthogroups=$WorkDir/"$IsolateAbrv"_orthogroups.txt
-	PathDir=$WorkDir/path_orthogroups
-	echo "The number of pathogen common genes in the top 20 expressed Fus2 genes at 72hr"
-	TopGenes=timecourse/2016_genes/Fus2/72hrs/cufflinks/Fus2_expressed_genes_top20.txt
-	cat $TopGenes | grep -w -f $PathDir/Fus2_path_orthogroup_genes.txt
-	# secreted
-	PathOrthogroupsFus2Secreted=$PathDir/Fus2_path_orthogroup_secreted.txt
-	cat $PathOrthogroupsFus2Secreted | grep -w -f $TopGenes
-	# near mimps
-	MimpGenesTxt=analysis/mimps/F.oxysporum_fsp_cepae/Fus2/Fus2_genes_in_2kb_mimp.txt
-  cat $MimpGenesTxt | grep -w -f $TopGenes
-	# Intersecting SIX genes
-
 ``` -->
+
+
 
 ### 5.4 Enrichment of genes on LS contigs
 

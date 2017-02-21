@@ -123,6 +123,8 @@ set1_count = 0
 set2_count = 0
 set1_dict = defaultdict(int)
 set2_dict = defaultdict(int)
+NLR_structure_dict1 = defaultdict(int)
+NLR_structure_dict2 = defaultdict(int)
 seen_NLR_set = set()
 
 for line in interpro_lines:
@@ -153,12 +155,17 @@ for line in interpro_lines:
             set1_dict[NLR] += 1
             seen_NLR_set.add(NLR)
         set1_count += 1
+        NLR_structure = "-".join(NLR_hit_set)
+        NLR_structure_dict1[NLR_structure] += 1
         # [seen_NLR_set.add(x) for x in NLR_hit_set]
     elif split_line[1] in set2_contigs:
         for NLR in NLR_hit_set:
             set2_dict[NLR] += 1
             seen_NLR_set.add(NLR)
         set2_count += 1
+        NLR_structure = "-".join(NLR_hit_set)
+        NLR_structure_dict2[NLR_structure] += 1
+
         # [seen_NLR_set.add(x) for x in NLR_hit_set]
 
 print set1_count
@@ -177,3 +184,8 @@ for NLR in seen_NLR_set:
     o = open(outfile, 'w')
     o.write("".join([outline1, outline2]))
     o.close()
+
+for key in NLR_structure_dict1.keys():
+    print key + "\t" + str(NLR_structure_dict1[key])
+for key in NLR_structure_dict2.keys():
+    print key + "\t" + str(NLR_structure_dict2[key])

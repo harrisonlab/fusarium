@@ -39,14 +39,14 @@ Cazy=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_heade
 EffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_headers.txt
 EffectorP=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted_headers.txt
 Transposons=analysis/transposons/transposon_headers.txt
-Metabolites=analysis/antismash/79c1471f-4a2b-41f7-ba36-18ba94675f59/metabolite_cluster_gene_headers.txt
+Metabolites=analysis/antismash/F.oxysporum_fsp_cepae/Fus2_canu_new/metabolite_cluster_gene_headers.txt
 Annotations=gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab
 $ProgDir/fpkm_by_gene.py --fpkm_file $fpkm_files --CAZY_headers $Cazy --effectorP_headers $EffectorP  --transposon_headers $Transposons --metabolite_headers $Metabolites --annotation_table $Annotations > analysis/expression/Fus2_expressed_genes.tsv
 
 
 
 echo "Number of variaible core genes in top 50 expressed genes:"
-cat analysis/expression/Fus2_expressed_genes.tsv | head -n 50 | grep -w -v -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_18_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' | grep -w -e 'contig_9_pilon' -e 'contig_11_pilon' -e 'contig_12_pilon' -e 'contig_13_pilon' -e 'contig_15_pilon' -e 'contig_17_pilon' | wc -l
+cat analysis/expression/Fus2_expressed_genes.tsv | head -n 50 | grep -w -v -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_18_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' | grep -w -e 'contig_9_pilon' -e 'contig_11_pilon' -e 'contig_12_pilon' -e 'contig_13_pilon' -e 'contig_15_pilon' -e 'contig_17_pilon' | wc -l
 
 # in Top 50 genes
 echo "Number of effectorP genes in top 50 expressed genes:"
@@ -66,7 +66,7 @@ cat analysis/expression/Fus2_expressed_genes.tsv | head -n 50 | grep -i 'Transpo
 
 # in Top 50 LS genes
 echo "Number of LS genes in top 50 expressed genes:"
-cat analysis/expression/Fus2_expressed_genes.tsv | grep -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_18_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' > analysis/expression/Fus2_expressed_LS_genes.tsv
+cat analysis/expression/Fus2_expressed_genes.tsv | grep -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' > analysis/expression/Fus2_expressed_LS_genes.tsv
 
 echo "Number of effectorP genes in top 50 expressed genes:"
 cat analysis/expression/Fus2_expressed_LS_genes.tsv | head -n 50 | grep 'EffP' | wc -l
@@ -81,7 +81,7 @@ cat analysis/expression/Fus2_expressed_LS_genes.tsv | head -n 50 | grep -i 'Tran
 
 # in Top 50 core genes
 echo "Number of LS genes in top 50 expressed genes:"
-cat analysis/expression/Fus2_expressed_genes.tsv | grep -v -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_18_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' > analysis/expression/Fus2_expressed_core_genes.tsv
+cat analysis/expression/Fus2_expressed_genes.tsv | grep -v -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' > analysis/expression/Fus2_expressed_core_genes.tsv
 
 echo "Number of effectorP genes in top 50 expressed genes:"
 cat analysis/expression/Fus2_expressed_core_genes.tsv | head -n 50 | grep 'EffP' | wc -l
@@ -168,4 +168,39 @@ $ProgDir/fpkm_by_gene.py --fpkm_file $fpkm_files --CAZY_headers $Cazy --effector
   cat analysis/expression/fo47_expressed_genes.tsv | head -n 50 | cut -f17 | grep 'Yes' | wc -l
   echo "Number of ribosomal genes in top 50 expressed genes:"
   cat analysis/expression/fo47_expressed_genes.tsv | head -n 50 | grep -i 'ribosomal' | wc -l
+```
+
+
+Annotaions for expressed secreted CAZY genes were identified:
+
+```bash
+cat analysis/expression/Fus2_expressed_genes.tsv | grep -w -f gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.txt > gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_annot.tsv
+```
+
+<!-- ```bash
+cat gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.txt | cut -f6 > tmp.txt
+cat tmp.txt gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.txt | sort | uniq -u
+cat gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.txt | grep 'g10836.t1'
+``` -->
+
+Annotaions for expressed secreted antismash genes were identified:
+```bash
+cat analysis/expression/Fus2_expressed_genes.tsv | grep -w -f analysis/antismash/F.oxysporum_fsp_cepae/Fus2_canu_new/metabolite_cluster_gene_headers.txt > analysis/antismash/F.oxysporum_fsp_cepae/Fus2_canu_new/metabolite_cluster_gene_annot.tsv
+```
+
+Annotaions for genes within 2kb of MIMPs were :
+```bash
+cat analysis/expression/Fus2_expressed_genes.tsv | grep -w -f analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp.txt > analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp_annot.tsv
+```
+
+Annotations of all other gene families:
+
+```bash
+cat analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted_headers.txt  | cut -f1 > analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted_headers_parsed.txt
+
+cat analysis/expression/Fus2_expressed_genes.tsv \
+| grep -v -w -f analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted_headers_parsed.txt | grep -v -w -f gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.txt \
+| grep -v -w -f analysis/antismash/F.oxysporum_fsp_cepae/Fus2_canu_new/metabolite_cluster_gene_headers.txt \
+| grep -v -w -f analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp.txt \
+> analysis/expression/Fus2_expressed_genes_non-effector.tsv
 ```

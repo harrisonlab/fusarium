@@ -667,7 +667,7 @@ repeat_masked/F.oxysporum_fsp_narcissi/N139_ncbi/ncbi_submission/N139_contigs_so
 Number of masked bases:
 5689747
 ```
-
+<!--
 The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
@@ -686,7 +686,7 @@ sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 
 cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 echo
 done
-```
+``` -->
 <!--
 ```
 F.oxysporum_fsp_cepae	125_ncbi
@@ -2923,19 +2923,29 @@ The orthogorups that these genes belonged to was identified:
 ```
 
 ```
-orthogroup763: 4287|FOXG_17458-t26_1-p1 4287|FOXG_14422-t26_1-p1 4287|FOXG_15059-t26_1-p1 A13|g9338.t1 4287|FOXG_09390-t26_1-p1 A8|g13204.t1 A28|g1088.t1 fo47|FOZG_12687T0 PG|g9482.t1 CB3|g6501.t1 Fus2|g10474.t1 A23|g3017.t1 fo47|FOZG_18011T0 PG|g14993.t1 125|g2599.t1 125|g16201.t1 Fus2|g16859.t1 Fus2|NS_02884.t1 A23|g16099.t1 4287|FOXG_17123-t26_1-p1 4287|FOXG_17084-t26_1-p1 4287|FOXG_14000-t26_1-p1 4287|FOXG_12589-t26_1-p1 4287|FOXG_12539-t26_1-p1 4287|FOXG_16414-t26_1-p1 4287|FOXG_14257-t26_1-p1 A13|g15237.t1
+orthogroup730: 4287|FOXG_17458-t26_1-p1 4287|FOXG_14422-t26_1-p1 4287|FOXG_15059-t26_1-p1 A13|g9338.t1 4287|FOXG_09390-t26_1-p1 A28|g1088.t1 fo47|FOZG_12687T0 PG|g9482.t1 CB3|g6501.t1 Fus2|g10474.t1 A23|g3017.t1 fo47|FOZG_18011T0 PG|g14993.t1 125|g2599.t1 125|g16201.t1 Fus2|g16859.t1 Fus2|NS_02884.t1 A23|g16099.t1 4287|FOXG_17123-t26_1-p1 4287|FOXG_17084-t26_1-p1 4287|FOXG_14000-t26_1-p1 4287|FOXG_12589-t26_1-p1 4287|FOXG_12539-t26_1-p1 4287|FOXG_16414-t26_1-p1 4287|FOXG_14257-t26_1-p1 A13|g15237.t1
 ```
 
-This identified orthogroup763 as containing FTF1 & FTF2.
+This identified orthogroup730 as containing FTF1 & FTF2.
 
-for Strain in Fus2 A13 4287 A28 fo47 PG
+9 Transcription factor genes (TF) have been identified in FoL that potentially
+regulate SIX gene expression. The genes in FoL can be used to identify orthologous
+FoC genes:
 
-<!--
-FTF genes were identified by identifying orthogroups containing FoL FTF genes
-identified in Sanchez et al 2016.
+```bash
+TF_list="FOXG_14257 FOXG_17260 FOXG_17266 FOXG_14201 FOXG_14230 FOXG_14211 FOXG_14275 FOXG_14277 FOXG_14274"
+num=0
+OrthoTxt=$(ls analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt)
+AnnotTab=$(ls gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab)
+for TF in $TF_list; do
+num=$(($num +1))
+echo "TF"$num
+Orthogroup=$(cat $OrthoTxt | grep -w "$TF" | cut -f1 -d ':')
+cat $AnnotTab | grep -w "$Orthogroup"
+done > analysis/transcription_factors/Fus2_canu_new_TF1-9.tsv
+```
 
-This led to orthogroups_652 being identified as the FTF  
- -->
+
 
 
 ## 5.1.C) Identifying Mitochondrial genes in assemblies
@@ -3191,7 +3201,7 @@ therefore features can not be restricted by strand when they are intersected.
 
 ### 5.4 Enrichment of genes on LS contigs
 
-Fus2 contigs 10, 14, 16, 17, 19, 20 were identified as lineage specific.
+Fus2 contigs 10, 14, 16, 19, 20, 21 and 22 were identified as lineage specific.
 
 As such interproscan annotation were extracted for these contigs and Functional
 enrichments were compared to the entire genome.
@@ -3223,6 +3233,58 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/inte
 $ProgDir/filter_by_gene.py --inp_interpro $InterPro --inp_txt $MimpGeneHeaders > $MimpInterpro
 ```
 
+more information of number of mimps in LS and PS regions was extracted:
+
+```bash
+TotalMimps=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_mimps.gff
+# Total in Genome
+cat $TotalMimps |wc -l
+# In all LS regions
+cat $TotalMimps | grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' -e 'contig_14' -e 'contig_20' -e 'contig_22' | wc -l
+# In PS regions
+cat $TotalMimps | grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' | wc -l
+GenesIn2Kb=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp.gff
+# Total in Genome
+cat $GenesIn2Kb | grep 'gene'| wc -l
+# In all LS regions
+cat $GenesIn2Kb | grep 'gene'| grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' -e 'contig_14' -e 'contig_20' -e 'contig_22' | wc -l
+# In PS regions
+cat $GenesIn2Kb | grep 'gene'| grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' | wc -l
+SecretedIn2Kb=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp_secreted.gff
+# Total in Genome
+cat $SecretedIn2Kb | grep 'gene'| wc -l
+# In all LS regions
+cat $SecretedIn2Kb | grep 'gene'| grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' -e 'contig_14' -e 'contig_20' -e 'contig_22' | wc -l
+# In PS regions
+cat $SecretedIn2Kb | grep 'gene'| grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21'  | wc -l
+```
+
+Effector candidates within 2Kb of a MIMP were identified:
+
+```bash
+GenesIn2Kb=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp.gff
+OutDir=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new
+cat $GenesIn2Kb | grep 'gene'| grep -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' | cut -f2 -d '=' | tr -d ';' > $OutDir/Fus2_canu_new_genes_in_2kb_mimp_PS_headers.txt
+cat $GenesIn2Kb | grep 'gene'| grep -e 'contig_14' -e 'contig_20' -e 'contig_22' | cut -f2 -d '=' | tr -d ';' > $OutDir/Fus2_canu_new_genes_in_2kb_mimp_non-PS_LS_headers.txt
+cat $GenesIn2Kb | grep 'gene'| grep -v -e 'contig_10' -e 'contig_16' -e 'contig_19' -e 'contig_21' -e 'contig_14' -e 'contig_20' -e 'contig_22' | cut -f2 -d '=' | tr -d ';' > $OutDir/Fus2_canu_new_genes_in_2kb_mimp_core_headers.txt
+
+EffectorPHeaders=analysis/effectorP/F.oxysporum_fsp_cepae/Fus2_canu_new/F.oxysporum_fsp_cepae_Fus2_canu_new_EffectorP_secreted_headers.txt
+cat $EffectorPHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $OutDir/Fus2_canu_new_genes_in_2kb_mimp_PS_headers.txt | wc -l
+cat $EffectorPHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $OutDir/Fus2_canu_new_genes_in_2kb_mimp_non-PS_LS_headers.txt | wc -l
+cat $EffectorPHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $OutDir/Fus2_canu_new_genes_in_2kb_mimp_core_headers.txt | wc -l
+
+CazyHeaders=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY_secreted_headers.txt
+cat $CazyHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $OutDir/Fus2_canu_new_genes_in_2kb_mimp_PS_headers.txt | wc -l
+cat $CazyHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $OutDir/Fus2_canu_new_genes_in_2kb_mimp_non-PS_LS_headers.txt | wc -l
+cat $CazyHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $OutDir/Fus2_canu_new_genes_in_2kb_mimp_core_headers.txt | wc -l
+
+
+
+AntismashGff=analysis/antismash/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_secondary_metabolite_regions.gff
+MimpPlus2KbGff=analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_mimps_exp.gff
+bedtools intersect -u -a $AntismashGff -b $MimpPlus2KbGff | less -S
+
+```
 
 <!-- ```bash
 	OutDir=analysis/enrichment/LS_regions/F.oxysporum_fsp_cepae/Fus2_canu_new

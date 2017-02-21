@@ -213,7 +213,7 @@ The number of pathogen expanded orthogroups was identified:
 ```bash
 AnnotTable=gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab
 OutDir=$(dirname $AnnotTable)
-cat $AnnotTable | grep -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_18_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' > $OutDir/Fus2_canu_new_LS._specific_regions.tab
+cat $AnnotTable | grep -w -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' > $OutDir/Fus2_canu_new_LS._specific_regions.tab
 cat $AnnotTable | grep -w -e 'contig_9_pilon' -e 'contig_11_pilon' -e 'contig_12_pilon' -e 'contig_13_pilon' -e 'contig_15_pilon' -e 'contig_17_pilon' > $OutDir/Fus2_canu_new_sp._specific_regions.tab
 cat $AnnotTable | grep -w -e 'contig_1_pilon' -e 'contig_2_pilon' -e 'contig_3_pilon' -e 'contig_4_pilon' -e 'contig_5_pilon' -e 'contig_6_pilon' -e 'contig_7_pilon' -e 'contig_8_pilon' > $OutDir/Fus2_canu_new_core_regions.tab
 ```
@@ -227,25 +227,41 @@ cat gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_LS._
 
 cat analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors.tab | cut -f2 | sort | uniq -c
 cat analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors.tab | cut -f1 > analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors_headers.txt
-echo "The number of transcription factors on LS contigs 10, 14, 16, 18, 19, 20 & 21 is:"
+echo "The number of transcription factors on LS contigs 10, 14, 16, 19, 20, 21 and 22 is:"
 cat analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors.tab | wc -l
 echo "These are present in the following number of orthogroups:"
 cat analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors.tab | cut -f16 | sort | uniq -c | sort -r -n | wc -l
 ```
 
 ```
-  8 contig_10_pilon
-  8 contig_14_pilon
-  2 contig_16_pilon
-  9 contig_18_pilon
-  3 contig_19_pilon
-  6 contig_20_pilon
-  2 contig_21_pilon
+7 contig_10_pilon
+8 contig_14_pilon
+2 contig_16_pilon
+3 contig_19_pilon
+6 contig_20_pilon
+2 contig_21_pilon
+2 contig_22_pilon
+
   The number of transcription factors on LS contigs 10, 14, 16, 18, 19, 20 & 21 is:
-  38
+  30
   These are present in the following number of orthogroups:
-  31
+  23
 ```
 
-locations of LS specific transcription factors were intersected with
-antismash gene clusters
+Expression of each transcription factor was shown using:
+
+```bash
+TransFactors=$(ls analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors.tab)
+ExpressionAnnotation=$(ls analysis/expression/Fus2_expressed_genes.tsv)
+for TransFactor in $(cat $TransFactors | cut -f1); do
+  # echo $TransFactor
+  cat $ExpressionAnnotation | grep "$TransFactor"
+done > analysis/transcription_factors/Fus2_canu_new_LS_specific_transcrtiption_factors_fpkm.tab
+
+TransFactors=$(ls analysis/transcription_factors/Fus2_canu_new_TF1-9.tsv)
+ExpressionAnnotation=$(ls analysis/expression/Fus2_expressed_genes.tsv)
+for TransFactor in $(cat $TransFactors | grep 'contig' | cut -f1); do
+  cat $ExpressionAnnotation | grep "$TransFactor"
+done > analysis/transcription_factors/Fus2_canu_new_TF1-9_fpkm.tab
+
+```

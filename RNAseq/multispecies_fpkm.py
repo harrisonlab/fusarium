@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 '''
-
+/home/armita/git_repos/emr_repos/scripts/fusarium/RNAseq/multispecies_fpkm.py --mummer_tsv analysis/genome_alignment/mummer/F.oxysporum/fo47/fo47_vs_Fus2/fo47_vs_Fus2_coords.tsv --ref_genes gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 --query_genes assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts_parsed.gff3 --ref_fpkm_files alignment/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_72hrs_rep1/fpkm/genes.fpkm_tracking alignment/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_72hrs_rep2/fpkm/genes.fpkm_tracking alignment/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_72hrs_rep3/fpkm/genes.fpkm_tracking --query_fpkm_files alignment/F.oxysporum/fo47/FO47_72hrs_rep1/fpkm/genes.fpkm_tracking alignment/F.oxysporum/fo47/FO47_72hrs_rep2/fpkm/genes.fpkm_tracking alignment/F.oxysporum/fo47/FO47_72hrs_rep3/fpkm/genes.fpkm_tracking | less
 '''
 
 import sys,argparse
@@ -20,6 +20,8 @@ ap = argparse.ArgumentParser(description=__doc__,formatter_class=argparse.Argume
 ap.add_argument('--mummer_tsv',required=True,type=str,help='mummer alignment output in tsv')
 ap.add_argument('--ref_genes',required=True,type=str,help='gff file of gene models from the reference organism')
 ap.add_argument('--query_genes',required=True,type=str,help='gff file of gene models from the query organism')
+ap.add_argument('--ref_fpkm_files',required=True,nargs= '+', type=str,help='cufflinks fpkm_tracking files giving fpkm by gene')
+ap.add_argument('--query_fpkm_files',required=True,nargs= '+', type=str,help='cufflinks fpkm_tracking files giving fpkm by gene')
 
 
 
@@ -36,6 +38,38 @@ query_alignment_dict = defaultdict(list)
 intervals_by_ref_contig_dict = defaultdict(list)
 intervals_by_query_contig_dict = defaultdict(list)
 relative_coord_dict = defaultdict(list)
+ref_fpkm_dict = defaultdict(list)
+query_fpkm_dict = defaultdict(list)
+
+#######################################
+#    Import fpkm for gene models      #
+#                                     #
+#                                     #
+#######################################
+#
+
+for fpkm_file in conf.ref_fpkm_files:
+    with open(fpkm_file) as f:
+        for line in f:
+            if line.startswith('tracking_id'):
+                continue
+            line = line.rstrip()
+            split_line = line.split()
+            gene_id = split_line[0]
+            fpkm = split_line[9]
+            ref_fpkm_dict[gene_id].append(fpkm)
+
+for fpkm_file in conf.query_fpkm_files:
+    with open(fpkm_file) as f:
+        for line in f:
+            if line.startswith('tracking_id'):
+                continue
+            line = line.rstrip()
+            split_line = line.split()
+            gene_id = split_line[0]
+            fpkm = split_line[9]
+            query_fpkm_dict[gene_id].append(fpkm)
+
 
 #######################################
 #    Import coordinates of Mummer     #
@@ -203,9 +237,10 @@ for ref_gff_line in sorted_ref_gff_lines:
     relative_start = int(gene_start) - int(ref_start)
     relative_end = int(gene_end) - int(ref_start)
     # print "\t".join([contig, str(relative_start), str(relative_end), gene_id])
-    fpkm = 'unknown'
+    # fpkm = 'unknown'
+    fpkm = ":".join(ref_fpkm_dict[gene_id])
     key = "_".join([contig, str(relative_start), str(relative_end)])
-    relative_coord_dict[key] = [gene_id, fpkm]
+    relative_coord_dict[key] = [contig, str(relative_start), str(relative_end), gene_id, fpkm]
 
 # print relative_coord_dict
 
@@ -229,6 +264,7 @@ with open(conf.query_genes) as f:
         if line.startswith('#'):
             continue
         elif 'mRNA' in split_line[2]:
+        # elif 'gene' in split_line[2]:
             query_gff_lines.append(line)
 
 def sort_query_gff_func(line):
@@ -237,6 +273,11 @@ def sort_query_gff_func(line):
     contig = col1.split('.')[1]
     start = split_line[3]
     return int(contig), int(start)
+    # split_line = line.split('\t')
+    # col1 = split_line[0]
+    # contig = col1.split('_')[1]
+    # start = split_line[3]
+    # return int(contig), int(start)
 
 sorted_query_gff_lines = sorted(query_gff_lines, key=lambda x: sort_query_gff_func(x))
 
@@ -267,6 +308,9 @@ for gff_line in sorted_query_gff_lines:
     split_features = features.split(';')
     gene_id = split_features[0]
     gene_id = gene_id.replace('ID=', '')
+    # fo_47 gene_id's from the gff file contain transcript numbers
+    gene_id = gene_id[:-2]
+    # print gene_id
     # print "\t".join([contig, gene_start, gene_end, gene_id])
     interval_list = intervals_by_query_contig_dict[contig]
     alignment_start = 'none'
@@ -289,7 +333,7 @@ for gff_line in sorted_query_gff_lines:
     query_length = split_alignment_line[5]
     ref_contig = split_alignment_line[10]
     query_contig = split_alignment_line[11]
-    # print "\t".join([query_contig, query_start, query_end, query_contig, query_start, query_end])
+    # print "\t".join([ref_contig, ref_start, ref_end, query_contig, query_start, query_end])
     # print "\t".join([contig, gene_start, gene_end, gene_id])
 # ---
 # Identify relative location of gene to alignment location
@@ -297,8 +341,10 @@ for gff_line in sorted_query_gff_lines:
     relative_start = int(gene_start) - int(query_start)
     relative_end = int(gene_end) - int(query_start)
     # print "\t".join([contig, str(relative_start), str(relative_end), gene_id])
-    fpkm = 'unknown'
+    # fpkm = 'unknown'
+    fpkm = ":".join(query_fpkm_dict[gene_id])
     key = "_".join([ref_contig, str(relative_start), str(relative_end)])
     # relative_coord_dict[key] = [gene_id, fpkm]
     if relative_coord_dict[key]:
-        print "\t".join([contig, str(relative_start), str(relative_end), gene_id]) + "\t" + "\t".join(relative_coord_dict[key])
+        # print "\t".join([ref_contig, ref_start, ref_end, query_contig, query_start, query_end])
+        print "\t".join([contig, str(relative_start), str(relative_end), gene_id, fpkm]) + "\t" + "\t".join(relative_coord_dict[key])

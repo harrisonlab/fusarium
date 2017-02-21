@@ -677,8 +677,8 @@ The number of ortholog groups shared between FoC and FoL was identified:
 
 ```
   The number of ortholog groups common to FoC and FoL are:
-  11650
-  73
+  11675
+  74
 ```
 
 ## 4.5.b Plot venn diagrams:
@@ -746,21 +746,21 @@ number of unique groups of inparalogs
   $ProgDir/orthoMCLgroups2fasta.py --orthogroups $OrthogroupTxt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
 ```
 
-<!-- A combined dataset for nucleotide data was made for all gene models:
+A combined dataset for nucleotide data was made for all gene models:
 
 ```bash
 
-for nuc_file in $(ls gene_pred/final_genes/F.*/*/final/final_genes_combined.gene.fasta | grep -e 'ncbi' -e 'canu_new' | grep -e 'Fus2' -e '125' -e 'A23' -e 'PG' -e 'A28' -e 'CB3' -e 'A13' -e 'PG'-e 'A8'); do
-  Strain=$(echo $nuc_file | rev | cut -f3 -d '/' | rev)
-  cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t' | sed 's/ /\n/g' | grep -v 'orthogroup' | sed 's/\.t*//g' | sed 's/T0//g' | grep "$Strain" | cut -f2 -d '|' > tmp.txt
-  ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-  $ProgDir/extract_from_fasta.py --fasta $nuc_file  --headers tmp.txt > $WorkDir/FTF/"$Strain"_FTF.nuc
+mkdir -p $WorkDir/FTF
+rm $WorkDir/goodProteins/nucleotide_seq.fa
+for nuc_file in $(ls gene_pred/final_genes/F.*/*/final/final_genes_combined.gene.fasta | grep -e 'ncbi' -e 'canu_new' | grep -e 'Fus2' -e '125' -e 'A23' -e 'PG' -e 'A28' -e 'CB3' -e 'A13' -e 'PG'); do
+  Strain=$(echo $nuc_file | rev | cut -f3 -d '/' | rev | sed 's/_ncbi//g' | sed 's/_canu_new//g')
+  cat $nuc_file | sed -E "s/>/>$Strain|/g" >> $WorkDir/goodProteins/nucleotide_seq.fa
 done
 
 nuc_file=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_genes.fasta
-cat $nuc_file | sed "s/FOZG/fo47|FOZG/g" >> $WorkDir/goodProteins/nucleotide_seq.fa
+cat $nuc_file | sed "s/FOZG/fo47|FOZG/g" | cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
 nuc_file=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_transcripts_20110522.nt.fasta
-cat $nuc_file | sed "s/FOXG/4287|FOXG/g" >> $WorkDir/goodProteins/nucleotide_seq.fa
+cat $nuc_file | sed "s/>.*FOXG/>4287|FOXG/g" | cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
 
 ```
 
@@ -768,11 +768,10 @@ cat $nuc_file | sed "s/FOXG/4287|FOXG/g" >> $WorkDir/goodProteins/nucleotide_seq
 The FTF ortholog group was extracted from the main table. Constituant genes were
 extracted from the nucleotide file:
 ```bash
-  mkdir -p $WorkDir/FTF
-	cat analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication/FoC_vs_Fo_vs_FoL_publication_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t' | sed 's/ /\n/g' | grep -v 'orthogroup' | sed 's/\.t*//g' | sed 's/T0//g' > $WorkDir/FTF/FTF_list.txt
+	cat analysis/orthology/orthomcl/$IsolateAbrv/"$IsolateAbrv"_orthogroups.txt | grep -e 'Fus2|g16859.t' -e 'Fus2|g10474.t' | sed 's/ /\n/g' | grep -v 'orthogroup' | sed -E 's/\.t.*//g' | sed 's/T0//g' | cut -f1 -d '-' > $WorkDir/FTF/FTF_list.txt
   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-  $ProgDir/extract_from_fasta.py --fasta $WorkDir/goodProteins/nucleotide_seq.fa --headers $WorkDir/FTF/FTF_list.txt > $WorkDir/FTF/orthogroup506_nuc.fa
-``` -->
+  $ProgDir/extract_from_fasta.py --fasta $WorkDir/goodProteins/nucleotide_seq.fa --headers $WorkDir/FTF/FTF_list.txt > $WorkDir/FTF/orthogroup730_nuc.fa
+```
 
 
 <!-- #### 6.3) Extracting fasta files for all orthogroups

@@ -46,7 +46,7 @@ $ProgDir/fpkm_by_gene.py --fpkm_file $fpkm_files --CAZY_headers $Cazy --effector
 
 
 echo "Number of variaible core genes in top 50 expressed genes:"
-cat analysis/expression/Fus2_expressed_genes.tsv | head -n 50 | grep -w -v -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_18_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' | grep -w -e 'contig_9_pilon' -e 'contig_11_pilon' -e 'contig_12_pilon' -e 'contig_13_pilon' -e 'contig_15_pilon' -e 'contig_17_pilon' | wc -l
+cat analysis/expression/Fus2_expressed_genes.tsv | head -n 50 | grep -w -v -e 'contig_10_pilon' -e 'contig_14_pilon' -e 'contig_16_pilon' -e 'contig_19_pilon' -e 'contig_20_pilon' -e 'contig_21_pilon' -e 'contig_22_pilon' | grep -w -e 'contig_9_pilon' -e 'contig_11_pilon' -e 'contig_12_pilon' -e 'contig_13_pilon' -e 'contig_15_pilon' -e 'contig_17_pilon'  -e 'contig_18_pilon'| wc -l
 
 # in Top 50 genes
 echo "Number of effectorP genes in top 50 expressed genes:"

@@ -137,13 +137,34 @@ Fo Fo47 assembly and protein sequences were parsed
 ```
 
 
+Fver 7600 assembly and protein sequences were parsed
+
+```bash
+  OutDir=assembly/external_group/F.verticilloides/7600/v3
+  mkdir -p $OutDir
+  # genome
+  Fver_assembly=assembly/external_group/F.verticilloides/7600/Fusarium_verticillioides.ASM14955v1.dna.toplevel.fa
+  Fver_assembly_parsed=$OutDir/Fusarium_verticillioides.ASM14955v1.dna.toplevel_parsed.fa
+  cat $Fver_assembly | cut -f1 -d ' ' > $Fver_assembly_parsed
+  # gene models
+  Fver_genes=assembly/external_group/F.verticilloides/7600/pep/Fusarium_verticillioides.ASM14955v1.pep.all.fa
+  Fver_genes_parsed=$OutDir/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+  cat $Fver_genes | cut -f1 -d ' ' > $Fver_genes_parsed
+  # Gff gene models
+  Fver_gff=assembly/external_group/F.verticilloides/7600/Fusarium_verticillioides.ASM14955v1.34.chr.gff3
+  Fver_gff_parsed=$OutDir/Fusarium_verticillioides.ASM14955v1.34_parsed.gff3
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/tools
+  cat $Fver_gff | sed -r "s/\ttranscript\t/\tmRNA\t/g" | grep -v '#' > $Fver_gff_parsed
+```
+
+
 Quast
 
 Quast was run to collect assembly statistics
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed); do
+  for Assembly in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed $Fver_assembly_parsed | grep '7600'); do
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
     OutDir=$(dirname $Assembly)
@@ -163,7 +184,8 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-  for BestAss in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_Genome_parsed.fasta); do
+  # for BestAss in $(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_Genome_parsed.fasta); do
+  for BestAss in $(ls assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.dna.toplevel_parsed.fa); do
     OutDir=repeat_masked/$Organism/"$Strain"/fungidb_repmask
     qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
     qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
@@ -175,7 +197,7 @@ The TransposonPSI masked bases were used to mask additional bases from the
 repeatmasker / repeatmodeller softmasked and harmasked files.
 
 ```bash
-for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep '4287_v2'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -w -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
@@ -185,13 +207,13 @@ echo "Number of masked bases:"
 cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
 # The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
-for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep '4287_v2'); do
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep -w -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
 OutDir=$(dirname $File)
 TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
 OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
 echo "$OutFile"
 bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
-echo "Number of masked bases:"
+# echo "Number of masked bases:"
 # cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[N]", ".")}' | cut -f2 -d ' '
 done
 ```
@@ -200,7 +222,7 @@ The number of bases masked by transposonPSI and Repeatmasker were summarised
 using the following commands:
 
 ```bash
-  for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -e 'fo47' -e '4287_v2'); do
+  for RepDir in $(ls -d repeat_masked/F.*/*/* | grep -w -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
     Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
     Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
     RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -274,8 +296,9 @@ SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 CurPath=$PWD
 FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
-# Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -299,7 +322,7 @@ done
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-  for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -w -e '4287_v2' -e 'fo47'); do
+  for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -w -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
     Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
     Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
     InStringAA=''
@@ -329,7 +352,8 @@ Proteins containing a transmembrane domain were identified:
 ```bash
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
   Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
     Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -341,7 +365,7 @@ Those proteins with transmembrane domains were removed from lists of Signal
 peptide containing proteins
 
 ```bash
-for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -e 'fo47' -e '4287_v2'); do
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -e 'fo47' -e '4287_v2' -e '7600' | grep '7600'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -357,6 +381,8 @@ if [ $Strain == 'fo47' ]; then
   cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d 'T' | sort | uniq | wc -l
 elif [ $Strain == '4287_v2' ]; then
   cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d '-' | sort | uniq | wc -l
+elif [ $Strain == '7600' ]; then
+  cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d '-' | sort | uniq | wc -l
 fi
 done
 ```
@@ -367,6 +393,9 @@ F.oxysporum - fo47
 F.oxysporum_fsp_lycopersici - 4287_v2
 2053
 1638
+F.verticilloides - 7600
+1294
+1068
 ```
 
 
@@ -379,7 +408,8 @@ Required programs:
 ```bash
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
   Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
     Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
     BaseName="$Organism"_"$Strain"_EffectorP
@@ -393,7 +423,7 @@ Those genes that were predicted as secreted and tested positive by effectorP
 were identified:
 
 ```bash
-for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287_v2' | grep 'fo47'); do
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'fo47' -e '4287_v2' -e '7600' | grep '7600'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -424,6 +454,8 @@ F.oxysporum - fo47
 F.oxysporum_fsp_lycopersici - 4287_v2
 384
 351
+F.verticilloides - 7600
+218
 ```
 
 ### C) Identification of MIMP-flanking genes
@@ -442,13 +474,19 @@ Fo_Fo47_gff=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo
   FoL_4287_gff_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff  
 # FoL_4287_genes=assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta
 # FoL_4287_gff=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.gff3
-for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed ); do
+Fver_assembly_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.dna.toplevel_parsed.fa
+Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+Fver_gff_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.34_parsed.gff3
+
+for Genome in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed $Fver_assembly_parsed | grep '7600'); do
 Organism=$(echo "$Genome" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Genome" | rev | cut -d '/' -f3 | rev)
 if [ $Strain == 'fo47' ]; then
   BrakerGff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
 elif [ $Strain == '4287_v2' ]; then
   BrakerGff=$(ls $FoL_4287_gff_parsed)
+elif [ $Strain == '7600' ]; then
+  BrakerGff=$(ls $Fver_gff_parsed)
 fi
 OutDir=analysis/mimps/$Organism/$Strain
 mkdir -p "$OutDir"
@@ -468,6 +506,9 @@ if [ $Strain == 'fo47' ]; then
 elif [ $Strain == '4287_v2' ]; then
   cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpProtsTxt
   cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | cut -f1 -d '-' | sort | uniq > $MimpGenesTxt
+elif [ $Strain == '7600' ]; then
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq | cut -f2 -d ':'  > $MimpProtsTxt
+  cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | cut -f1 -d '-' | sort | uniq | cut -f2 -d ':' > $MimpGenesTxt
 fi
 cat $MimpProtsTxt | wc -l
 cat $MimpGenesTxt | wc -l
@@ -480,13 +521,19 @@ The number of mimps identified:
 158
 The following transcripts intersect mimps:
 134
+F.verticilloides - 7600
+The number of mimps identified:
+2
+The following transcripts intersect mimps:
+2
+2
 ```
 
 Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_v2' -e 'ncbi' -e 'Fus2_canu_new' | grep -e 'fo47' -e '4287_v2'); do
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -e 'fo47' -e '4287_v2' -e 'ncbi' -e 'Fus2_canu_new' -e '7600' | grep -e 'fo47' -e '4287_v2' -e '7600' | grep '7600'); do
   ProtsFile=$(echo $File | sed 's/genes/prots/g')
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
@@ -501,6 +548,8 @@ if [ $Strain == 'fo47' ]; then
 cat $SecretedHeaders | cut -f1 | cut -f1 -d 'T' | sort | uniq | grep -f $File | wc -l
 elif [ $Strain == '4287_v2' ]; then
 cat $SecretedHeaders | cut -f1 | cut -f1 -d '-' | sort | uniq | grep -f $File | wc -l
+elif [ $Strain == '7600' ]; then
+cat $SecretedHeaders | cut -f1 | cut -f1 -d '-' | sort | uniq | grep -f $File | wc -l
 fi
 # ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 # $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $File secreted_mimp ID > $OutFile
@@ -512,6 +561,8 @@ F.oxysporum - fo47
 3
 F.oxysporum_fsp_lycopersici - 4287_v2
 23
+F.verticilloides - 7600
+0
 
 ## A) Interproscan
 
@@ -530,8 +581,9 @@ was redirected to a temporary output file named interproscan_submission.log .
   cd /home/groups/harrisonlab/project_files/fusarium
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
+  Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
   # Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Genes in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  for Genes in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
     echo $Genes
     $ProgDir/sub_interproscan.sh $Genes
   done 2>&1 | tee -a interproscan_submisison.log
@@ -544,7 +596,8 @@ commands:
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
   Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
     Strain=$(echo $Proteome | rev | cut -d '/' -f3 | rev)
     Organism=$(echo $Proteome | rev | cut -d '/' -f4 | rev)
     echo "$Organism - $Strain"
@@ -558,8 +611,9 @@ commands:
 ## B) SwissProt
 ```bash
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
-  # Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+  Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
     Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
     OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -591,8 +645,9 @@ at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
   FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins_parsed.fasta
-  # Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
-  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+  Fo_Fo47_genes_parsed=gene_pred/external_group/F.oxysporum/fo47/Fusox1/fusarium_oxysporum_fo47_1_proteins_parsed.fa
+  Fver_genes_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.pep_parsed.fa
+  for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed $Fver_genes_parsed | grep '7600'); do
     Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
     OutDir=gene_pred/CAZY/$Organism/$Strain
@@ -610,7 +665,7 @@ Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'fo47' -e '4287_v2' | grep 'fo47'); do
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'fo47' -e '4287_v2' -e '7600' | grep '7600'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 OutDir=$(dirname $File)
@@ -624,6 +679,8 @@ cat $CazyHeaders | wc -l
 if [ $Strain == 'fo47' ]; then
 cat $CazyHeaders | cut -f1 -d 'T' | sort | uniq | wc -l
 elif [ $Strain == '4287_v2' ]; then
+cat $CazyHeaders | cut -f1 -d '-' | sort | uniq | wc -l
+elif [ $Strain == '7600' ]; then
 cat $CazyHeaders | cut -f1 -d '-' | sort | uniq | wc -l
 fi
 # if [ $Strain == 'fo47' ]; then
@@ -647,6 +704,8 @@ cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l
 if [ $Strain == 'fo47' ]; then
 cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d 'T' | sort | uniq | wc -l
 elif [ $Strain == '4287_v2' ]; then
+cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '-' | sort | uniq | wc -l
+elif [ $Strain == '7600' ]; then
 cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '-' | sort | uniq | wc -l
 fi
 done
@@ -682,6 +741,32 @@ Cols in yourfile.out.dm.ps:
 
 * The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
 
+### Summary of CAZY families by organism
+
+```bash
+Fver_gff_parsed=assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.34_parsed.gff3
+FoL_4287_gff_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff  
+for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'fo47' -e '4287_v2' -e '7600'); do
+  Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
+  OutDir=$(dirname $CAZY)
+  echo "$Organism - $Strain"
+  Secreted=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
+  if [ $Strain == 'fo47' ]; then
+    Gff=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_transcripts.gtf)
+  elif [ $Strain == '4287_v2' ]; then
+    cat $CAZY | sed "s/-p.//g" >  $OutDir/"$Strain"_CAZY_parsed.out.dm.ps
+    CAZY=$(ls $OutDir/"$Strain"_CAZY_parsed.out.dm.ps)
+    Gff=$(ls $FoL_4287_gff_parsed)
+  elif [ $Strain == '7600' ]; then
+    Gff=$(ls $Fver_gff_parsed)
+  fi
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/CAZY
+  $ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
+done | less -S
+
+```
+
 ## D) AntiSMASH
 
 Antismash was run to identify clusters of secondary metabolite genes within
@@ -693,16 +778,17 @@ Results of web-annotation of gene clusters within the assembly were downloaded t
 the following directories:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '4287_v2' -e 'fo47'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
 OutDir=analysis/antismash/$Organism/$Strain
 mkdir -p $OutDir
 done
 ```
 
 ```bash
-for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e '4287_v2' -e 'fo47'); do
+for Zip in $(ls analysis/antismash/*/*/*.zip | grep -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
 OutDir=$(dirname $Zip)
 unzip -d $OutDir $Zip
 done
@@ -710,7 +796,7 @@ done
 
 
 ```bash
-for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep 'fo47'); do
+for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -e '4287_v2' -e 'fo47' -e '7600' | grep '7600'); do
 Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -719,13 +805,23 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/seco
 $ProgDir/antismash2gff.py --inp_antismash $AntiSmash > $OutDir/"$Strain"_secondary_metabolite_regions.gff
 printf "Number of clusters detected:\t"
 cat $OutDir/"$Strain"_secondary_metabolite_regions.gff | grep 'antismash_cluster' | wc -l
+if [ $Strain == '7600' ]; then
+GeneGff=$(ls assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.34_parsed.gff3)
+bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d ':' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+printf "Number of predicted proteins in clusters:\t"
+cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
+printf "Number of predicted genes in clusters:\t"
+cat $OutDir/metabolite_cluster_genes.gff |  grep -w 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d ':' | sort | uniq | wc -l
+else
 GeneGff=$(ls assembly/external_group/$Organism/$Strain/*/*.gtf | grep -e 'fungidb' -e 'broad' | grep -v -e 'FungiDB-29_Foxysporum4287_parsed' -e 'fo47_1_transcripts_parsed')
 bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_secondary_metabolite_regions.gff > $OutDir/metabolite_cluster_genes.gff
-cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f4 -d '"' | sort | uniq > $OutDir/metabolite_cluster_gene_headers.txt
+cat $OutDir/metabolite_cluster_genes.gff | grep -w 'exon' | cut -f9 | cut -f4 -d '"' | sort | uniq | wc -l > $OutDir/metabolite_cluster_gene_headers.txt
 printf "Number of predicted proteins in clusters:\t"
 cat $OutDir/metabolite_cluster_gene_headers.txt | wc -l
 printf "Number of predicted genes in clusters:\t"
 cat $OutDir/metabolite_cluster_genes.gff |  grep -w 'exon' | cut -f9 | cut -f2 -d '"' | sort | uniq | wc -l
+fi
 done
 
 for AntiSmash in $(ls analysis/antismash/*/*/*/*.final.gbk | grep -e '4287_v2'); do
@@ -769,7 +865,7 @@ over what constitutes a SSCP.
 
 ```bash
 
-for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -e 'fo47' -e '4287_v2'); do
+for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -e 'fo47' -e '4287_v2' -e '7600' | grep '7600' ); do
 Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
 Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -781,6 +877,8 @@ cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.
 printf "number of SSC-rich genes:\t"
 if [ $Strain == "4287_v2" ]; then
 cat $OutDir/"$Strain"_sscp.fa | grep '>' | cut -f1 | tr -d '>' | cut -f1 -d '-' | sort | uniq | wc -l
+elif [ $Strain == "7600" ]; then
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | cut -f1 | tr -d '>' | cut -f1 -d 'T' | sort | uniq | wc -l
 elif [ $Strain == "fo47" ]; then
 cat $OutDir/"$Strain"_sscp.fa | grep '>' | cut -f1 | tr -d '>' | cut -f1 -d 'T' | sort | uniq | wc -l
 fi
@@ -792,6 +890,11 @@ printf "Number of SSCPs predicted by both effectorP and this approach: \t"
 cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '-' > $OutDir/"$Strain"_sscp_headers.txt
 cat $EffectorP | cut -f1 | cut -f1 -d '-' | sort | uniq | grep -f $OutDir/"$Strain"_sscp_headers.txt |  wc -l
 elif [ $Strain == "fo47" ]; then
+cat $EffectorP | cut -f1 -d 'T' | sort | uniq | wc -l
+printf "Number of SSCPs predicted by both effectorP and this approach: \t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>'| cut -f1 -d 'T' > $OutDir/"$Strain"_sscp_headers.txt
+cat $EffectorP | cut -f1 | sort | uniq | cut -f1 -d 'T' | sort | uniq | grep -f $OutDir/"$Strain"_sscp_headers.txt | wc -l
+elif [ $Strain == "7600" ]; then
 cat $EffectorP | cut -f1 -d 'T' | sort | uniq | wc -l
 printf "Number of SSCPs predicted by both effectorP and this approach: \t"
 cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>'| cut -f1 -d 'T' > $OutDir/"$Strain"_sscp_headers.txt
@@ -858,9 +961,7 @@ Previously published FTF genes from Sanchez et al 2016 were blasted against
 Fusarium genomes.
 
 ```bash
-FoL_4287_assembly_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum.FO2.31.dna.chromosome_parsed.fa
-Fo_Fo47_assembly_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta
-for Assembly in $(ls $FoL_4287_assembly_parsed $Fo_Fo47_assembly_parsed); do
+for Assembly in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -e '4287' -e 'fo47' -e '7600' | grep '7600'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 echo $Assembly
@@ -875,7 +976,7 @@ done
 BLAST hits were converted to Gff annotations and intersected with gene models:
 
 ```bash
-for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -e '4287' -e 'fo47'); do
+for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -e '4287' -e 'fo47' -e '7600' | grep '7600'); do
 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 OutDir=analysis/FTF/$Organism/$Strain
@@ -885,7 +986,8 @@ NumHits=1
 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
 $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 
-GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
+# GffAppended=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
+GffAppended=$(ls assembly/external_group/F.verticilloides/7600/v3/Fusarium_verticillioides.ASM14955v1.34_parsed.gff3)
 bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_FTF_hits_intersected.bed
 done
 ```

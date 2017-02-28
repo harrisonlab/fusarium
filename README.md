@@ -1974,15 +1974,190 @@ Cols in yourfile.out.dm.ps:
 
 * The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
 
+
+### Summary of CAZY families by organism
+
+
 ```bash
-ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/CAZY
-Secreted=gene_pred/final_genes_signalp-4.1/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_final_sp_no_trans_mem_headers.txt
-CAZY=gene_pred/CAZY/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_CAZY.out.dm.ps
-Gff=gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3
-$ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff | less -S
+for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+  Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
+  OutDir=$(dirname $CAZY)
+  echo "$Organism - $Strain"
+  Secreted=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
+  Gff=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3
+  ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/CAZY
+  $ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
+done | less -S
 ```
 
+```
+F.oxysporum_fsp_cepae - 125_ncbi
+AA - 70
+GT - 3
+CE - 64
+CBM - 46
+PL - 25
+GH - 177
+F.oxysporum_fsp_cepae - A13_ncbi
+AA - 67
+GT - 2
+CE - 71
+CBM - 51
+PL - 24
+GH - 182
+F.oxysporum_fsp_cepae - A23_ncbi
+AA - 69
+GT - 3
+CE - 67
+CBM - 48
+PL - 25
+GH - 175
+F.oxysporum_fsp_cepae - A28_ncbi
+AA - 63
+GT - 2
+CE - 64
+CBM - 49
+PL - 22
+GH - 176
+F.oxysporum_fsp_cepae - CB3_ncbi
+AA - 64
+GT - 3
+CE - 69
+CBM - 42
+PL - 25
+GH - 179
+F.oxysporum_fsp_cepae - Fus2_canu_new
+AA - 69
+GT - 3
+CE - 66
+CBM - 47
+PL - 26
+GH - 174
+F.oxysporum_fsp_cepae - PG_ncbi
+AA - 66
+GT - 2
+CE - 65
+CBM - 48
+PL - 27
+GH - 173
+F.oxysporum_fsp_narcissi - N139_ncbi
+AA - 68
+GT - 1
+CE - 66
+CBM - 41
+PL - 27
+GH - 195
+F.proliferatum - A8_ncbi
+AA - 64
+GT - 3
+CE - 64
+CBM - 28
+PL - 26
+GH - 156
+```
 
+```
+F.oxysporum_fsp_cepae - 125_ncbi
+B-Galactosidases - 3
+A-Galactosidases - 4
+Polygalacturonase - 13
+A-Arabinosidases - 26
+Xylanases - 11
+Polygalacturonate lyases - 26
+B-Glucuronidases - 4
+B-Glycosidases - 13
+Cellulases - 20
+Xyloglucanases - 1
+F.oxysporum_fsp_cepae - A13_ncbi
+B-Galactosidases - 3
+A-Galactosidases - 3
+Polygalacturonase - 14
+A-Arabinosidases - 28
+Xylanases - 11
+Polygalacturonate lyases - 26
+B-Glucuronidases - 3
+B-Glycosidases - 13
+Cellulases - 22
+Xyloglucanases - 1
+F.oxysporum_fsp_cepae - A23_ncbi
+B-Galactosidases - 3
+B-Glucuronidases - 4
+Polygalacturonase - 13
+A-Arabinosidases - 26
+Xylanases - 11
+Polygalacturonate lyases - 26
+A-Galactosidases - 4
+B-Glycosidases - 13
+Cellulases - 21
+Xyloglucanases - 1
+F.oxysporum_fsp_cepae - A28_ncbi
+B-Galactosidases - 2
+A-Galactosidases - 4
+Polygalacturonase - 13
+A-Arabinosidases - 29
+Xylanases - 11
+Polygalacturonate lyases - 24
+B-Glucuronidases - 4
+B-Glycosidases - 13
+Cellulases - 21
+Xyloglucanases - 1
+F.oxysporum_fsp_cepae - CB3_ncbi
+B-Galactosidases - 2
+B-Glucuronidases - 4
+Polygalacturonase - 12
+A-Arabinosidases - 28
+Xylanases - 10
+Polygalacturonate lyases - 26
+A-Galactosidases - 4
+B-Glycosidases - 14
+Cellulases - 21
+Xyloglucanases - 1
+F.oxysporum_fsp_cepae - Fus2_canu_new
+B-Galactosidases - 2
+A-Galactosidases - 4
+Polygalacturonase - 13
+A-Arabinosidases - 26
+Xylanases - 11
+Polygalacturonate lyases - 27
+B-Glucuronidases - 4
+B-Glycosidases - 13
+Cellulases - 20
+Xyloglucanases - 1
+F.oxysporum_fsp_cepae - PG_ncbi
+B-Galactosidases - 2
+A-Galactosidases - 4
+Polygalacturonase - 12
+A-Arabinosidases - 28
+Xylanases - 10
+Polygalacturonate lyases - 26
+B-Glucuronidases - 4
+B-Glycosidases - 12
+Cellulases - 20
+Xyloglucanases - 1
+F.oxysporum_fsp_narcissi - N139_ncbi
+B-Galactosidases - 2
+B-Glucuronidases - 4
+Polygalacturonase - 12
+A-Arabinosidases - 28
+Xylanases - 11
+Polygalacturonate lyases - 27
+A-Galactosidases - 4
+B-Glycosidases - 17
+Cellulases - 20
+Xyloglucanases - 1
+F.proliferatum - A8_ncbi
+B-Galactosidases - 2
+A-Galactosidases - 3
+Polygalacturonase - 11
+A-Arabinosidases - 20
+Xylanases - 9
+Polygalacturonate lyases - 26
+B-Glucuronidases - 2
+B-Glycosidases - 10
+Cellulases - 21
+Xyloglucanases - 1
+```
 
 ## D) AntiSMASH
 
@@ -2880,22 +3055,22 @@ Previously published FTF genes from Sanchez et al 2016 were blasted against
 Fusarium genomes.
 
 ```bash
-	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -e 'HB17' | grep -w 'Fus2_canu_new'); do
-		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-		echo $Assembly
-		Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
-		OutDir=analysis/FTF/$Organism/$Strain
-		mkdir -p $OutDir
-		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		qsub $ProgDir/run_blast2csv.sh $Query dna $Assembly $OutDir
-	done
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v -e 'HB17' | grep -v -w 'Fus2_canu_new' | grep 'A8_ncbi'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo $Assembly
+Query=analysis/blast_homology/Fo_path_genes/FTF_cds_Sanchez_et_al_2016.fasta
+OutDir=analysis/FTF/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $Assembly $OutDir
+done
 ```
 
 BLAST hits were converted to Gff annotations and intersected with gene models:
 
 ```bash
-for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -w 'Fus2_canu_new'); do
+for BlastHits in $(ls analysis/FTF/*/*/*_FTF_cds_Sanchez_et_al_2016.fasta_hits.csv | grep -v -w 'Fus2_canu_new' | grep 'A8_ncbi'); do
 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
 OutDir=analysis/FTF/$Organism/$Strain
@@ -2969,20 +3144,20 @@ done
  BLAST hits were converted to Gff annotations and intersected with gene models:
 
  ```bash
-	 for BlastHits in $(ls analysis/Mt_genes/*/*/*_F.spp._mt_prots_Al-Reedy_et_al._2012.fasta_hits.csv | grep -v -e 'HB17' | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'); do
-		 Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
-		 Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
-		 echo "$Organism - $Strain"
-		 OutDir=analysis/Mt_genes/$Organism/$Strain
-		 HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
-		 Column2=Mt_gene_homolog
-		 NumHits=1
-		 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-		 $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+for BlastHits in $(ls analysis/Mt_genes/*/*/*_F.spp._mt_prots_Al-Reedy_et_al._2012.fasta_hits.csv | grep -v -e 'HB17' | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep 'A8'); do
+Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/Mt_genes/$Organism/$Strain
+HitsGff=$(echo $BlastHits | sed  's/.csv/.gff/g')
+Column2=Mt_gene_homolog
+NumHits=1
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 
-		 GffAppended=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
-		 bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_Mt_hits_intersected.bed
-	 done
+GffAppended=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+bedtools intersect -wao -a $HitsGff -b $GffAppended > $OutDir/"$Strain"_Mt_hits_intersected.bed
+done
  ```
 
 

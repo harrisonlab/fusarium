@@ -78,6 +78,65 @@ done
 done
 ```
 
+Gene tables were made for Fp A8
+
+```bash
+
+for Strain in A8_ncbi; do
+for GeneGff in $(ls gene_pred/final_genes/*/$Strain/final/final_genes_appended.gff3); do
+Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Genome=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_unmasked.fa)
+BlastCsv=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined.pep.fasta_hits.csv)
+FolIntersect=$(ls analysis/blast_homology/$Organism/$Strain/4287_chromosomal_final_genes_combined_intersect.bed)
+GeneGff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+SigpTab=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp.tab)
+TmhmmTxt=$(ls gene_pred/trans_mem/$Organism/$Strain/*_tmhmm_out.txt)
+MimpTxt=$(ls analysis/mimps/$Organism/$Strain/*_genes_in_2kb_mimp.txt)
+EffectorpTxt=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP.txt)
+OrthogroupsTxt=$(ls analysis/orthology/orthomcl/Fp_Fv_FoC_FoL_Fo/Fp_Fv_FoC_FoL_Fo_orthogroups.txt)
+InterProTsv=$(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv)
+SwissprotTab=$(ls gene_pred/swissprot/$Organism/$Strain/swissprot_vJul2016_tophit_parsed.tbl)
+# DEG_Orthogroups=$(ls analysis/expression/warwick/F.oxysporum_fsp_cepae/Fus2/23_06/Fus2_path_vs_non_path_orthogroups.tab)
+
+OrthoMCL_id=Fp
+OrthoMCL_id_list="Fp Fv Fo FoC FoL"
+OrthoMCL_path_ids="Fo FoC FoL"
+OrthoMCL_nonpath_ids="Fp Fv"
+
+if [ "$Strain" == 'Fus2_canu_new' ]; then OrthoMCL_id="Fus2"; fi
+# if [ "$Strain" == 'A1-2' ]; then OrthoMCL_id="A1_2"; fi
+
+OutDir=gene_pred/annotations/$Organism/$Strain
+OutTable=$OutDir/"$Strain"_gene_annotations.tab
+
+mkdir -p $OutDir
+
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes
+$ProgDir/Fo_build_gene_annot_table.py \
+--blast_csv $BlastCsv \
+--FoL_intersected_genes $FolIntersect \
+--genome $Genome \
+--FoC_genes_gff $GeneGff \
+--FoC_SigP $SigpTab \
+--FoC_TM_list $TmhmmTxt \
+--FoC_MIMP_list $MimpTxt \
+--FoC_effectorP $EffectorpTxt \
+--FoC_orthogroup $OrthogroupsTxt \
+--OrthoMCL_id $OrthoMCL_id \
+--OrthoMCL_all $OrthoMCL_id_list \
+--OrthoMCL_path $OrthoMCL_path_ids \
+--OrthoMCL_nonpath $OrthoMCL_nonpath_ids \
+--InterPro $InterProTsv \
+--Swissprot $SwissprotTab \
+> $OutTable
+# --DEG_Orthogroups $DEG_Orthogroups \
+# > $OutTable
+done
+done
+```
+
 Gene tables were made for Fo fo47 and FoL 4287
 
 ```bash

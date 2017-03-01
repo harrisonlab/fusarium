@@ -3120,6 +3120,19 @@ cat $AnnotTab | grep -w "$Orthogroup"
 done > analysis/transcription_factors/Fus2_canu_new_TF1-9.tsv
 ```
 
+```bash
+TF_list="FOXG_14257 FOXG_17260 FOXG_17266 FOXG_14201 FOXG_14230 FOXG_14211 FOXG_14275 FOXG_14277 FOXG_14274"
+num=0
+OrthoTxt=$(ls analysis/orthology/orthomcl/Fp_Fv_FoC_FoL_Fo/Fp_Fv_FoC_FoL_Fo_orthogroups.txt)
+AnnotTab=$(ls gene_pred/annotations/F.proliferatum/A8_ncbi/A8_ncbi_gene_annotations.tab)
+for TF in $TF_list; do
+num=$(($num +1))
+echo "TF"$num
+Orthogroup=$(cat $OrthoTxt | grep -w "$TF" | cut -f1 -d ':')
+cat $AnnotTab | grep -w "$Orthogroup"
+done > analysis/transcription_factors/Fp_TF1-9.tsv
+```
+
 
 
 

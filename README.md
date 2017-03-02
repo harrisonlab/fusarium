@@ -2288,6 +2288,108 @@ Number of predicted proteins in clusters:	762
 Number of predicted genes in clusters:	762
 ```
 
+```bash
+for Antismash in $(ls analysis/antismash/F.*/*/*_secondary_metabolite_regions.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+	Organism=$(echo $Antismash | rev | cut -f3 -d '/' | rev)
+	Strain=$(echo $Antismash | rev | cut -f2 -d '/' | rev)
+	echo "$Organism - $Strain"
+	cat $Antismash | cut -f3 | sort | uniq -c
+done
+```
+
+```
+F.oxysporum_fsp_cepae - 125_ncbi
+      3 indole
+     11 nrps
+      1 nrps-indole
+      4 nrps-t1pks
+     10 other
+      6 t1pks
+      1 t3pks
+     10 terpene
+F.oxysporum_fsp_cepae - A13_ncbi
+      3 indole
+     12 nrps
+      3 nrps-t1pks
+     10 other
+      9 t1pks
+      1 t1pks-nrps
+      1 t3pks
+     10 terpene
+F.oxysporum_fsp_cepae - A23_ncbi
+      3 indole
+     11 nrps
+      1 nrps-indole
+      4 nrps-t1pks
+     10 other
+      6 t1pks
+      1 t3pks
+     10 terpene
+F.oxysporum_fsp_cepae - A28_ncbi
+      3 indole
+      1 indole-nrps
+     11 nrps
+      2 nrps-t1pks
+     10 other
+      8 t1pks
+      1 t1pks-nrps
+      1 t3pks
+      9 terpene
+F.oxysporum_fsp_cepae - CB3_ncbi
+      1 bacteriocin
+      3 indole
+      1 indole-nrps
+     11 nrps
+      3 nrps-t1pks
+      9 other
+      6 t1pks
+      1 t1pks-indole
+      1 t3pks
+      8 terpene
+F.oxysporum_fsp_cepae - Fus2_canu_new
+      3 indole
+      1 indole-nrps
+     11 nrps
+      3 nrps-t1pks
+     11 other
+      7 t1pks
+      1 t1pks-nrps
+      1 t3pks
+     12 terpene
+F.oxysporum_fsp_cepae - PG_ncbi
+      3 indole
+      1 indole-nrps
+     11 nrps
+      3 nrps-t1pks
+     10 other
+      5 t1pks
+      1 t1pks-indole
+      1 t3pks
+      9 terpene
+      1 terpene-t1pks
+F.oxysporum_fsp_narcissi - N139_ncbi
+      3 indole
+      1 indole-nrps
+     13 nrps
+      3 nrps-t1pks
+     10 other
+      6 t1pks
+      1 t1pks-terpene
+      1 t3pks
+      8 terpene
+F.proliferatum - A8_ncbi
+      1 hserlactone
+      3 indole
+     13 nrps
+      1 nrps-indole
+      6 nrps-t1pks
+      9 other
+     14 t1pks
+      1 t1pks-terpene
+      1 t3pks
+      9 terpene
+```
+
 ## E) SSCP
 
 Small secreted cysteine rich proteins were identified within secretomes. These
@@ -2768,7 +2870,7 @@ Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep -v 'ncbi' ); do
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi'| grep -e 'Fus2_canu_new' -e 'ncbi' | grep -v 'old' | grep 'ncbi' ); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"

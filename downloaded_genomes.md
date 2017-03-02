@@ -843,7 +843,7 @@ cat $OutDir/metabolite_cluster_genes.gff |  grep -w 'mRNA' | cut -f9 | cut -f3 -
 done
 ```
 
-These clusters represenyed the following genes. Note that these numbers just
+These clusters represented the following genes. Note that these numbers just
 show the number of intersected genes with gff clusters and are not confirmed by
 function
 
@@ -855,6 +855,48 @@ F.oxysporum_fsp_lycopersici - 4287_v2
 Number of clusters detected:	49
 Number of predicted genes in clusters:	861
 ```
+
+```bash
+for Antismash in $(ls analysis/antismash/F.*/*/*_secondary_metabolite_regions.gff | grep -e '4287_v2' -e 'fo47' -e '7600'); do
+	Organism=$(echo $Antismash | rev | cut -f3 -d '/' | rev)
+	Strain=$(echo $Antismash | rev | cut -f2 -d '/' | rev)
+	echo "$Organism - $Strain"
+	cat $Antismash | cut -f3 | sort | uniq -c
+done
+```
+
+```
+F.oxysporum - fo47
+      3 indole
+     11 nrps
+      1 nrps-indole
+      3 nrps-t1pks
+     12 other
+      6 t1pks
+      1 t1pks-indole
+      1 t1pks-terpene
+      1 t3pks
+      8 terpene
+F.oxysporum_fsp_lycopersici - 4287_v2
+      3 indole
+     12 nrps
+      3 nrps-t1pks
+     10 other
+      9 t1pks
+      1 t3pks
+     10 terpene
+      1 terpene-t1pks
+F.verticilloides - 7600
+      3 indole
+     12 nrps
+      3 nrps-t1pks
+      9 other
+     11 t1pks
+      1 t1pks-nrps
+      1 t3pks
+      6 terpene
+      1 terpene-t1pks
+``
 
 
 ## E) SSCP

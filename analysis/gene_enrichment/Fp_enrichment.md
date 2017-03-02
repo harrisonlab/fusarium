@@ -27,29 +27,9 @@ GO enrichment of terms in Fp vs FoC:
   $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $OutDir/Fp_FoC_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
 ```
 
-GO enrichment of terms in other LS contigs:
-
-```bash
-  OutDir=analysis/enrichment/F.oxysporum_fsp_cepae/Fus2_canu_new/other_LS_vs_core
-  mkdir -p $OutDir
-  InterProTSV=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv
-  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/analysis/gene_enrichment
-  $ProgDir/GO_prep_table.py --interpro $InterProTSV > $OutDir/Fus2_gene_GO_annots.tsv
-
-  AnnotTable=gene_pred/annotations/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_gene_annotations.tab
-  AllGenes=$OutDir/Fus2_all_genes.txt
-  cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
-  Set1Genes=$OutDir/Fus2_Set1_genes.txt
-  Set2Genes=$OutDir/Fus2_Set2_genes.txt
-  AllGenes=$OutDir/Fus2_all_genes.txt
-  cat $AnnotTable | tail -n+2 | grep -e 'contig_14' -e 'contig_20' -e 'contig_22' | cut -f1 | sed -e 's/$/\t0.001/g'> $Set1Genes
-  cat $AnnotTable | tail -n+2 | grep -v -e 'contig_14' -e 'contig_20' -e 'contig_22' | cut -f1 | sed -e 's/$/\t1.00/g' > $Set2Genes
-  cat $Set1Genes $Set2Genes > $AllGenes
-
-  $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $OutDir/Fus2_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
-```
-
 ## Interproscan term enrichment using Fishers exact test in R
+
+IPR enrichment of terms in Fp vs FoC:
 
 ```bash
   OutDir=analysis/enrichment/F.proliferatum/A8_ncbi/Fp_vs_FoC

@@ -49,6 +49,13 @@ cat $OutDir/Fp_FoL_links_edited.txt | cut -f1 | uniq > $OutDir/Fp_contig_order.t
   $ProgDir/find_contig_orientation.py --links_file $OutDir/Fp_FoL_links_edited.txt > $OutDir/Fp_FoL_contig_orientation.txt
 ```
 
+The number of bp in syntenous contigs was identified using:
+
+```bash
+  cat $OutDir/Fp_FoL_contig_orientation.txt | tail -n3 | grep -v 'orientation' | sed 's/, /\n/g' > $OutDir/Fp_syntenous_contigs.txt
+  cat $OutDir/Fp_genome.txt | grep -v -e "chr2.." -e "chr3.." -e "chr4.." -e "chr5.." -e "chr191" -e "chr192" -e "chr193" -e "chr194" -e "chr195" -e "chr196" -e "chr197" -e "chr198" -e "chr199" | grep -f $OutDir/Fp_syntenous_contigs.txt | cut -f6 -d ' ' | awk '{s+=$1} END {print s}'
+```
+
 Contig order was selected by taking the first line of that file and then also
 taking the reversed order of FoL contigs using the command:
 
@@ -95,4 +102,15 @@ ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_c
 circos -conf $ProgDir/Fp_A8/Fp_FoL/Fp_FoL_circos.conf -outputdir $OutDir
 mv $OutDir/circos.png $OutDir/Fp_FoL_circos.png
 mv $OutDir/circos.svg $OutDir/Fp_FoL_circos.svg
+```
+
+
+# Further analysis of non-syntenous regions regions
+
+The number of MIMPs and effectors in LS regions were identified:
+
+
+```bash
+cat $OutDir/A8_mimp_plot.txt | grep -v -f $OutDir/Fp_syntenous_contigs.txt | wc -l
+
 ```

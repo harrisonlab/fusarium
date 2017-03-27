@@ -766,6 +766,21 @@ Outputs were summarised using the commands:
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
 
+Busco has replaced CEGMA and was run to check gene space in predicted gene models
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' -e 'canu_new' | grep -v 'old'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+# BuscoDB="Fungal"
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
 
 #Gene prediction
 
@@ -1692,6 +1707,23 @@ cat $GffBraker $GffQuary > $GffAppended
 
 done
 ```
+
+
+## Assessing the Gene space in predicted transcriptomes:
+
+```bash
+	for Assembly in $(ls gene_pred/final_genes/*/*/final/final_genes_combined.gene.fasta | grep -e 'Fus2' -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' -e 'canu_new' | grep -v 'old'); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+		# BuscoDB="Fungal"
+		BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+		OutDir=gene_pred/busco/$Organism/$Strain/genes
+		qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+	done
+```
+
 
 ## ORF finder
 

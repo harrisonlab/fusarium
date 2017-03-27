@@ -7,6 +7,7 @@
 GO enrichment of terms in PS contigs:
 
 ```bash
+# Extract GO terms
 OutDir=analysis/enrichment/F.oxysporum_fsp_cepae/Fus2_canu_new/PS_vs_core
 mkdir -p $OutDir
 InterProTSV=gene_pred/interproscan/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_interproscan.tsv

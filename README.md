@@ -766,21 +766,27 @@ Outputs were summarised using the commands:
 	less gene_pred/cegma/cegma_results_dna_summary.txt
 ```
 
-Busco has replaced CEGMA and was run to check gene space in predicted gene models
+Busco has replaced CEGMA and was run to check gene space in assemblies
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'Fus2' -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' -e 'canu_new' | grep -v 'old'); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
-# BuscoDB="Fungal"
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
-OutDir=gene_pred/busco/$Organism/$Strain/assembly
-qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
-done
+	for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -e 'Fus2' -e '125' -e 'A23' -e 'A13' -e 'A28' -e 'CB3' -e 'PG' -e 'A8' -e 'N139' | grep -e 'ncbi' -e 'canu_new' | grep -v 'old'); do
+		Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		echo "$Organism - $Strain"
+		ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+		# BuscoDB="Fungal"
+		BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+		OutDir=gene_pred/busco/$Organism/$Strain/assembly
+		qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+	done
 ```
 
+```bash
+	for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt); do  
+		echo $File;
+		cat $File | grep -e '(C)' -e 'Total';
+	done
+```
 
 #Gene prediction
 
@@ -1724,6 +1730,13 @@ done
 	done
 ```
 
+```bash
+	for File in $(ls gene_pred/busco/*/*/genes/*/short_summary_*.txt); do  
+		echo $File;
+		cat $File | grep -e '(C)' -e 'Total';
+	done
+```
+
 
 ## ORF finder
 
@@ -2011,7 +2024,7 @@ Cols in yourfile.out.dm.ps:
 
 
 ```bash
-for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'Fus2'); do
   Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
   Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
   OutDir=$(dirname $CAZY)
@@ -2321,7 +2334,7 @@ Number of predicted genes in clusters:	762
 ```
 
 ```bash
-for Antismash in $(ls analysis/antismash/F.*/*/*_secondary_metabolite_regions.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+for Antismash in $(ls analysis/antismash/F.*/*/*_secondary_metabolite_regions.gff | grep -v 'HB17' | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'Fus2'); do
 	Organism=$(echo $Antismash | rev | cut -f3 -d '/' | rev)
 	Strain=$(echo $Antismash | rev | cut -f2 -d '/' | rev)
 	echo "$Organism - $Strain"

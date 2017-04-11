@@ -282,6 +282,47 @@ for Proteome in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
 done
 ```
 
+Busco has replaced CEGMA and was run to check gene space in predicted gene models
+
+
+```bash
+  Fo_Fo47_assembly_parsed=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_supercontigs_parsed.fasta)
+  FoL_4287_assembly_parsed=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_Genome_parsed.fasta)
+  for Assembly in $(ls $Fo_Fo47_assembly_parsed $FoL_4287_assembly_parsed); do
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+    BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+    OutDir=gene_pred/busco/$Organism/$Strain/assembly
+    qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+  done
+```
+
+```bash
+  for File in $(ls gene_pred/busco/F*/*/genes/*/short_summary_*.txt); do  
+    echo $File;
+    cat $File | grep -e '(C)' -e 'Total';
+  done
+```
+
+## Assessing the Gene space in predicted transcriptomes:
+
+```bash
+FoL_4287_genes_parsed=assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedTranscripts.fasta
+Fo_Fo47_genes_parsed=assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_genes.fasta
+for Assembly in $(ls $FoL_4287_genes_parsed $Fo_Fo47_genes_parsed); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+# BuscoDB="Fungal"
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/genes
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
 ### A) From Predicted gene models - Identifying secreted proteins
 
 Required programs:

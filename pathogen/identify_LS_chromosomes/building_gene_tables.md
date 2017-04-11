@@ -82,7 +82,8 @@ Gene tables were made for Fp A8
 
 ```bash
 
-for Strain in A8_ncbi; do
+# for Strain in A8_ncbi; do
+for Strain in N139_ncbi; do
 for GeneGff in $(ls gene_pred/final_genes/*/$Strain/final/final_genes_appended.gff3); do
 Organism=$(echo $GeneGff | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $GeneGff | rev | cut -f3 -d '/' | rev)

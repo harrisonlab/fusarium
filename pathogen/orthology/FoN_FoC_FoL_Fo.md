@@ -19,8 +19,8 @@
 
 ### for FoN N139
 ```bash
-  Taxon_code=N139
-  Fasta_file=$(ls gene_pred/codingquary/F.oxysporum_fsp_narcissi/N139/*/final_genes_combined.pep.fasta)
+  Taxon_code=FoN
+  Fasta_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/*/final_genes_combined.pep.fasta)
   Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
@@ -38,9 +38,9 @@
 ### for FoL 4287
 
 ```bash
-  Taxon_code=4287
-  Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_proteins_20110522.aa.fasta)
-  Id_field=4
+  Taxon_code=FoL
+  Fasta_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins.fasta)
+  Id_field=1
   orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
@@ -175,17 +175,17 @@ number of unique groups of inparalogs
 
 
 ```
-[1] "4287 (12395)"
-[1] 874
-[1] 212
-[1] "FoC (13788)"
-[1] 620
-[1] 41
-[1] "N139 (16225)"
-[1] 2828
-[1] 257
-[1] "fo47 (14314)"
-[1] 1497
+[1] "FoC (13761)"
+[1] 628
+[1] 40
+[1] "FoL (12370)"
+[1] 875
+[1] 214
+[1] "FoN (14312)"
+[1] 1110
+[1] 99
+[1] "fo47 (14297)"
+[1] 1496
 [1] 127
 ```
 

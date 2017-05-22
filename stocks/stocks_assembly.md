@@ -167,22 +167,36 @@ cd $WorkDir
 
 OutDir=assembly/nanopolish/F.oxysporum_f.sp_mathioli/Stocks4
 mkdir -p $OutDir
-Reads=$(ls /home/groups/harrisonlab/project_files/fusarium/raw_dna/minion/F.oxysporum/Stocks4/all_reads.fastq.gz)
+# Reads=$(ls /home/groups/harrisonlab/project_files/fusarium/raw_dna/minion/F.oxysporum/Stocks4/all_reads.fastq.gz)
+Fast5Dir=$(ls -d /home/miseq_data/minion/2017/MINION_20170424_FNFAB42727_MN18323_sequencing_run_Fusarium_oxysporum_Stocks4/albacore1.1.1)
+nanopolish extract -r $Fast5Dir | gzip -cf > stocks4_reads.fa.gz
+
 Assembly=$(ls /home/groups/harrisonlab/project_files/fusarium/assembly/SMARTdenovo/F.oxysporum_f.sp_mathioli/Stocks4/Stocks4_SMARTdenovo.fasta)
 cp $Assembly assembly.fa
 bwa index assembly.fa
-cp $Reads reads.fa.gz
-bwa mem -x ont2d -t 8 assembly.fa reads.fa.gz > aligned.sam
+# cp $Reads reads.fa.gz
+bwa mem -x ont2d -t 8 assembly.fa  stocks4_reads.fa.gz > aligned.sam
 # samtools sort $OutDir/aligned.bam -f $OutDir/reads.sorted.bam
 samtools view -b -S aligned.sam | samtools sort - -o tmp > reads.sorted.bam
 # samtools view -u aligned.bam | samtools sort - -f reads.sorted.bam
 samtools index reads.sorted.bam
 NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
 python $NanoPolishDir/nanopolish_makerange.py assembly.fa > nanopolish_range.txt
-cat reads.fa.gz | gunzip -cf | head -n1 | cut -f1 -d ' ' | gzip -cf reads_2.fa.gz
+# cat reads.fa.gz | gunzip -cf | head -n1 | cut -f1 -d ' ' | gzip -cf reads_2.fa.gz
+cat stocks4_reads.fa.gz | gunzip -cf > stocks4_reads.fa
+
+# cat assembly.fa | cut -f1 > assembly2.fa
+
+for line in $(cat nanopolish_range.txt); do
+	echo $line
+	nanopolish variants -t 8 --reads stocks4_reads.fa --bam reads.sorted.bam --genome assembly.fa --ploidy 1 -w $line --consensus="$line"_consensus.fa --fix-homopolymers --min-candidate-frequency 0.1 > "$line"_variants.txt
+done
 
 
-nanopolish variants --consensus polished.{1}.fa -w {1} -r reads.fa.gz -b reads.sorted.bam -g assembly.fa -t 8 --min-candidate-frequency 0.1 -o nanopolish_out.txt
+
+cat nanopolish_range.txt | nanopolish variants --consensus polished.{1}.fa -w {1} -r stocks4_reads.fa -b reads.sorted.bam -g assembly2.fa -t 8 --min-candidate-frequency 0.1 -o nanopolish_out.txt
+
+python $NanoPolishDir/nanopolish_makerange.py assembly.fa
 
 # python $NanoPolishDir/nanopolish_makerange.py assembly.fa | parallel --results nanopolish.results -P 8 \
 #   nanopolish variants --consensus polished.{1}.fa -w {1} -r $TMPDIR/WT_07-03-17_pass.fastq.gz -b $TMPDIR/reads.sorted.bam -g $TMPDIR/contigs_min_500bp.fasta -t 8 --min-candidate-frequency 0.1

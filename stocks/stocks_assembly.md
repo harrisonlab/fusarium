@@ -48,7 +48,7 @@ f. sp. mathioli
   ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/canu
   qsub $ProgDir/submit_canu_minion.sh $Reads $GenomeSz $Prefix $OutDir
 ```
-
+<!--
 
 # Aligning corrected reads to the longest minion read:
 
@@ -90,8 +90,9 @@ OutDir=analysis/genome_alignment/bowtie/$Organism/$Strain/vs_Stocks4_longest_rea
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment
 qsub $ProgDir/bowtie/sub_bowtie_2lib.sh $Reference $F1_Read $R1_Read $F2_Read $R2_Read $OutDir $Strain
 done
-```
+``` -->
 
+# Assembly using SMARTdenovo
 
 ```bash
 qlogin -pe smp 8
@@ -216,5 +217,26 @@ for line in $(cat nanopolish_range.txt); do
 	echo $line
 	nanopolish variants -t 8 --reads stocks4_reads.fa --bam reads.sorted.bam --genome assembly.fa --ploidy 1 -w $line --consensus="$line"_consensus.fa --fix-homopolymers --min-candidate-frequency 0.1 > "$line"_variants.txt
 done
+```
 
+# Assembly will with full trimming of reads:
+
+Splitting reads and trimming adapters using porechop
+```bash
+	RawReads=raw_dna/minion/F.oxysporum/Stocks4/all_reads.fastq.gz
+	OutDir=qc_dna/minion/F.oxysporum/Stocks4
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+	qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
+```
+
+Read correction using Canu
+
+```bash
+for TrimReads in $(ls qc_dna/minion/F.oxysporum/Stocks4/*_trim.fastq.gz); do
+Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
+OutDir=assembly/canu-1.5/F.oxysporum_fsp_mathioli/"$Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
+qsub $ProgDir/sub_canu_correction.sh $TrimReads 60m $Strain $OutDir
+done
 ```

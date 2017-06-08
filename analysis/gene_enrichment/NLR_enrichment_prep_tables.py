@@ -65,7 +65,7 @@ pfam_domain_dict = {
 'PF00082' : "Peptidase_S8",
 'PF11558' : "PFD",
 'PF00069' : "PKinase",
-'PF01048' : "PND_UDP",
+'PF01048' : "PNP_UDP",
 'PF04607' : "RelA_Spot",
 'PF17107' : 'SesA',
 'PF17046' : 'sesB-like',

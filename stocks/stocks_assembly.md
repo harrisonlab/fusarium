@@ -232,12 +232,23 @@ Splitting reads and trimming adapters using porechop
 Read correction using Canu
 
 ```bash
-# for TrimReads in $(ls qc_dna/minion/F.oxysporum/Stocks4/*_trim.fastq.gz); do
-for TrimReads in $(ls assembly/canu-1.5/F.oxysporum_fsp_mathioli/Stocks4/Stocks4.correctedReads.fasta.gz); do
+for TrimReads in $(ls qc_dna/minion/F.oxysporum/Stocks4/*_trim.fastq.gz); do
 Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
 OutDir=assembly/canu-1.5/F.oxysporum_fsp_mathioli/"$Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
 qsub $ProgDir/sub_canu_correction.sh $TrimReads 60m $Strain $OutDir
+done
+```
+
+Assembbly using SMARTdenovo
+
+```bash
+for CorrectedReads in $(ls assembly/canu-1.5/F.oxysporum_fsp_mathioli/Stocks4/Stocks4.trimmedReads.fasta.gz); do
+Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+OutDir=assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/"$Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
+qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $OutDir
 done
 ```

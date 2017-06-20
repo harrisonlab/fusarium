@@ -355,7 +355,7 @@ echo "$Organism - $Strain"
 # Step 1 extract reads as a .fq file which contain info on the location of the fast5 files
 Fast5Dir=$(ls -d /home/miseq_data/minion/2017/MINION_20170424_FNFAB42727_MN18323_sequencing_run_Fusarium_oxysporum_Stocks4/albacore1.1.1)
 ReadDir=raw_dna/nanopolish/$Organism/$Strain
-if [ $ReadDir/"$Strain"_reads.fa.gz ]; then
+if [ -d $ReadDir ]; then
 	echo "reads already extracted"
 else
 	echo "extracting reads"
@@ -366,7 +366,7 @@ else
 	cd $CurDir
 fi
 
-RawReads=$(ls $ReadDir/Stocks4_reads.fa.gz)
+RawReads=$(ls $ReadDir/"$Strain"_reads.fa.gz)
 OutDir=$(dirname $Assembly)
 mkdir -p $OutDir
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish

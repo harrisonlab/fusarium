@@ -219,6 +219,11 @@ for line in $(cat nanopolish_range.txt); do
 done
 ```
 
+
+
+
+
+
 # Assembly will with full trimming of reads:
 
 Splitting reads and trimming adapters using porechop
@@ -253,3 +258,118 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
 qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
 done
 ```
+
+Quast for the SMARTdenovo assembly:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/wtasm.dmo.lay.utg); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+Busco has replaced CEGMA and was run to check gene space in assemblies
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/wtasm.dmo.lay.utg); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+# OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+```bash
+	for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt); do  
+		echo $File;
+		cat $File | grep -e '(C)' -e 'Total';
+	done
+```
+
+```
+285     Complete BUSCOs (C)
+284     Complete and single-copy BUSCOs (S)
+1       Complete and duplicated BUSCOs (D)
+377     Fragmented BUSCOs (F)
+3063    Missing BUSCOs (M)
+3725    Total BUSCO groups searched
+```
+
+Error correction using racon:
+
+```bash
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/wtasm.dmo.lay.utg)
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+ReadsFq=qc_dna/minion/F.oxysporum/Stocks4/all_reads_trim.fastq.gz
+OutDir=assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
+Iterations=5
+qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq $Iterations $OutDir
+
+```
+
+Quast and busco were run to assess the effects of racon on assembly quality:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta | grep 'round2'); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+# OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+
+# Assembly correction using nanopolish
+
+
+```bash
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/wtasm_racon_round2.fasta)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+# Step 1 extract reads as a .fq file which contain info on the location of the fast5 files
+Fast5Dir=$(ls -d /home/miseq_data/minion/2017/MINION_20170424_FNFAB42727_MN18323_sequencing_run_Fusarium_oxysporum_Stocks4/albacore1.1.1)
+ReadDir=raw_dna/nanopolish/$Organism/$Strain
+if [ $ReadDir/"$Strain"_reads.fa.gz ]; then
+	echo "reads already extracted"
+else
+	echo "extracting reads"
+	mkdir -p $ReadDir
+	CurDir=$PWD
+	cd $ReadDir
+	nanopolish extract -r $Fast5Dir | gzip -cf > "$Strain"_reads.fa.gz
+	cd $CurDir
+fi
+
+RawReads=$(ls $ReadDir/Stocks4_reads.fa.gz)
+OutDir=$(dirname $Assembly)
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $RawReads $OutDir/nanopolish
+
+qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $OutDir/nanopolish

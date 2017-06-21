@@ -331,7 +331,7 @@ done
 
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta); do
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta | grep "round_.*.fasta"); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -342,6 +342,14 @@ OutDir=gene_pred/busco/$Organism/$Strain/assembly
 qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
 done
 ```
+
+```bash
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'mathioli'); do  
+echo $File;
+cat $File | grep -e '(C)' -e 'Total';
+done
+```
+
 
 
 # Assembly correction using nanopolish
@@ -370,6 +378,33 @@ RawReads=$(ls $ReadDir/"$Strain"_reads.fa.gz)
 OutDir=$(dirname $Assembly)
 mkdir -p $OutDir
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+# submit alignments for nanoppolish
 qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $RawReads $OutDir/nanopolish
+```
 
-qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $OutDir/nanopolish
+ Split the assembly into 50Kb fragments an dumit each to the cluster for
+ nanopolish correction
+
+```bash
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/wtasm_racon_round2.fasta)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)
+RawReads=$(ls $ReadDir/"$Strain"_reads.fa.gz)
+AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
+
+Ploidy=1
+for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | head -n1); do
+	echo $Region
+	# nanopolish variants -t 8 --reads stocks4_reads.fa --bam reads.sorted.bam --genome assembly.fa --ploidy 1 -w $line --consensus="$line"_consensus.fa --fix-homopolymers --min-candidate-frequency 0.1 > "$line"_variants.txt
+	qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+done
+
+
+
+
+OutDir=$5

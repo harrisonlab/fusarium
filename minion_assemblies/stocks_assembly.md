@@ -246,6 +246,19 @@ qsub $ProgDir/sub_canu_correction.sh $TrimReads 60m $Strain $OutDir
 done
 ```
 
+Assembly using Canu
+
+```bash
+for CorrectedReads in $(ls assembly/canu-1.5/F.oxysporum_fsp_mathioli/Stocks4/Stocks4.trimmedReads.fasta.gz); do
+Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+OutDir=assembly/canu-1.5/F.oxysporum_fsp_mathioli/"$Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
+qsub $ProgDir/sub_canu_assembly_only.sh $CorrectedReads 60m $Strain $OutDir
+done
+
+```
+
 Assembbly using SMARTdenovo
 
 ```bash
@@ -287,19 +300,37 @@ done
 ```
 
 ```bash
-	for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt); do  
-		echo $File;
-		cat $File | grep -e '(C)' -e 'Total';
-	done
+# printf "Organism\tStrain\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'Stocks4'); do  
+# echo $File;
+# Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
+# Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
+FileName=$(basename $File)
+Complete=$(cat $File | grep "(C)" | cut -f2)
+Duplicated=$(cat $File | grep "(D)" | cut -f2)
+Fragmented=$(cat $File | grep "(F)" | cut -f2)
+Missing=$(cat $File | grep "(M)" | cut -f2)
+Total=$(cat $File | grep "Total" | cut -f2)
+# printf "$Organism\t$Strain\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
+printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
+done
 ```
 
 ```
-285     Complete BUSCOs (C)
-284     Complete and single-copy BUSCOs (S)
-1       Complete and duplicated BUSCOs (D)
-377     Fragmented BUSCOs (F)
-3063    Missing BUSCOs (M)
-3725    Total BUSCO groups searched
+Filename	Complete	Duplicated	Fragmented	Missing	Total
+short_summary_wtasm.dmo.lay.txt	285	1	377	3063	3725
+short_summary_wtasm_racon_round_1.txt	1940	11	873	912	3725
+short_summary_wtasm_racon_round_2.txt	2239	13	744	742	3725
+short_summary_wtasm_racon_round_3.txt	2308	16	717	700	3725
+short_summary_wtasm_racon_round_4.txt	2281	17	750	694	3725
+short_summary_wtasm_racon_round_5.txt	2312	17	709	704	3725
+short_summary_wtasm_racon_round_6.txt	2286	14	749	690	3725
+short_summary_wtasm_racon_round_7.txt	2306	17	741	678	3725
+short_summary_wtasm_racon_round_8.txt	2314	12	740	671	3725
+short_summary_wtasm_racon_round_9.txt	2314	19	736	675	3725
+short_summary_wtasm_racon_round_10.txt	2350	18	730	645	3725
+
 ```
 
 Error correction using racon:
@@ -312,7 +343,7 @@ echo "$Organism - $Strain"
 ReadsFq=qc_dna/minion/F.oxysporum/Stocks4/all_reads_trim.fastq.gz
 OutDir=assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
-Iterations=5
+Iterations=10
 qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq $Iterations $OutDir
 
 ```
@@ -321,7 +352,7 @@ Quast and busco were run to assess the effects of racon on assembly quality:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta | grep 'round2'); do
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta | grep 'round_4'); do
   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
   OutDir=$(dirname $Assembly)
@@ -331,7 +362,7 @@ done
 
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/*.fasta | grep "round_.*.fasta"); do
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2/*.fasta | grep "round_.*.fasta"); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -356,7 +387,7 @@ done
 
 
 ```bash
-Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/wtasm_racon_round2.fasta)
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2/wtasm_racon_round_10.fasta)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -386,25 +417,29 @@ qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $RawReads $OutDir/nanopolish
  nanopolish correction
 
 ```bash
-Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon/wtasm_racon_round2.fasta)
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2/wtasm_racon_round_10.fasta)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
 OutDir=$(dirname $Assembly)
-RawReads=$(ls $ReadDir/"$Strain"_reads.fa.gz)
+RawReads=$(ls raw_dna/nanopolish/$Organism/$Strain/"$Strain"_reads.fa.gz)
 AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
 
 NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
 python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
 
 Ploidy=1
-for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | head -n1); do
-	echo $Region
-	# nanopolish variants -t 8 --reads stocks4_reads.fa --bam reads.sorted.bam --genome assembly.fa --ploidy 1 -w $line --consensus="$line"_consensus.fa --fix-homopolymers --min-candidate-frequency 0.1 > "$line"_variants.txt
-	qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+echo "nanopolish log:" > nanopolish_log.txt
+for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | head -n 20); do
+Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 1m
+printf "."
+Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+done		
+printf "\n"
+echo $Region
+echo $Region >> nanopolish_log.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
-
-
-
-
-OutDir=$5

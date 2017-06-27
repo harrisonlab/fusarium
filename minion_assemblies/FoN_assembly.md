@@ -51,7 +51,8 @@ Splitting reads and trimming adapters using porechop
 ### Read correction using Canu
 
 ```bash
-  for TrimReads in $(ls qc_dna/minion/F.*/*/*_trim.fastq.gz | grep 'FON_63'); do
+  # for TrimReads in $(ls qc_dna/minion/F.*/*/*_trim.fastq.gz | grep 'FON_63'); do
+	for TrimReads in $(ls assembly/canu-1.5/F.oxysporum_fsp_mathioli/Stocks4/Stocks4.correctedReads.fasta.gz); do
     Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
     OutDir=assembly/canu-1.5/$Organism/"$Strain"

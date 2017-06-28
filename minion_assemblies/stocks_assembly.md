@@ -430,7 +430,7 @@ python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nan
 
 Ploidy=1
 echo "nanopolish log:" > nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | head -n 20); do
+for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | tail -n+21); do
 Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 1m

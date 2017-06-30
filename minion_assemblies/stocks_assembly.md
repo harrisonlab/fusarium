@@ -317,21 +317,6 @@ printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
 
-```
-Filename	Complete	Duplicated	Fragmented	Missing	Total
-short_summary_wtasm.dmo.lay.txt	285	1	377	3063	3725
-short_summary_wtasm_racon_round_1.txt	1940	11	873	912	3725
-short_summary_wtasm_racon_round_2.txt	2239	13	744	742	3725
-short_summary_wtasm_racon_round_3.txt	2308	16	717	700	3725
-short_summary_wtasm_racon_round_4.txt	2281	17	750	694	3725
-short_summary_wtasm_racon_round_5.txt	2312	17	709	704	3725
-short_summary_wtasm_racon_round_6.txt	2286	14	749	690	3725
-short_summary_wtasm_racon_round_7.txt	2306	17	741	678	3725
-short_summary_wtasm_racon_round_8.txt	2314	12	740	671	3725
-short_summary_wtasm_racon_round_9.txt	2314	19	736	675	3725
-short_summary_wtasm_racon_round_10.txt	2350	18	730	645	3725
-
-```
 
 Error correction using racon:
 
@@ -345,7 +330,6 @@ OutDir=assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
 Iterations=10
 qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq $Iterations $OutDir
-
 ```
 
 Quast and busco were run to assess the effects of racon on assembly quality:
@@ -374,13 +358,35 @@ qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
 done
 ```
 
+
 ```bash
-for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'mathioli'); do  
-echo $File;
-cat $File | grep -e '(C)' -e 'Total';
+printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'Stocks4'); do  
+FileName=$(basename $File)
+Complete=$(cat $File | grep "(C)" | cut -f2)
+Duplicated=$(cat $File | grep "(D)" | cut -f2)
+Fragmented=$(cat $File | grep "(F)" | cut -f2)
+Missing=$(cat $File | grep "(M)" | cut -f2)
+Total=$(cat $File | grep "Total" | cut -f2)
+printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
 
+```
+Filename	Complete	Duplicated	Fragmented	Missing	Total
+short_summary_wtasm.dmo.lay.txt	285	1	377	3063	3725
+short_summary_wtasm_racon_round_1.txt	1940	11	873	912	3725
+short_summary_wtasm_racon_round_2.txt	2239	13	744	742	3725
+short_summary_wtasm_racon_round_3.txt	2308	16	717	700	3725
+short_summary_wtasm_racon_round_4.txt	2281	17	750	694	3725
+short_summary_wtasm_racon_round_5.txt	2312	17	709	704	3725
+short_summary_wtasm_racon_round_6.txt	2286	14	749	690	3725
+short_summary_wtasm_racon_round_7.txt	2306	17	741	678	3725
+short_summary_wtasm_racon_round_8.txt	2314	12	740	671	3725
+short_summary_wtasm_racon_round_9.txt	2314	19	736	675	3725
+short_summary_wtasm_racon_round_10.txt	2350	18	730	645	3725
+
+```
 
 
 # Assembly correction using nanopolish
@@ -443,3 +449,4 @@ echo $Region >> nanopolish_log.txt
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
+```

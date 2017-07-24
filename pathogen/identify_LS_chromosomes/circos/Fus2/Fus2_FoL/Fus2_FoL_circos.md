@@ -17,16 +17,24 @@
   # cat $OutDir/Fus2_FoL_genome_edited.txt | grep -v -e 'chr23' -e 'chr24' -e 'chr25' -e 'chr26' -e 'chr27' -e 'chr28' -e 'chr29' -e 'chr30' -e 'chr31' -e 'chr32' -e 'chr33' -e 'chr34' > $OutDir/Fus2_FoL_genome_edited2.txt
   cat $OutDir/Fus2_FoL_genome.txt | grep -v 'DS231' | grep -v -e 'chr23' -e 'chr24' -e 'chr25' -e 'chr26' -e 'chr27' -e 'chr28' -e 'chr29' -e 'chr30' -e 'chr31' -e 'chr32' -e 'chr33' -e 'chr34' > $OutDir/Fus2_FoL_genome_edited.txt
 ```
-
+<!--
 The order of contigs was changed manually using nano
 ```bash
 cp $OutDir/Fus2_FoL_genome_edited.txt $OutDir/Fus2_FoL_genome_edited2.txt
 nano $OutDir/Fus2_FoL_genome_edited2.txt
 cp $OutDir/Fus2_FoL_genome_edited2.txt $OutDir/Fus2_FoL_genome_final.txt
 ```
+```bash
+# cp $OutDir/Fus2_FoL_genome_final.txt $OutDir/Fus2_FoL_genome_edited2.txt
+cat $OutDir/Fus2_FoL_genome_edited2.txt > $OutDir/Fus2_FoL_genome_final.txt
+tac $OutDir/FoL_genome.txt | grep -v 'DS231' >> $OutDir/Fus2_FoL_genome_final.txt
+```
+
+-->
 
 
 ```bash
+  OutDir=analysis/circos/F.oxysporum_fsp_cepae/Fus2_FoL
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/orthology2circos_ribbons.py --orthology analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt --name1 Fus2 --gff1 gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_appended.gff3 --name2 4287 --gff2 assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_parsed.gff   > $OutDir/Fus2_FoL_links.txt
   # Links to FoL LS contigs 3, 6, 14 and 15 were coloured black
@@ -53,7 +61,7 @@ for Num in $(seq 1 22); do
   Chr="contig_"$Num"_pilon"
   echo "$Chr"
   OrthologyTxt=analysis/orthology/orthomcl/FoC_vs_Fo_vs_FoL_publication_ncbi/FoC_vs_Fo_vs_FoL_publication_ncbi_orthogroups.txt
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+  ProgDir=~/git_repos/emr_repossh s/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/orthology2ribbons_internal.py \
   --chr1 $Chr \
   --orthology $OrthologyTxt \

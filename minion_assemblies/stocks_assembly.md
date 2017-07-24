@@ -419,7 +419,7 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $RawReads $OutDir/nanopolish
 ```
 
- Split the assembly into 50Kb fragments an dumit each to the cluster for
+ Split the assembly into 50Kb fragments and submit each to the cluster for
  nanopolish correction
 
 ```bash
@@ -448,5 +448,53 @@ echo $Region
 echo $Region >> nanopolish_log.txt
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+done
+```
+
+```bash
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2/wtasm_racon_round_10.fasta)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+mkdir -p $OutDir
+# cat "" > $OutDir/"$Strain"_nanoplish.fa
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_merge.py assembly/SMARTdenovo/$Organism/$Strain/racon2/*/*.fa > $OutDir/"$Strain"_nanoplish.fa
+
+# for File in $(ls assembly/SMARTdenovo/F.*/*/racon2/*/*.fa | grep ":*-"); do
+# 	# echo $File
+# 	cat $File >> $OutDir/"$Strain"_nanoplish.fa
+# done
+
+echo "" > tmp.txt
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanoplish.fa --out $OutDir/"$Strain"_nanoplish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+
+```
+
+
+Quast and busco were run to assess the effects of racon on assembly quality:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/nanopolish/Stocks4_nanoplish_min_500bp_renamed.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/nanopolish/Stocks4_nanoplish_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+# OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
 done
 ```

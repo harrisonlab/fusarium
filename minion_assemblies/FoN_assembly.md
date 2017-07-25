@@ -17,6 +17,9 @@ Functional annotation
 
 
 # 0. Building of directory structure
+
+### Minion Data
+
 ```bash
 	RawDatDir=/home/miseq_data/minion/2017/FON-63_2017-05-22
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
@@ -29,6 +32,47 @@ Sequence data was moved into the appropriate directories
 	RawDatDir=/home/miseq_data/minion/2017/FON-63_2017-05-22
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
 	cp $RawDatDir/all_reads_albacore1.1.1.fastq.gz $ProjectDir/raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63/.
+```
+
+### MiSeq data
+
+```bash
+	RawDatDir=/home/miseq_data/2017/RAW/170626_M04465_0043_000000000-B48RG/Data/Intensities/BaseCalls
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/FON_63
+	mkdir -p $OutDir/F
+	mkdir -p $OutDir/R
+	cp $RawDatDir/FON63_S2_L001_R1_001.fastq.gz $OutDir/F/.
+	cp $RawDatDir/FON63_S2_L001_R2_001.fastq.gz $OutDir/R/.
+```
+
+
+#### QC of MiSeq data
+
+programs:
+  fastqc
+  fastq-mcf
+  kmc
+
+Data quality was visualised using fastqc:
+```bash
+	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz | grep 'FON_63'); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+		echo $RawData;
+		qsub $ProgDir/run_fastqc.sh $RawData
+	done
+```
+
+```bash
+	for StrainPath in $(ls -d raw_dna/paired/*/* | grep 'FON_63'); do
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
+		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+		ReadsF=$(ls $StrainPath/F/*.fastq*)
+		ReadsR=$(ls $StrainPath/R/*.fastq*)
+		echo $ReadsF
+		echo $ReadsR
+		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+	done
 ```
 
 
@@ -228,4 +272,54 @@ echo $Region >> nanopolish_log.txt
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
+```
+
+### Pilon assembly correction
+
+Assemblies were polished using Pilon
+
+```bash
+	for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep 'Stocks4'); do
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/*/$Strain)
+		TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n1)
+		TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n1)
+		OutDir=$(dirname $Assembly)/../pilon
+		Iterations=5
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+	done
+```
+
+# Hybrid Assembly
+
+
+## Spades Assembly
+
+```bash
+for TrimReads in $(ls qc_dna/minion/*/*/*_trim.fastq.gz | grep 'FON_63'); do
+Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
+# Organism="F.oxysporum_fsp_mathioli"
+Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
+IlluminaDir=$(ls -d qc_dna/paired/*/$Strain)
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n1)
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n1)
+OutDir=assembly/spades_minion/$Organism/"$Strain"
+echo $TrimR1_Read
+echo $TrimR1_Read
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
+qsub $ProgDir/sub_spades_minion.sh $ReadsONT $TrimF1_Read $TrimR1_Read $OutDir
+done
+```
+
+Contigs shorter thaan 500bp were removed from the assembly
+
+```bash
+  for Contigs in $(ls assembly/spades_minion/*/*/contigs.fasta); do
+    AssemblyDir=$(dirname $Contigs)
+    mkdir $AssemblyDir/filtered_contigs
+    FilterDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/abyss
+    $FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
+  done
 ```

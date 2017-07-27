@@ -337,23 +337,6 @@ printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
 
-```
-Filename	Complete	Duplicated	Fragmented	Missing	Total
-short_summary_Stocks4_SMARTdenovo.txt	365	0	400	2960	3725
-short_summary_wtasm_racon_round_1.txt	1940	11	873	912	3725
-short_summary_wtasm_racon_round_2.txt	2239	13	744	742	3725
-short_summary_wtasm_racon_round_3.txt	2308	16	717	700	3725
-short_summary_wtasm_racon_round_4.txt	2281	17	750	694	3725
-short_summary_wtasm_racon_round_5.txt	2312	17	709	704	3725
-short_summary_wtasm_racon_round_6.txt	2286	14	749	690	3725
-short_summary_wtasm_racon_round_7.txt	2306	17	741	678	3725
-short_summary_wtasm_racon_round_8.txt	2314	12	740	671	3725
-short_summary_wtasm_racon_round_9.txt	2314	19	736	675	3725
-short_summary_wtasm_racon_round_10.txt	2350	18	730	645	3725
-short_summary_Stocks4_nanoplish_min_500bp_renamed.txt	3326	27	211	188	3725
-
-```
-
 ### Pilon error correction
 
 
@@ -373,12 +356,84 @@ Assemblies were polished using Pilon
 	done
 ```
 
+Contigs were renamed
+```bash
+echo "" > tmp.txt
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/pilon/*.fasta | grep 'pilon_5')
+OutDir=$(dirname $Assembly)
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+```
+
+Quast and busco were run to assess the effects of racon on assembly quality:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/pilon/*.fasta | grep 'pilon_min_500bp_renamed.fasta'); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/pilon/*.fasta ); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+# OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+
+```bash
+printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'Stocks4'); do  
+FileName=$(basename $File)
+Complete=$(cat $File | grep "(C)" | cut -f2)
+Duplicated=$(cat $File | grep "(D)" | cut -f2)
+Fragmented=$(cat $File | grep "(F)" | cut -f2)
+Missing=$(cat $File | grep "(M)" | cut -f2)
+Total=$(cat $File | grep "Total" | cut -f2)
+printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
+done
+```
+
+```
+Filename	Complete	Duplicated	Fragmented	Missing	Total
+short_summary_Stocks4_SMARTdenovo.txt	365	0	400	2960	3725
+short_summary_wtasm_racon_round_1.txt	1940	11	873	912	3725
+short_summary_wtasm_racon_round_2.txt	2239	13	744	742	3725
+short_summary_wtasm_racon_round_3.txt	2308	16	717	700	3725
+short_summary_wtasm_racon_round_4.txt	2281	17	750	694	3725
+short_summary_wtasm_racon_round_5.txt	2312	17	709	704	3725
+short_summary_wtasm_racon_round_6.txt	2286	14	749	690	3725
+short_summary_wtasm_racon_round_7.txt	2306	17	741	678	3725
+short_summary_wtasm_racon_round_8.txt	2314	12	740	671	3725
+short_summary_wtasm_racon_round_9.txt	2314	19	736	675	3725
+short_summary_wtasm_racon_round_10.txt	2350	18	730	645	3725
+short_summary_Stocks4_nanoplish_min_500bp_renamed.txt	3326	27	211	188	3725
+short_summary_pilon_1.txt	3669	33	21	35	3725
+short_summary_pilon_2.txt	3679	34	18	28	3725
+short_summary_pilon_3.txt	3684	34	15	26	3725
+short_summary_pilon_4.txt	3684	34	15	26	3725
+short_summary_pilon_5.txt	3684	34	15	26	3725
+short_summary_pilon_min_500bp_renamed.txt	3684	34	15	26	3725
+```
+
+
 # Hybrid Assembly
 
 ## Spades Assembly
 
 ```bash
-for TrimReads in $(ls qc_dna/minion/*/Stocks4/*_trim.fastq.gz); do
+for TrimReads in $(ls qc_dna/minion/*/*/*_trim.fastq.gz | grep 'Stocks4'); do
 # Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
 Organism="F.oxysporum_fsp_mathioli"
 Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
@@ -389,7 +444,7 @@ OutDir=assembly/spades_minion/$Organism/"$Strain"
 echo $TrimR1_Read
 echo $TrimR1_Read
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
-qsub $ProgDir/sub_spades_minion.sh $ReadsONT $TrimF1_Read $TrimR1_Read $OutDir
+qsub $ProgDir/sub_spades_minion.sh $TrimReads $TrimF1_Read $TrimR1_Read $OutDir
 done
 ```
 
@@ -402,4 +457,31 @@ Contigs shorter thaan 500bp were removed from the assembly
     FilterDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/abyss
     $FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
   done
+```
+
+
+Quast and busco were run to assess the quality of hybrid assemblies:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades_minion/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/spades_minion/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+# OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
 ```

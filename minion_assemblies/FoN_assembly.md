@@ -75,7 +75,6 @@ Data quality was visualised using fastqc:
 	done
 ```
 
-
 ## Assembly
 
 ### Removal of adapters
@@ -92,6 +91,55 @@ Splitting reads and trimming adapters using porechop
   done
 ```
 
+
+## Identify sequencing coverage
+
+For Minion data:
+```bash
+	for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'FON_63'); do
+		echo $RawData;
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+		GenomeSz=60
+		OutDir=$(dirname $RawData)
+		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+	done
+```
+
+```bash
+  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'FON_63'); do
+    Strain=$(basename $StrainDir)
+    printf "$Strain\t"
+    for File in $(ls qc_dna/paired/*/"$Strain"/*.txt); do
+      echo $(basename $File);
+      cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+    done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+  done
+```
+
+For Miseq data:
+```bash
+	for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'FON_63'); do
+		echo $RawData;
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+		qsub $ProgDir/run_fastqc.sh $RawData;
+		GenomeSz=60
+		OutDir=$(dirname $RawData)
+		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+	done
+```
+
+```bash
+  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'FON_63'); do
+    Strain=$(basename $StrainDir)
+    printf "$Strain\t"
+    for File in $(ls qc_dna/paired/*/"$Strain"/*/*.txt); do
+      echo $(basename $File);
+      cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+    done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+  done
+```
+
+
 ### Read correction using Canu
 
 ```bash
@@ -99,7 +147,8 @@ Splitting reads and trimming adapters using porechop
 	# for TrimReads in $(ls assembly/canu-1.5/F.oxysporum_fsp_narcissi/FON_63/FON_63.correctedReads.fasta.gz); do
     Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
     Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
-    OutDir=assembly/canu-1.5/$Organism/"$Strain"
+    # OutDir=assembly/canu-1.5/$Organism/"$Strain"
+    OutDir=assembly/canu-1.6/$Organism/"$Strain"_test
     ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
     qsub $ProgDir/sub_canu_correction.sh $TrimReads 60m $Strain $OutDir
   done
@@ -209,10 +258,18 @@ Total=$(cat $File | grep "Total" | cut -f2)
 printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
-<!--
+
 
 # Assembly correction using nanopolish
 
+Fast5 files are very large and need to be stored as gzipped tarballs. These needed temporarily unpacking but must be deleted after nanpolish has finished running.
+
+```bash
+	TarBall=$(ls /home/miseq_data/minion/2017/FON-63_2017-05-22/FON-63_2017-05-22_albacore_output_1.1.1_fast5s.tar.gz)
+	Fast5Dir=raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63
+	mkdir -p $Fast5Dir
+	tar -zxvf $TarBall -C $Fast5Dir
+```
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/racon_min_500bp_renamed.fasta); do
@@ -220,7 +277,8 @@ Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
 # Step 1 extract reads as a .fq file which contain info on the location of the fast5 files
-Fast5Dir=$(ls -d /home/miseq_data/minion/2017/MINION_20170424_FNFAB42727_MN18323_sequencing_run_Fusarium_oxysporum_Stocks4/albacore1.1.1)
+# Note - the full path from home must be used
+Fast5Dir=$(ls -d /home/groups/harrisonlab/project_files/fusarium/raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63)
 ReadDir=raw_dna/nanopolish/$Organism/$Strain
 if [ -d $ReadDir ]; then
 	echo "reads already extracted"
@@ -273,7 +331,7 @@ echo $Region >> nanopolish_log.txt
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
-``` -->
+```
 
 ### Pilon assembly correction
 
@@ -293,6 +351,54 @@ Assemblies were polished using Pilon
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
 		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
 	done
+```
+
+Contigs were renamed
+```bash
+echo "" > tmp.txt
+Assembly=$(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'FON_63' | grep 'pilon_10')
+OutDir=$(dirname $Assembly)
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+```
+
+Quast and busco were run to assess the effects of pilon on assembly quality:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'FON_63' | grep 'pilon_min_500bp_renamed.fasta'); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'FON_63'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+
+```bash
+printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'FON_63'); do  
+FileName=$(basename $File)
+Complete=$(cat $File | grep "(C)" | cut -f2)
+Duplicated=$(cat $File | grep "(D)" | cut -f2)
+Fragmented=$(cat $File | grep "(F)" | cut -f2)
+Missing=$(cat $File | grep "(M)" | cut -f2)
+Total=$(cat $File | grep "Total" | cut -f2)
+printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
+done
 ```
 
 # Hybrid Assembly
@@ -325,4 +431,21 @@ Contigs shorter thaan 500bp were removed from the assembly
     FilterDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/abyss
     $FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
   done
+```
+
+
+# Repeat Masking
+
+Repeat masking was performed on the non-hybrid assembly.
+
+```bash
+	for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'FON_63'); do
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+		qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+		qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+	done
 ```

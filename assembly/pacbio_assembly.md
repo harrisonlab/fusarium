@@ -152,7 +152,7 @@ Contigs shorter thaan 500bp were removed from the assembly
     Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
     Strain=$(echo $PacBioAssembly | rev | cut -f3 -d '/' | rev)
     HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
-    QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
+    # QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
     # N50=$(cat $QuastReport | grep 'N50' | cut -f2)
     # AnchorLength=$N50
     AnchorLength=20000

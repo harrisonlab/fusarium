@@ -75,6 +75,52 @@ Data quality was visualised using fastqc:
 	done
 ```
 
+# Identify sequencing coverage
+
+For Minion data:
+```bash
+	for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'Stocks4'); do
+		echo $RawData;
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+		GenomeSz=60
+		OutDir=$(dirname $RawData)
+		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+	done
+```
+
+```bash
+  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'Stocks4'); do
+    Strain=$(basename $StrainDir)
+    printf "$Strain\t"
+    for File in $(ls qc_dna/paired/*/"$Strain"/*.txt); do
+      echo $(basename $File);
+      cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+    done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+  done
+```
+
+For Miseq data:
+```bash
+	for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'Stocks4'); do
+		echo $RawData;
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+		qsub $ProgDir/run_fastqc.sh $RawData;
+		GenomeSz=60
+		OutDir=$(dirname $RawData)
+		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+	done
+```
+
+```bash
+  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'Stocks4'); do
+    Strain=$(basename $StrainDir)
+    printf "$Strain\t"
+    for File in $(ls qc_dna/paired/*/"$Strain"/*/*.txt); do
+      echo $(basename $File);
+      cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+    done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+  done
+```
 
 ## Assembly
 
@@ -365,7 +411,7 @@ ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_cont
 $ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 ```
 
-Quast and busco were run to assess the effects of racon on assembly quality:
+Quast and busco were run to assess the effects of pilon on assembly quality:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
@@ -430,6 +476,9 @@ short_summary_pilon_min_500bp_renamed.txt	3684	34	15	26	3725
 
 # Hybrid Assembly
 
+Hybrid assembly was performed on the FoM genome, but did not significantly
+improve the assembly
+
 ## Spades Assembly
 
 ```bash
@@ -483,5 +532,78 @@ BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
 OutDir=gene_pred/busco/$Organism/$Strain/assembly
 # OutDir=$(dirname $Assembly)
 qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+## Merging MinION and hybrid assemblies
+
+Note - the anchor length is the starting point for contigs to be merged - only contigs
+larger than these will be extended.
+
+```bash
+for MinIONAssembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/pilon/*.fasta | grep 'pilon_min_500bp_renamed.fasta'); do
+Organism=$(echo $MinIONAssembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $MinIONAssembly | rev | cut -f3 -d '/' | rev)
+HybridAssembly=$(ls assembly/spades_minion/$Organism/$Strain/filtered_contigs/contigs_min_500bp.fasta)
+# QuastReport=$(ls assembly/canu/$Organism/$Strain/filtered_contigs/report.tsv)
+# N50=$(cat $QuastReport | grep 'N50' | cut -f2)
+# AnchorLength=$N50
+AnchorLength=20000
+OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_minion_first_20k
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+qsub $ProgDir/sub_quickmerge.sh $MinIONAssembly $HybridAssembly $OutDir $AnchorLength
+OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_hybrid_first_20k
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+qsub $ProgDir/sub_quickmerge.sh $HybridAssembly $MinIONAssembly $OutDir $AnchorLength
+AnchorLength=200000
+OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_minion_first_200k
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+qsub $ProgDir/sub_quickmerge.sh $MinIONAssembly $HybridAssembly $OutDir $AnchorLength
+OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_hybrid_first_200k
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/quickmerge
+qsub $ProgDir/sub_quickmerge.sh $HybridAssembly $MinIONAssembly $OutDir $AnchorLength
+done
+```
+
+
+Quast and busco were run to assess the quality of hybrid assemblies:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/merged_canu_spades/*/*/merged.fasta | grep 'Stocks4'); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/merged_canu_spades/*/*/merged.fasta | grep 'Stocks4'); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+# OutDir=gene_pred/busco/$Organism/$Strain/assembly
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+# Repeat Masking
+
+Repeat masking was performed on the non-hybrid assembly.
+
+```bash
+for Assembly in $(ls assembly/spades_minion/*/*/filtered_contigs/contigs_min_500bp.fasta | grep 'Stocks4'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
 done
 ```

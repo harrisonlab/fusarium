@@ -106,14 +106,18 @@ For Minion data:
 ```
 
 ```bash
-  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'FON_63'); do
+  for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'FON_63'); do
     Strain=$(basename $StrainDir)
     printf "$Strain\t"
-    for File in $(ls qc_dna/paired/*/"$Strain"/*.txt); do
+    for File in $(ls $StrainDir/*.txt); do
       echo $(basename $File);
       cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
     done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
   done
+```
+MinION coverage
+```
+FON_63	122.23
 ```
 
 For Miseq data:
@@ -137,6 +141,9 @@ For Miseq data:
       cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
     done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
   done
+```
+```
+FON_63	52.39
 ```
 
 
@@ -272,7 +279,7 @@ Fast5 files are very large and need to be stored as gzipped tarballs. These need
 ```
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/racon_min_500bp_renamed.fasta); do
+for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/racon_min_500bp_renamed.fasta | grep 'FON_63'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -301,11 +308,11 @@ qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $RawReads $OutDir/nanopolish
 done
 ```
 
- Split the assembly into 50Kb fragments an dumit each to the cluster for
+ Split the assembly into 50Kb fragments an submit each to the cluster for
  nanopolish correction
 
 ```bash
-Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_mathioli/Stocks4/racon2/wtasm_racon_round_10.fasta)
+for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/racon_min_500bp_renamed.fasta | grep 'FON_63'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -330,6 +337,7 @@ echo $Region
 echo $Region >> nanopolish_log.txt
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+done
 done
 ```
 

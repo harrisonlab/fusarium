@@ -89,14 +89,18 @@ For Minion data:
 ```
 
 ```bash
-  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'Stocks4'); do
+  for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'Stocks4'); do
     Strain=$(basename $StrainDir)
     printf "$Strain\t"
-    for File in $(ls qc_dna/paired/*/"$Strain"/*.txt); do
+    for File in $(ls $StrainDir/*.txt); do
       echo $(basename $File);
       cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
     done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
   done
+```
+MinION coverage was:
+```
+Stocks4	65.05
 ```
 
 For Miseq data:
@@ -112,14 +116,19 @@ For Miseq data:
 ```
 
 ```bash
-  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'Stocks4'); do
-    Strain=$(basename $StrainDir)
-    printf "$Strain\t"
-    for File in $(ls qc_dna/paired/*/"$Strain"/*/*.txt); do
-      echo $(basename $File);
-      cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
-    done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
-  done
+	for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'Stocks4'); do
+		Strain=$(basename $StrainDir)
+		printf "$Strain\t"
+		for File in $(ls $StrainDir/*/*.txt); do
+			echo $(basename $File);
+			cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+		done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+	done
+```
+
+Miseq coverage was:
+```
+Stocks4	58.66
 ```
 
 ## Assembly
@@ -473,7 +482,7 @@ short_summary_pilon_5.txt	3684	34	15	26	3725
 short_summary_pilon_min_500bp_renamed.txt	3684	34	15	26	3725
 ```
 
-
+<!--
 # Hybrid Assembly
 
 Hybrid assembly was performed on the FoM genome, but did not significantly
@@ -606,4 +615,4 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
 qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
 qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
 done
-```
+``` -->

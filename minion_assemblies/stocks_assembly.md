@@ -600,7 +600,7 @@ OutDir=$(dirname $Assembly)
 qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
 done
 ```
-
+-->
 # Repeat Masking
 
 Repeat masking was performed on the non-hybrid assembly.
@@ -615,4 +615,33 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
 qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
 qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
 done
-``` -->
+```
+
+
+The TransposonPSI masked bases were used to mask additional bases from the
+repeatmasker / repeatmodeller softmasked and hardmasked files.
+
+```bash
+
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'Stocks4'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa | grep 'Stocks4'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+done
+```
+```
+Number of masked bases:
+8321901
+```

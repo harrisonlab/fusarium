@@ -388,6 +388,7 @@ cp $OutDir/tbl2asn/final/genome.sqn $OutDir/tbl2asn/final/$FinalName.sqn
 done
 ``` -->
 
+
 # Preperation of files for Fo, Fp and FoN isolates
 
 An output and working directory was made for genome submission:
@@ -404,7 +405,7 @@ BFJ70 SAMN05529102 Fo_PG
 BFJ71 SAMN05529103 Fo_CB3
 BFJ72 SAMN05529104 Fp_A8" \
 > $LocusTags
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -v 'old' | grep -v -e 'CB3' -e 'N139' | grep -e 'A23' -e '125'); do
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -v 'old' | grep -v -e 'CB3' -e 'N139'); do
 # tbl2asn options:
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
@@ -456,7 +457,7 @@ mkdir -p $OutDir/tbl2asn/round1
 tbl2asn -p $OutDir/gag/round1/. -t $OutDir/gag/round1/genome.sbt -r $OutDir/tbl2asn/round1 -M n -X E -Z $OutDir/gag/round1/discrep.txt -j "[organism=$OrganismOfficial] [strain=$StrainOfficial]"
 
 mkdir -p $OutDir/gag/edited
-$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "vAg" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
+$ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "g" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
 printf "StructuredCommentPrefix\t##Genome-Annotation-Data-START##
 Annotation Provider\tHarrison Lab NIAB-EMR
 Annotation Date\tSEP-2016
@@ -488,3 +489,27 @@ cat genome_submission/$Organism/$Strain/tbl2asn/round1/genome.val | grep 'Duplic
 echo "";
 done > genome_submission/FoC_Fo_Fp_isolate_errors.txt
 ```
+<!--
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'Fus2_canu_new' | grep -v 'Fus2_merged'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+mkdir -p tmp_assembly/$Organism/$Strain
+cp $Assembly tmp_assembly/$Organism/$Strain/.
+GffFile=$(ls gene_pred/final_genes/$Organism/Fus2/final/final_genes_appended.gff3)
+cp $GffFile tmp_assembly/$Organism/$Strain/.
+GeneConversions=$(ls genome_submission/$Organism/$Strain/gag/edited/genome_gene_conversions.tsv)
+cp $GeneConversions tmp_assembly/$Organism/$Strain/.
+done
+
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep -v 'Fus2' | grep 'ncbi' | grep -e '125_ncbi' -e 'A23_ncbi' -e 'A13_ncbi' -e 'A28_ncbi' -e 'PG_ncbi' -e 'CB3_ncbi' -e 'A8_ncbi' | grep -v 'old' | grep -v -e 'CB3' -e 'N139'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+mkdir -p tmp_assembly/$Organism/$Strain
+cp $Assembly tmp_assembly/$Organism/$Strain/.
+GffFile=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+cp $GffFile tmp_assembly/$Organism/$Strain/.
+GeneConversions=$(ls genome_submission/$Organism/$Strain/gag/edited/genome_gene_conversions.tsv)
+cp $GeneConversions tmp_assembly/$Organism/$Strain/.
+done
+``` -->

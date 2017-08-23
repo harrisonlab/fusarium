@@ -171,7 +171,7 @@ done > genome_submission/FoN_isolate_errors.txt
 
 The final error report contained the following warnings. These were judged to be
 legitimate concerns but biologically explainable.
-
+```
 67 WARNING: SEQ_FEAT.PartialProblem
  5 WARNING: SEQ_FEAT.ProteinNameEndsInBracket
 211 WARNING: SEQ_FEAT.ShortExon
@@ -187,3 +187,16 @@ legitimate concerns but biologically explainable.
  http://www.ncbi.nlm.nih.gov/genbank/eukaryotic_genome_submission_annotation#Partialcodingregionsinincompletegenomes
  *SEQ_FEAT.ProteinNameEndsInBracket. These gene names include brackets for good
  reason
+ ```
+```bash
+ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'N139_ncbi' | grep -v 'old'); do
+ Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+ Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+ mkdir -p tmp_assembly/$Organism/$Strain
+ cp $Assembly tmp_assembly/$Organism/$Strain/.
+ GffFile=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+ cp $GffFile tmp_assembly/$Organism/$Strain/.
+ GeneConversions=$(ls genome_submission/$Organism/$Strain/gag/edited/genome_gene_conversions.tsv)
+ cp $GeneConversions tmp_assembly/$Organism/$Strain/.
+ done
+ ```

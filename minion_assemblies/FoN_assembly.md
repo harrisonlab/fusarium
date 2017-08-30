@@ -341,13 +341,47 @@ done
 done
 ```
 
+```bash
+Assembly=$(ls assembly/SMARTdenovo/F.oxysporum_fsp_narcissi/FON_63/racon_10/racon_min_500bp_renamed.fasta)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+mkdir -p $OutDir
+# cat "" > $OutDir/"$Strain"_nanoplish.fa
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_merge.py assembly/SMARTdenovo/$Organism/$Strain/racon_10/*/*.fa > $OutDir/"$Strain"_nanoplish.fa
+
+echo "" > tmp.txt
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanoplish.fa --out $OutDir/"$Strain"_nanoplish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+```
+
+Quast and busco were run to assess the effects of nanopolish on assembly quality:
+
+```bash
+
+for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_narcissi/FON_63/nanopolish/FON_63_nanoplish_min_500bp_renamed.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+	# Quast
+  OutDir=$(dirname $Assembly)
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	# Busco
+	BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+	OutDir=gene_pred/busco/$Organism/$Strain/assembly
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+	qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+
 ### Pilon assembly correction
 
 Assemblies were polished using Pilon
 
 ```bash
-	# for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep 'Stocks4'); do
-	for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/racon_min_500bp_renamed.fasta); do
+	for Assembly in $(ls assembly/SMARTdenovo/F.oxysporum_fsp_narcissi/FON_63/nanopolish/FON_63_nanoplish_min_500bp_renamed.fasta); do
 		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		echo "$Organism - $Strain"
@@ -409,9 +443,36 @@ printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
 
+```
+short_summary_FON_63_nanoplish_min_500bp_renamed.txt	3569	34	74	82	3725
+short_summary_FON_63_smartdenovo.dmo.lay.txt	636	2	582	2507	3725
+short_summary_FON_63_smartdenovo_racon_round_10.txt	2577	18	605	543	3725
+short_summary_FON_63_smartdenovo_racon_round_1.txt	2344	12	725	656	3725
+short_summary_FON_63_smartdenovo_racon_round_2.txt	2528	16	620	577	3725
+short_summary_FON_63_smartdenovo_racon_round_3.txt	2534	21	617	574	3725
+short_summary_FON_63_smartdenovo_racon_round_4.txt	2520	19	636	569	3725
+short_summary_FON_63_smartdenovo_racon_round_5.txt	2551	20	609	565	3725
+short_summary_FON_63_smartdenovo_racon_round_6.txt	2543	13	635	547	3725
+short_summary_FON_63_smartdenovo_racon_round_7.txt	2533	14	618	574	3725
+short_summary_FON_63_smartdenovo_racon_round_8.txt	2558	19	616	551	3725
+short_summary_FON_63_smartdenovo_racon_round_9.txt	2546	18	628	551	3725
+short_summary_pilon_10.txt	3690	37	14	21	3725
+short_summary_pilon_1.txt	3689	37	15	21	3725
+short_summary_pilon_2.txt	3690	37	14	21	3725
+short_summary_pilon_3.txt	3690	37	14	21	3725
+short_summary_pilon_4.txt	3690	37	14	21	3725
+short_summary_pilon_5.txt	3690	37	14	21	3725
+short_summary_pilon_6.txt	3690	37	14	21	3725
+short_summary_pilon_7.txt	3690	37	14	21	3725
+short_summary_pilon_8.txt	3690	37	14	21	3725
+short_summary_pilon_9.txt	3690	37	14	21	3725
+short_summary_pilon_min_500bp_renamed.txt	3690	37	14	21	3725
+short_summary_racon_min_500bp_renamed.txt	2577	18	605	543	3725
+```
+
 # Hybrid Assembly
 
-
+<!--
 ## Spades Assembly
 
 ```bash
@@ -440,7 +501,7 @@ Contigs shorter thaan 500bp were removed from the assembly
     $FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
   done
 ```
-
+ -->
 
 # Repeat Masking
 

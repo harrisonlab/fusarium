@@ -210,11 +210,15 @@ Identification and expression of helitron helicases:
 ```bash
 AnnotTab=$(ls analysis/expression/Fus2_expressed_genes.tsv)
 Headers=analysis/transposons/Fus2_helitron_helicicase_headers.txt
+cat $AnnotTab | grep 'IPR025476' | cut -f2 > $Headers
 Proteins=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_Braker.gene.fasta)
 OutFasta=analysis/transposons/Fus2_helitron_helicicase_headers.fa
-cat $AnnotTab | grep 'IPR025476' | cut -f2 > $Headers
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_from_fasta.py --fasta $Proteins --headers $Headers > $OutFasta
-
-
+Headers=analysis/transposons/Fus2_helitron_helicicase_headers_pep.txt
+cat $AnnotTab | grep 'IPR025476' | cut -f6 > $Headers
+Proteins=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_Braker.pep.fasta)
+OutFasta=analysis/transposons/Fus2_helitron_helicicase_headers_pep.fa
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Proteins --headers $Headers > $OutFasta
 ```

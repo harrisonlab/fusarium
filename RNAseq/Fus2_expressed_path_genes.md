@@ -204,3 +204,17 @@ cat analysis/expression/Fus2_expressed_genes.tsv \
 | grep -v -w -f analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp.txt \
 > analysis/expression/Fus2_expressed_genes_non-effector.tsv
 ```
+
+Identification and expression of helitron helicases:
+
+```bash
+AnnotTab=$(ls analysis/expression/Fus2_expressed_genes.tsv)
+Headers=analysis/transposons/Fus2_helitron_helicicase_headers.txt
+Proteins=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/final/final_genes_Braker.gene.fasta)
+OutFasta=analysis/transposons/Fus2_helitron_helicicase_headers.fa
+cat $AnnotTab | grep 'IPR025476' | cut -f2 > $Headers
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Proteins --headers $Headers > $OutFasta
+
+
+```

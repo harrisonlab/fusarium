@@ -544,5 +544,5 @@ done
 ```
 ```
 Number of masked bases:
-9089901
+9075386
 ```

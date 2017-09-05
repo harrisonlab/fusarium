@@ -601,14 +601,15 @@ qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
 done
 ```
 -->
+
 # Repeat Masking
 
 Repeat masking was performed on the non-hybrid assembly.
 
 ```bash
-for Assembly in $(ls assembly/spades_minion/*/*/filtered_contigs/contigs_min_500bp.fasta | grep 'Stocks4'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stocks4'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
 OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
@@ -616,7 +617,6 @@ qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
 qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
 done
 ```
-
 
 The TransposonPSI masked bases were used to mask additional bases from the
 repeatmasker / repeatmodeller softmasked and hardmasked files.
@@ -641,7 +641,8 @@ echo "$OutFile"
 bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
 done
 ```
+
 ```
 Number of masked bases:
-8321901
+9928878
 ```

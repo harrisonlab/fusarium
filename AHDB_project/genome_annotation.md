@@ -218,7 +218,7 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -e 'FON_63' -e 'Stocks4' | grep -e 'FON_63'); do
 Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_pacbio//g'| sed 's/_braker//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -272,14 +272,14 @@ done
 ```
 ```
 gene_pred/final_genes/F.oxysporum_fsp_narcissi/FON_63/final
-20045
-1696
-21741
+19243
+1443
+20686
 ```
 
 
 ```bash
-for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4'); do
+for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
 	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
 	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
 	echo "$Strain - $Organism"
@@ -288,16 +288,14 @@ done
 ```
 
 ```
-Stocks4 - F.oxysporum_fsp_mathioli
-20323
 FON_63 - F.oxysporum_fsp_narcissi
-21597
+20545
 ```
 
 ## Identification of duplicated genes in gene models
 
 ```bash
-for AddGenes in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4'); do
+for AddGenes in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
 Strain=$(echo $AddGenes| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $AddGenes | rev | cut -d '/' -f4 | rev)
 OutDir=$(dirname $AddGenes)
@@ -313,7 +311,7 @@ done
 ## Assessing the Gene space in predicted transcriptomes:
 
 ```bash
-for Assembly in $(ls gene_pred/final_genes/*/*/final/final_genes_combined.gene.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+for Assembly in $(ls gene_pred/final_genes/*/*/final/final_genes_combined.gene.fasta | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"

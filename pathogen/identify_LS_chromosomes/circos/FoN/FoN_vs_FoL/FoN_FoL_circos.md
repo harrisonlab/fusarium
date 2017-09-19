@@ -37,6 +37,7 @@ $ProgDir/fasta2circos.py --genome $FoL_genome --contig_prefix "FoL_" > $OutDir/F
 
   cat $OutDir/FoN_FoL_genome.txt | grep -v 'DS231' | grep -e "0 .... chr" -e "0 ... chr" | cut -f3 -d ' ' > $OutDir/FoN_FoL_excluded_contigs.txt
   cat $OutDir/FoN_FoL_links.txt | grep -v -f $OutDir/FoN_FoL_excluded_contigs.txt > $OutDir/FoN_FoL_links_edited.txt
+  cat $OutDir/FoN_FoL_links.txt | wc -l
 ```
 
 A file showing contig orientations was made:

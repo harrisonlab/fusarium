@@ -115,47 +115,32 @@
   GoodProts=$WorkDir/goodProteins/goodProteins.fasta
   qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts 5
 ```
-<!--
+
 ## 3.5.a Manual identification of numbers of orthologous and unique genes
 
-
 ```bash
-  for num in 1; do
-    echo "The number of ortholog groups found in pathogen but absent in non-pathogens is:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' |  wc -l
-    echo "The number of ortholog groups unique to pathogens are:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3|' | grep 'Fus2|' | grep '125|' | grep 'A23|' | wc -l
-    echo "The number of ortholog groups unique to non-pathogens are:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'Fus2|' -e '125|' -e 'A23|' | grep 'A13|' | grep 'A28|' | grep 'PG|' | grep 'fo47|' | grep 'CB3|' | wc -l
-    echo "The number of ortholog groups common to all F. oxysporum isolates are:"
-    cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep 'A28|' | grep 'PG|' | grep 'A13|' | grep 'fo47|' | grep 'CB3|' | grep '4287|' |wc -l
-  done
+for num in 1; do
+echo "The number of ortholog groups shared between all isoaltes is::"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -e 'FoN|' | grep -e 'FoC|' | grep -e 'FoL|' | grep -e 'fo47|' |  wc -l
+echo "This represented the following number of proteins:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -e 'FoN|' | grep -e 'FoC|' | grep -e 'FoL|' | grep -e 'fo47|' |  grep -o '|' | wc -l
+echo "This represented the following number of proteins from FoN:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -e 'FoN|' | grep -e 'FoC|' | grep -e 'FoL|' | grep -e 'fo47|' |  grep -o 'FoN|' | wc -l
+echo "This Number of orthogroups unique to FoN:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -e 'FoN|' | grep -v -e 'FoC|' -e 'FoL|' -e 'fo47|' | wc -l
+echo "This represented the following number of proteins:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -e 'FoN|' | grep -v -e 'FoC|' -e 'FoL|' -e 'fo47|' | grep -o '|' | wc -l
+done
 ```
 
 ```
-  The number of ortholog groups found in pathogen but absent in non-pathogens is:
-  277
-  The number of ortholog groups unique to pathogens are:
-  277
-  The number of ortholog groups unique to non-pathogens are:
-  64
-  The number of ortholog groups common to all F. oxysporum isolates are:
-  10396
+The number of ortholog groups shared between all isoaltes is::
+11316
+This represented the following number of proteins:
+77393
+This represented the following number of proteins from FoN:
+17147
 ```
-
-The number of ortholog groups shared between FoN and FoL was identified:
-
-```bash
-  echo "The number of ortholog groups common to FoN and FoL are:"
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep 'N139|' | grep '4287|' | wc -l
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -v -e 'A28|' -e 'PG|' -e 'A13|' -e 'fo47|' -e 'CB3' | grep 'Fus2|' | grep '125|' | grep 'A23|' | grep '4287|' |  wc -l
-```
-
-```
-  The number of ortholog groups common to FoC and FoL are:
-  10629
-  37
-``` -->
 
 ## 3.5.b Plot venn diagrams:
 

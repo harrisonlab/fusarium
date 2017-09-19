@@ -100,7 +100,7 @@ Alignments were concatenated prior to gene prediction. This step was done throug
 a qlogin session on the cluster.
 
 ```bash
-	for StrainDir in $(ls -d ls alignment/star/*/* | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+	for StrainDir in $(ls -d ls alignment/star/*/* | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
 	BamFiles=$(ls $StrainDir/*/*/star_aligmentAligned.sortedByCoord.out.bam | tr -d '\n' | sed 's/.bam/.bam /g')
 	OutDir=$StrainDir/concatenated
 	mkdir -p $OutDir
@@ -139,7 +139,7 @@ directory:
 
 ```bash
 
-for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -175,7 +175,7 @@ Note - cufflinks doesn't always predict direction of a transcript and
 therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -190,13 +190,13 @@ done
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-# while [ $Jobs -ge 1 ]; do
-# sleep 10m
-# printf "."
-# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-# done
-for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+while [ $Jobs -ge 1 ]; do
+sleep 10m
+printf "."
+Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+done
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
 Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
 while [ $Jobs -ge 1 ]; do
 sleep 10
@@ -218,15 +218,15 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -e 'FON_63' -e 'Stocks4' | grep -e 'FON_63'); do
-Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_pacbio//g'| sed 's/_braker//g')
+for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -e 'FON_63' -e 'Stocks4'); do
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
-Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+Assembly=$(ls repeat_masked/$Organism/$Strain/filtered_contigs/*_softmasked_repeatmasker_TPSI_appended.fa)
 CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
 PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
 AddDir=gene_pred/codingquary/$Organism/$Strain/additional
-FinalDir=gene_pred/final_genes/$Organism/$Strain/final
+FinalDir=gene_pred/final/$Organism/$Strain/final
 AddGenesList=$AddDir/additional_genes.txt
 AddGenesGff=$AddDir/additional_genes.gff
 FinalGff=$AddDir/combined_genes.gff
@@ -240,7 +240,7 @@ $ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID 
 $ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 # -
-# This section is corrects alternatively spliced genes
+# This section is edited
 $ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $AddDir/add_genes_CodingQuary_unspliced.gff3
 $ProgDir/correct_CodingQuary_splicing.py --inp_gff $AddDir/add_genes_CodingQuary_unspliced.gff3 > $FinalDir/final_genes_CodingQuary.gff3
 # -
@@ -252,25 +252,22 @@ cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cd
 cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
 cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
 
-GffBraker=$FinalDir/final_genes_CodingQuary.gff3
-GffQuary=$FinalDir/final_genes_Braker.gff3
+
+GffBraker=$FinalDir/final_genes_Braker.gff3
+GffQuary=$FinalDir/final_genes_CodingQuary.gff3
 GffAppended=$FinalDir/final_genes_appended.gff3
 cat $GffBraker $GffQuary > $GffAppended
 
+# cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
 done
 ```
 
-The final number of genes per isolate was observed using:
-```bash
-for DirPath in $(ls -d gene_pred/final_genes/F.*/*/final | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
-echo $DirPath;
-cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
-cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
-cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
-echo "";
-done
 ```
-```
+gene_pred/final_genes/F.oxysporum_fsp_mathioli/Stocks4/final
+19185
+1197
+20382
+
 gene_pred/final_genes/F.oxysporum_fsp_narcissi/FON_63/final
 19243
 1443
@@ -279,7 +276,7 @@ gene_pred/final_genes/F.oxysporum_fsp_narcissi/FON_63/final
 
 
 ```bash
-for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
 	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
 	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
 	echo "$Strain - $Organism"
@@ -288,22 +285,41 @@ done
 ```
 
 ```
+Stocks4 - F.oxysporum_fsp_mathioli
+20361
 FON_63 - F.oxysporum_fsp_narcissi
 20545
 ```
 
-## Identification of duplicated genes in gene models
+
+In preperation for submission to ncbi, gene models were renamed and duplicate gene features were identified and removed.
+ * no duplicate genes were identified
+
 
 ```bash
-for AddGenes in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
-Strain=$(echo $AddGenes| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $AddGenes | rev | cut -d '/' -f4 | rev)
-OutDir=$(dirname $AddGenes)
-echo "$Organism - $Strain" > $OutDir/duplicated_genes.txt
+for GffAppended in $(ls gene_pred/final/*/*/final/final_genes_appended.gff3); do
+Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+FinalDir=gene_pred/final_genes/$Organism/$Strain/final
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
-$ProgDir/remove_dup_features.py --inp_gff $AddGenes >> $OutDir/duplicated_genes.txt
-cat $OutDir/duplicated_genes.txt
-echo ""
+$ProgDir/remove_dup_features.py --inp_gff $GffAppended
+$ProgDir/remove_dup_features.py --inp_gff $GffAppended | grep -A2 'Duplicate gene found' | tail -n1 | cut -f2 -d'=' > $FinalDir/filter_list.tmp
+GffFiltered=$FinalDir/filtered_duplicates.gff
+cat $GffAppended | grep -v -w -f $FinalDir/filter_list.tmp > $GffFiltered
+rm $FinalDir/filter_list.tmp
+GffRenamed=$FinalDir/final_genes_appended_renamed.gff3
+LogFile=$FinalDir/final_genes_appended_renamed.log
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+$ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+rm $GffFiltered
+
+Assembly=$(ls repeat_masked/$Organism/$Strain/filtered_contigs/*_softmasked_repeatmasker_TPSI_appended.fa)
+$ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed
+
+# The proteins fasta file contains * instead of Xs for stop codons, these should
+# be changed
+sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
 done
 ```
 
@@ -311,7 +327,7 @@ done
 ## Assessing the Gene space in predicted transcriptomes:
 
 ```bash
-for Assembly in $(ls gene_pred/final_genes/*/*/final/final_genes_combined.gene.fasta | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'FON_63'); do
+for Assembly in $(ls gene_pred/final_genes/*/*/final/final_genes_appended_renamed.gene.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -319,7 +335,7 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
 # BuscoDB="Fungal"
 BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
 OutDir=gene_pred/busco/$Organism/$Strain/genes
-qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 
@@ -349,7 +365,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -360,7 +376,7 @@ commands:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
 Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -376,7 +392,7 @@ done
 
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -400,7 +416,7 @@ the following commands:
 SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 CurPath=$PWD
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Stocks4'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4' | grep 'Stocks4'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -425,9 +441,10 @@ done
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -w -e 'Stocks4'); do
+for SplitDir in $(ls -d gene_pred/final_genes_split/*/* | grep -w -e 'Stocks4' -e 'FON_63'); do
 Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
 Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+echo "$Organism - $Strain"
 InStringAA=''
 InStringNeg=''
 InStringTab=''
@@ -453,7 +470,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Stocks4'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'Stocks4' -e 'FON_63'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
@@ -465,7 +482,7 @@ Those proteins with transmembrane domains were removed from lists of Signal
 peptide containing proteins
 
 ```bash
-for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -w -e 'Stocks4'); do
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt | grep -w -e 'Stocks4' -e 'FON_63'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -487,22 +504,27 @@ done
 ```
 F.oxysporum_fsp_mathioli - Stocks4
 Number of SigP proteins:
-1794
+1737
 Number without transmembrane domains:
-1484
+1436
 Number of gene models:
-1482
+1436
+F.oxysporum_fsp_narcissi - FON_63
+Number of SigP proteins:
+1880
+Number without transmembrane domains:
+1555
+Number of gene models:
+1550
 ```
 
 ### C) Identification of MIMP-flanking genes
 
 ```bash
-# for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
-for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stocks4'); do
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -w -e 'FON_63' -e 'Stocks4'); do
 Organism=$(echo "$Assembly" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Assembly" | rev | cut -d '/' -f3 | rev)
-BrakerGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_CodingQuary.gff3)
-QuaryGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_Braker.gff3)
+GeneGff=$(ls gene_pred/final_genes/$Organism/"$Strain"/final/final_genes_appended_renamed.gff3)
 OutDir=analysis/mimps/$Organism/$Strain
 mkdir -p "$OutDir"
 echo "$Organism - $Strain"
@@ -511,8 +533,7 @@ $ProgDir/mimp_finder.pl $Assembly $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_m
 $ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
 echo "The number of mimps identified:"
 cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
-bedtools intersect -u -a $BrakerGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
-bedtools intersect -u -a $QuaryGff -b $OutDir/"$Strain"_mimps_exp.gff >> $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
 echo "The following transcripts intersect mimps:"
 MimpProtsTxt=$OutDir/"$Strain"_prots_in_2kb_mimp.txt
 MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
@@ -527,17 +548,24 @@ done
 ```
 F.oxysporum_fsp_mathioli - Stocks4
 The number of mimps identified:
-117
+124
 The following transcripts intersect mimps:
-104
-102
+110
+110
+
+F.oxysporum_fsp_narcissi - FON_63
+The number of mimps identified:
+241
+The following transcripts intersect mimps:
+214
+212
 ```
 
 Those genes that were predicted as secreted and within 2Kb of a MIMP
 were identified:
 
 ```bash
-for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
+for File in $(ls analysis/mimps/*/*/*_genes_in_2kb_mimp.txt | grep -w -e 'FON_63' -e 'Stocks4'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev | sed 's/_chromosomal//g')
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -562,8 +590,11 @@ done
 
 ```
 F.oxysporum_fsp_mathioli - Stocks4
-14
-17
+15
+15
+F.oxysporum_fsp_narcissi - FON_63
+49
+49
 ```
 
 
@@ -573,7 +604,7 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_combined.pep.fasta | grep -w -e 'Stocks4'); do
+for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/CAZY/$Organism/$Strain
@@ -591,7 +622,7 @@ Those proteins with a signal peptide were extracted from the list and gff files
 representing these proteins made.
 
 ```bash
-for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi'); do
+for File in $(ls gene_pred/CAZY/*/*/*CAZY.out.dm | grep -w -e 'FON_63' -e 'Stocks4'); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 OutDir=$(dirname $File)
@@ -602,8 +633,8 @@ CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
 cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
 echo "number of CAZY proteins identified:"
 cat $CazyHeaders | wc -l
-# Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended.gff3)
-Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3)
+# Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+Gff=$(ls gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
 CazyGff=$OutDir/"$Strain"_CAZY.gff
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
@@ -621,9 +652,29 @@ cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l
 echo "number of Secreted CAZY genes identified:"
 cat $CazyGffSecreted | grep -w 'gene' | wc -l
 # cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
-done > tmp.txt
+done
 ```
 
+```
+F.oxysporum_fsp_mathioli - Stocks4
+number of CAZY proteins identified:
+902
+number of CAZY genes identified:
+902
+number of Secreted CAZY proteins identified:
+377
+number of Secreted CAZY genes identified:
+377
+F.oxysporum_fsp_narcissi - FON_63
+number of CAZY proteins identified:
+949
+number of CAZY genes identified:
+949
+number of Secreted CAZY proteins identified:
+398
+number of Secreted CAZY genes identified:
+398
+```
 
 Note - the CAZY genes identified may need further filtering based on e value and
 cuttoff length - see below:
@@ -649,18 +700,44 @@ Cols in yourfile.out.dm.ps:
 
 
 ```bash
-for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'Fus2'); do
+for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -w -e 'FON_63' -e 'Stocks4'); do
   Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
   Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
   OutDir=$(dirname $CAZY)
   echo "$Organism - $Strain"
   Secreted=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
-  Gff=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended.gff3
+  Gff=gene_pred/final_genes/$Organism/$Strain/final/final_genes_appended_renamed.gff3
   ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/CAZY
   $ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
 done | less -S
 ```
 
+```
+F.oxysporum_fsp_mathioli - Stocks4
+B-Galactosidases - 2
+A-Galactosidases - 4
+Polygalacturonase - 13
+A-Arabinosidases - 19
+Xylanases - 10
+Polygalacturonate lyases - 22
+B-Glucuronidases - 4
+B-Glycosidases - 10
+Cellulases - 19
+other - 273
+Xyloglucanases - 1
+F.oxysporum_fsp_narcissi - FON_63
+B-Galactosidases - 2
+A-Galactosidases - 4
+Polygalacturonase - 12
+A-Arabinosidases - 25
+Xylanases - 9
+Polygalacturonate lyases - 28
+B-Glucuronidases - 4
+B-Glycosidases - 18
+Cellulases - 17
+other - 277
+Xyloglucanases - 1
+```
 
 ## D) AntiSMASH
 

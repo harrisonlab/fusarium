@@ -32,7 +32,7 @@ for File in $(ls downloads/*.gz); do
   mv $File renamed/"$Organism"_"$Strain".fna.gz
 done
 
-gunzip downloads/*.gz
+gunzip renamed/*.gz
 
 ```
 

@@ -579,12 +579,16 @@ cat $ProtsFile $SecretedHeaders | cut -f1 | sort | uniq -d > $SecretedMimps
 cat $SecretedMimps | wc -l
 cat $SecretedHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $File > tmp.txt
 cat tmp.txt | wc -l
+cat $SecretedHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $File > tmp.txt
+cat $SecretedHeaders | cut -f1 | sort | uniq | grep -f $File > tmp2.txt
 MimpsGff=$(ls analysis/mimps/$Organism/$Strain/*_mimps.gff)
-SecretedMimpsGff=$(echo $MimpsGff | sed 's/.gff/_secreted.gff/g')
-# ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-# $ProgDir/extract_gff_for_sigP_hits.pl tmp.txt $MimpsGff secreted_mimp ID > $SecretedMimpsGff
+GenesIn2Kb=$(ls analysis/mimps/$Organism/$Strain/"$Strain"_genes_in_2kb_mimp.gff)
+SecretedMimpsGff=$(echo $GenesIn2Kb | sed 's/.gff/_secreted.gff/g')
+
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl tmp2.txt $GenesIn2Kb secreted_mimp ID > $SecretedMimpsGff
 # cat $SecretedMimpsGff | grep -w 'mRNA' | wc -l
-cat $MimpsGff | grep -w -f $SecretedMimps > $SecretedMimpsGff
+# cat $MimpsGff | grep -w -f $SecretedMimps > $SecretedMimpsGff
 done
 ```
 
@@ -743,4 +747,51 @@ Xyloglucanases - 1
 
 Antismash was run to identify clusters of secondary metabolite genes within
 the genome. Antismash was run using the weserver at:
-http://antismash.secondarymetabolites.org -->
+http://antismash.secondarymetabolites.org
+
+
+# Identifying genes on LS regions.
+
+
+The following contigs were identified as LS in FoN and FoM:
+```bash
+
+FoN_core="contig_1 contig_2 contig_3 contig_4 contig_5 contig_6 contig_7 contig_8 contig_10 contig_11 contig_12"
+Organism="F.oxysporum_fsp_narcissi"
+Strain="FON_63"
+echo $FoN_core | sed 's/ /\n/g' > tmp.txt
+GenesIn2Kb=$(ls analysis/mimps/$Organism/$Strain/"$Strain"_genes_in_2kb_mimp.gff)
+LS_MIMP_genes=$(echo $GenesIn2Kb | sed 's/.gff/_LS.gff/g')
+cat $GenesIn2Kb | grep -w -v -f tmp.txt > $LS_MIMP_genes
+SecretedMimpsGff=$(ls analysis/mimps/$Organism/$Strain/"$Strain"_genes_in_2kb_mimp_secreted.gff)
+LS_MIMP_secreted=$(echo $GenesIn2Kb | sed 's/.gff/_LS.gff/g')
+LS_MIMP_secretedHeaders=$(echo $GenesIn2Kb | sed 's/.gff/_LS_headers.txt/g')
+cat $SecretedMimpsGff | grep -w -v -f tmp.txt > $LS_MIMP_secreted
+cat $LS_MIMP_secreted | grep -w 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d '='>  $LS_MIMP_secretedHeaders
+cat $LS_MIMP_secreted | grep -w 'gene' | wc -l
+Genes=$(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.cdna.fasta | grep $Strain)
+LS_MIMP_secretedFasta=$(echo $GenesIn2Kb | sed 's/.gff/_LS.fa/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Genes --headers $LS_MIMP_secretedHeaders > $LS_MIMP_secretedFasta
+cat $LS_MIMP_secretedFasta | grep '>' | wc -l
+
+FoM_core="contig_1 contig_2 contig_3 contig_4 contig_5 contig_6 contig_7 contig_8 contig_9 contig_10 contig_12 contig_17"
+Organism="F.oxysporum_fsp_mathioli"
+Strain="Stocks4"
+echo $FoM_core | sed 's/ /\n/g' > tmp.txt
+GenesIn2Kb=$(ls analysis/mimps/$Organism/$Strain/"$Strain"_genes_in_2kb_mimp.gff)
+LS_MIMP_genes=$(echo $GenesIn2Kb | sed 's/.gff/_LS.gff/g')
+cat $GenesIn2Kb | grep -w -v -f tmp.txt > $LS_MIMP_genes
+SecretedMimpsGff=$(ls analysis/mimps/$Organism/$Strain/"$Strain"_genes_in_2kb_mimp_secreted.gff)
+LS_MIMP_secreted=$(echo $GenesIn2Kb | sed 's/.gff/_LS.gff/g')
+LS_MIMP_secretedHeaders=$(echo $GenesIn2Kb | sed 's/.gff/_LS_headers.txt/g')
+cat $SecretedMimpsGff | grep -w -v -f tmp.txt > $LS_MIMP_secreted
+cat $LS_MIMP_secreted | grep -w 'mRNA' | cut -f9 | cut -f1 -d ';' | cut -f2 -d '='>  $LS_MIMP_secretedHeaders
+cat $LS_MIMP_secreted | grep -w 'gene' | wc -l
+Genes=$(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.cdna.fasta | grep $Strain)
+LS_MIMP_secretedFasta=$(echo $GenesIn2Kb | sed 's/.gff/_LS.fa/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Genes --headers $LS_MIMP_secretedHeaders > $LS_MIMP_secretedFasta
+cat $LS_MIMP_secretedFasta | grep '>' | wc -l
+
+```

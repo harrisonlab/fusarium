@@ -26,24 +26,90 @@ The following is a summary of the work presented in this Readme.
 Sequence data was moved into the appropriate directories
 
 ```bash
-	RawDatDir=/data/seq_data/minion/2017/20170920_1225_FON77\ -\ FON139
+	RawDatDir=/data/seq_data/minion/2017/20170920_1225_FON77-FON139
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
   nanopolish index -r $RawDatDir/fast5/pass | gzip -cf > $ProjectDir/raw_dna/minion/$Organism/$Strain/"$Strain"_reads.fa.gz
 	cp $RawDatDir/all_reads_albacore1.1.1.fastq.gz $ProjectDir/raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63/.
 ```
 
 ### MiSeq data
-<!--
+
 ```bash
-	RawDatDir=/home/miseq_data/2017/RAW/170626_M04465_0043_000000000-B48RG/Data/Intensities/BaseCalls
+  # 171006
+	RawDatDir=/data/seq_data/miseq/2017/RAW/171006_M04465_0050_000000000-B49T7/Data/Intensities/BaseCalls
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
-	OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/FON_63
+	OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/FON129
 	mkdir -p $OutDir/F
 	mkdir -p $OutDir/R
-	cp $RawDatDir/FON63_S2_L001_R1_001.fastq.gz $OutDir/F/.
-	cp $RawDatDir/FON63_S2_L001_R2_001.fastq.gz $OutDir/R/.
-``` -->
+  cd $OutDir/F
+	cp -s $RawDatDir/FON129_S2_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+	cp -s $RawDatDir/FON129_S2_L001_R2_001.fastq.gz .
+  # 170926
+  RawDatDir=/data/seq_data/miseq/2017/RAW/170926_M04465_0049_000000000-B49VF/Data/Intensities/BaseCalls
+	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+	OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/FON77
+	mkdir -p $OutDir/F
+	mkdir -p $OutDir/R
+  cd $OutDir/F
+	cp -s $RawDatDir/FON77_S1_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+	cp -s $RawDatDir/FON77_S1_L001_R2_001.fastq.gz .
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/FON81
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/FON81_S2_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/FON81_S2_L001_R2_001.fastq.gz .
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_narcissi/FON89
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/FON89_S3_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/FON89_S3_L001_R2_001.fastq.gz .
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_fragariae/Straw465
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/Straw465_S4_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/Straw465_S4_L001_R1_001.fastq.gz .
+  RawDatDir=/data/seq_data/miseq/2017/RAW/171016_M04465_0051_000000000-B43DD/Data/Intensities/BaseCalls
+  ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/F81
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/F81_S3_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/F81_S3_L001_R2_001.fastq.gz .
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/FOP1-EMR
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/FOP1-EMR_S2_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/FOP1-EMR_S2_L001_R2_001.fastq.gz .
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/R2
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/R2_S1_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/R2_S1_L001_R2_001.fastq.gz .
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum/15-074
+  mkdir -p $OutDir/F
+  mkdir -p $OutDir/R
+  cd $OutDir/F
+  cp -s $RawDatDir/15-074_S4_L001_R1_001.fastq.gz .
+  cd $OutDir/R
+  cp -s $RawDatDir/15-074_S4_L001_R2_001.fastq.gz .
 
+  cd $ProjectDir
+```
+-e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'
 
 #### QC of MiSeq data
 
@@ -54,40 +120,36 @@ programs:
 
 Data quality was visualised using fastqc:
 ```bash
-	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz | grep 'FON_63'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
-		echo $RawData;
-		qsub $ProgDir/run_fastqc.sh $RawData
-	done
-```
-
-```bash
-	for StrainPath in $(ls -d raw_dna/paired/*/* | grep 'FON_63'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
-		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
-		ReadsF=$(ls $StrainPath/F/*.fastq*)
-		ReadsR=$(ls $StrainPath/R/*.fastq*)
-		echo $ReadsF
-		echo $ReadsR
-		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
-	done
-```
-
-## Assembly
-
-### Removal of adapters
-<!--
-Splitting reads and trimming adapters using porechop
-```bash
-	for RawReads in $(ls  raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63/all_reads_albacore1.1.1.fastq.gz); do
-    Organism=$(echo $RawReads| rev | cut -f3 -d '/' | rev)
-    Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-  	OutDir=qc_dna/minion/$Organism/$Strain
-  	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
-  	qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
+  for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz | grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'); do
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+    echo $RawData;
+    qsub $ProgDir/run_fastqc.sh $RawData
   done
-``` -->
+```
+
+```bash
+  for StrainPath in $(ls -d raw_dna/paired/*/* | grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'); do
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
+    IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+    ReadsF=$(ls $StrainPath/F/*.fastq*)
+    ReadsR=$(ls $StrainPath/R/*.fastq*)
+    echo $ReadsF
+    echo $ReadsR
+    qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+  done
+```
+
+Data quality was visualised once again following trimming:
+
+```bash
+  for TrimData in $(ls qc_dna/paired/*/*/*/*.fq.gz | grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'); do
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+    echo $RawData;
+    qsub $ProgDir/run_fastqc.sh $RawData
+  done
+```
+
+# Assembly
 
 
 ## Identify sequencing coverage
@@ -116,22 +178,23 @@ For Minion data:
 MinION coverage
 ```
 FON_63	122.23
-``` -->
+```
+-->
 
 For Miseq data:
 ```bash
-	for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'FON_63'); do
-		echo $RawData;
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
-		qsub $ProgDir/run_fastqc.sh $RawData;
-		GenomeSz=60
-		OutDir=$(dirname $RawData)
-		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
-	done
+for RawData in $(ls qc_dna/paired/*/*/*/*.fq.gz | grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'); do
+echo $RawData;
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $RawData;
+GenomeSz=60
+OutDir=$(dirname $RawData)
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
 ```
 
 ```bash
-  for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'FON_63'); do
+  for StrainDir in $(ls -d qc_dna/paired/*/* | grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'); do
     Strain=$(basename $StrainDir)
     printf "$Strain\t"
     for File in $(ls qc_dna/paired/*/"$Strain"/*/*.txt); do
@@ -141,8 +204,46 @@ For Miseq data:
   done
 ```
 ```
-FON_63	52.39
+
 ```
+
+
+
+## MiSeq Assembly
+
+
+
+```bash
+for StrainPath in $(ls -d qc_dna/paired/*/* |  grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074'); do
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
+Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+F_Read=$(ls $StrainPath/F/*.fq.gz)
+R_Read=$(ls $StrainPath/R/*.fq.gz)
+OutDir=assembly/spades/$Organism/$Strain
+echo $F_Read
+echo $R_Read
+qsub $ProgDir/submit_SPAdes_HiMem.sh $F_Read $R_Read $OutDir correct 10
+done
+```
+
+
+
+## MinION Assembly
+
+### Removal of adapters
+<!--
+Splitting reads and trimming adapters using porechop
+```bash
+	for RawReads in $(ls  raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63/all_reads_albacore1.1.1.fastq.gz); do
+    Organism=$(echo $RawReads| rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+  	OutDir=qc_dna/minion/$Organism/$Strain
+  	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+  	qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
+  done
+``` -->
 
 <!--
 ### Read correction using Canu

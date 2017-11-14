@@ -1,7 +1,7 @@
 ## Preparing genome and .conf files
 
 ```bash
-OutDir=analysis/circos/F.oxysporum_fsp_narcissi/FoN_FoL
+OutDir=analysis/circos/F.oxysporum_fsp_narcissi/FoN_FoL_v2
 mkdir -p $OutDir
 
 FoN_genome=$(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep 'N139' | grep -v 'old')
@@ -90,6 +90,9 @@ cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | grep -v -e "0 .... chr" -e 
 # contig order
 cat $OutDir/FoN_FoL_contig_orientation.txt | grep -A1 'Order of all seen contigs' | tail -n1
 cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoL' | cut -f3 -d ' ' | tr -d '\n' | sed 's/FoL/, FoL/g'
+# unplaced contigs
+# echo "The following contigs are unplaced:"
+# cat $OutDir/FoN_genome.txt | grep -wvf $OutDir/FoN_syntenous_contigs.txt | cut -f3 -d ' ' | tr -d '\n' | sed "s/FoN/, FoN/g" > $OutDir/FoN_FoL_contigs_unplaced.txt
 ```
 
 Contig orientation was used to edit the circos .conf file manually
@@ -115,7 +118,7 @@ Contig orientation was used to edit the circos .conf file manually
 
   BlastHits=analysis/blast_homology/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_Fo_path_genes_CRX.fa_homologs.gff
   GffSix=$OutDir/FoN_SIX.gff
-  cat $BlastHits | grep -v -e 'MIMP' -e 'C5' -e 'CRX' > $GffSix
+  cat $BlastHits | grep -v -e 'MIMP' -e 'C5' -e 'CRX' | grep 'SIX' > $GffSix
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/gff2circos_scatterplot.py --gff $GffSix --feature SIX_homolog --value 1 | sed -e 's/^/FoN_/g' > $OutDir/FoN_SIX_plot.txt
 ```

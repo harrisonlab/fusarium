@@ -17,7 +17,8 @@ $ProgDir/fasta2circos.py --genome $FoL_genome --contig_prefix "FoL_" > $OutDir/F
   tac $OutDir/FoL_genome.txt >> $OutDir/FoN_FoL_genome.txt
 
   # Contigs smaller than 10Kb were removed
-  cat $OutDir/FoN_FoL_genome.txt | grep -v 'DS231' | grep -v -e "0 .... chr" -e "0 ... chr" > $OutDir/FoN_FoL_genome_edited.txt
+  # cat $OutDir/FoN_FoL_genome.txt | grep -v 'DS231' | grep -v -e "0 .... chr" -e "0 ... chr" > $OutDir/FoN_FoL_genome_edited.txt
+    cat $OutDir/FoN_FoL_genome.txt > $OutDir/FoN_FoL_genome_edited.txt
 
   # cat $OutDir/FoN_FoL_genome.txt | grep -v 'DS231' > $OutDir/FoN_FoL_genome_edited.txt
 ```
@@ -37,8 +38,9 @@ $ProgDir/fasta2circos.py --genome $FoL_genome --contig_prefix "FoL_" > $OutDir/F
   #   | sed '/4287_CM000603.1/ s/$/\tcolor=black/' \
   #   > $OutDir/FoN_FoL_links_edited.txt
 
-  cat $OutDir/FoN_FoL_genome.txt | grep -v 'DS231' | grep -e "0 .... chr" -e "0 ... chr" | cut -f3 -d ' ' > $OutDir/FoN_FoL_excluded_contigs.txt
-  cat $OutDir/FoN_FoL_links.txt | grep -v -f $OutDir/FoN_FoL_excluded_contigs.txt  > $OutDir/FoN_FoL_links_edited.txt
+  # cat $OutDir/FoN_FoL_genome.txt | grep -v 'DS231' | grep -e "0 .... chr" -e "0 ... chr" | cut -f3 -d ' ' > $OutDir/FoN_FoL_excluded_contigs.txt
+  echo "" > $OutDir/FoN_FoL_excluded_contigs.txt
+  cat $OutDir/FoN_FoL_links.txt > $OutDir/FoN_FoL_links_edited.txt
   # cat $OutDir/FoN_FoL_links.txt | grep -v 'DS231' > $OutDir/FoN_FoL_links_edited.txt
   # cat $OutDir/FoN_FoL_links_edited.txt | wc -l
 ```
@@ -49,9 +51,9 @@ A file showing contig orientations was made:
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/circos
   $ProgDir/find_contig_orientation.py --links_file $OutDir/FoN_FoL_links_edited.txt > $OutDir/FoN_FoL_contig_orientation.txt
 
-  echo "contigs witout synteny are:"
+  echo "contigs with synteny are:"
   cat $OutDir/FoN_FoL_contig_orientation.txt | grep -A1 'seen contigs' | tail -n+2 | sed 's/, /\n/g' > tmp.txt
-  cat $OutDir/FoN_FoL_genome_edited.txt | grep -vw -f tmp.txt | grep 'FoN' | cut -f3 -d ' ' | sed "s/$/, /g" | tr -d '\n'
+  # cat $OutDir/FoN_FoL_genome_edited.txt | grep -vw -f tmp.txt | grep 'FoN' | cut -f3 -d ' ' | sed "s/$/, /g" | tr -d '\n'
 ```
 
 The number of bp in syntenous contigs was identified using:
@@ -59,20 +61,30 @@ The number of bp in syntenous contigs was identified using:
 ```bash
   cat $OutDir/FoN_FoL_contig_orientation.txt | tail -n3 | grep -v 'orientation' | sed 's/, /\n/g' > $OutDir/FoN_syntenous_contigs.txt
   echo "Total bp in syntenous contigs:"
-  cat $OutDir/FoN_genome.txt | grep -v -e "0 .... chr" -e "0 ... chr" | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | awk '{s+=$1} END {print s}'
+  # cat $OutDir/FoN_genome.txt | grep -v -e "0 .... chr" -e "0 ... chr" | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | awk '{s+=$1} END {print s}'
+  cat $OutDir/FoN_genome.txt | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | awk '{s+=$1} END {print s}'
   echo "This is shown in the following number of contigs:"
-  cat $OutDir/FoN_genome.txt | grep -v -e "0 .... chr" -e "0 ... chr" | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | wc -l
+  # cat $OutDir/FoN_genome.txt | grep -v -e "0 .... chr" -e "0 ... chr" | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | wc -l
+  cat $OutDir/FoN_genome.txt | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | wc -l
   echo "The ramining contigs represent the following number of bp:"
   cat $OutDir/FoN_genome.txt | grep -wvf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | awk '{s+=$1} END {print s}'
 ```
 
-```
+<!-- ```
 Total bp in syntenous contigs:
 42618748
 This is shown in the following number of contigs:
 267
 The ramining contigs represent the following number of bp:
 14898814
+``` -->
+```
+Total bp in syntenous contigs:
+42662134
+This is shown in the following number of contigs:
+273
+The remining contigs represent the following number of bp:
+14855428
 ```
 
 Contig order was selected by taking the first line of that file and then also
@@ -80,18 +92,23 @@ taking the reversed order of FoL contigs using the command:
 
 ```bash
 # all contigs
-cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | grep -v -e "0 .... chr" -e "0 ... chr" | cut -f3 -d ' '| tr -d '\n' | sed 's/FoN/, FoN/g' | sed 's/FoL/, FoL/g' > tmp3.txt
+# cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | grep -v -e "0 .... chr" -e "0 ... chr" | cut -f3 -d ' '| tr -d '\n' | sed 's/FoN/, FoN/g' | sed 's/FoL/, FoL/g' > tmp3.txt
+cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | cut -f3 -d ' '| tr -d '\n' | sed 's/FoN/, FoN/g' | sed 's/FoL/, FoL/g' > tmp3.txt
+cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoL' | cut -f3 -d ' ' | tr -d '\n' | sed 's/FoL/, FoL/g'  >> tmp3.txt
 # Forward orientation
 cat $OutDir/FoN_FoL_contig_orientation.txt | grep -A1 'Order of all seen contigs'
 cat $OutDir/FoN_FoL_contig_orientation.txt | grep -A1 'Order of all seen contigs' | tail -n1 | sed "s/, /\n/g" > tmp.txt
 # reverse orientation
-cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | grep -v -e "0 .... chr" -e "0 ... chr" | grep -w -v -f tmp.txt | cut -f3 -d ' '| tr -d '\n' | sed 's/FoN/, FoN/g'
+# cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | grep -v -e "0 .... chr" -e "0 ... chr" | grep -w -v -f tmp.txt | cut -f3 -d ' '| tr -d '\n' | sed 's/FoN/, FoN/g'
+cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoN' | grep -w -v -f tmp.txt | cut -f3 -d ' '| tr -d '\n' | sed 's/FoN/, FoN/g'
 # reference sequences (put in reverse)
 # contig order
 cat $OutDir/FoN_FoL_contig_orientation.txt | grep -A1 'Order of all seen contigs' | tail -n1
 cat $OutDir/FoN_FoL_genome_edited.txt | grep 'FoL' | cut -f3 -d ' ' | tr -d '\n' | sed 's/FoL/, FoL/g'
 # unplaced contigs
-# echo "The following contigs are unplaced:"
+echo "The following contigs are unplaced:"
+cat $OutDir/FoN_FoL_genome_edited.txt | grep -vw -f tmp.txt | grep 'FoN' | cut -f3 -d ' ' | tr -d '\n' | sed 's/FoN/, FoN/g' > $OutDir/FoN_FoL_contigs_unplaced.txt
+
 # cat $OutDir/FoN_genome.txt | grep -wvf $OutDir/FoN_syntenous_contigs.txt | cut -f3 -d ' ' | tr -d '\n' | sed "s/FoN/, FoN/g" > $OutDir/FoN_FoL_contigs_unplaced.txt
 ```
 
@@ -132,8 +149,8 @@ Contig orientation was used to edit the circos .conf file manually
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
 circos -conf $ProgDir/FoN/FoN_vs_FoL/FoN_FoL_circos.conf -outputdir $OutDir
-mv $OutDir/circos.png $OutDir/FoN_FoL_circos.png
-mv $OutDir/circos.svg $OutDir/FoN_FoL_circos.svg
+mv $OutDir/circos.png $OutDir/FoN_FoL_circos_full.png
+mv $OutDir/circos.svg $OutDir/FoN_FoL_circos_full.svg
 ```
 
 <!--

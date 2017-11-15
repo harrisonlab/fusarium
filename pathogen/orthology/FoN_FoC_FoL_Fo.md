@@ -134,7 +134,7 @@ done
 ```
 
 ```
-The number of ortholog groups shared between all isoaltes is::
+The number of ortholog groups shared between all isolates is::
 11316
 This represented the following number of proteins:
 77393
@@ -142,11 +142,19 @@ This represented the following number of proteins from FoN:
 17147
 ```
 
+```bash
+echo "The number of orthogroups present:"
+cat $WorkDir/"$IsolateAbrv"_orthogroups.tab | head -n1 | sed 's/ /\n/g' | wc -l
+
+```
+
 ## 3.5.b Plot venn diagrams:
 
 ```bash
-  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
-  $ProgDir/venn_diag_4_way.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+  # ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
+  # $ProgDir/venn_diag_4_way.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
+  $ProgDir/FoN_vs_FoC_vs_FoL_vs_Fo_venn_diag.r --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
 ```
 
 Output was a pdf file of the venn diagram.
@@ -175,7 +183,7 @@ number of unique groups of inparalogs
 ```
 
 
-#### 6.3) Extracting fasta files for all orthogroups
+## 3.6) Extracting fasta files for all orthogroups
 
 ```bash
 # IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
@@ -193,5 +201,13 @@ $ProgDir/orthoMCLgroups2fasta.py --orthogroups $WorkDir/"$IsolateAbrv"_orthogrou
 # $ProgDir/extract_from_fasta.py --fasta $GoodProt --headers $OutDir/singleton_genes.txt > $OutDir/singleton_genes.fa
 # echo "The numbe of singleton genes extracted is:"
 # cat $OutDir/singleton_genes.fa | grep '>' | wc -l
+```
+
+## 3.7) Extracting ortholog groups for SIX gene homologs:
+
+```bash
+IsolateAbrv=FoN_vs_FoC_vs_FoL_vs_Fo
+WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -w -e 'FoN|NS_09200' -e 'FoN|g17549' -e 'FoN|g16592' -e 'FoN|g16591'
 
 ```

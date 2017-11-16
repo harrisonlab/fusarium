@@ -56,6 +56,15 @@ A file showing contig orientations was made:
   # cat $OutDir/FoN_FoL_genome_edited.txt | grep -vw -f tmp.txt | grep 'FoN' | cut -f3 -d ' ' | sed "s/$/, /g" | tr -d '\n'
 ```
 
+linked contigs were identified:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/circos
+$ProgDir/show_linked_contigs.py --links_file $OutDir/FoN_FoL_links_edited.txt > $OutDir/FoN_FoL_linked_contigs.txt
+
+
+```
+
 The number of bp in syntenous contigs was identified using:
 
 ```bash

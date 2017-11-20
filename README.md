@@ -2024,7 +2024,7 @@ Cols in yourfile.out.dm.ps:
 
 
 ```bash
-for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep 'Fus2'); do
+for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'cepae' -e 'proliferatum' -e 'narcissi' | grep -e 'Fus2_canu_new' -e 'ncbi' | grep -e 'Fus2' -e 'N139'); do
   Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
   Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
   OutDir=$(dirname $CAZY)

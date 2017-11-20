@@ -77,6 +77,7 @@ The number of bp in syntenous contigs was identified using:
   cat $OutDir/FoN_genome.txt | grep -wf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | wc -l
   echo "The ramining contigs represent the following number of bp:"
   cat $OutDir/FoN_genome.txt | grep -wvf $OutDir/FoN_syntenous_contigs.txt | cut -f6 -d ' ' | awk '{s+=$1} END {print s}'
+  cat $OutDir/FoN_genome.txt | grep -wvf $OutDir/FoN_syntenous_contigs.txt | cut -f3 -d ' ' > $OutDir/FoN_unplaced_contigs.txt
 ```
 
 <!-- ```
@@ -162,16 +163,57 @@ mv $OutDir/circos.png $OutDir/FoN_FoL_circos_full.png
 mv $OutDir/circos.svg $OutDir/FoN_FoL_circos_full.svg
 ```
 
-<!--
+
 # Further analysis of non-syntenous regions regions
 
 The number of MIMPs and effectors in LS regions were identified:
 
 
 ```bash
-cat $OutDir/FoN_mimp_plot.txt | grep -v -f $OutDir/FoN_syntenous_contigs.txt | wc -l
+echo "Number of MIMPs in syntenous regions:"
+cat $OutDir/FoN_mimp_plot.txt | grep -w -v -f $OutDir/FoN_unplaced_contigs.txt | wc -l
+cat $OutDir/FoN_mimp_plot.txt | grep -w -v -f $OutDir/FoN_unplaced_contigs.txt
+echo "Number of MIMPs in unplaced regions:"
+cat $OutDir/FoN_mimp_plot.txt | grep -w -f $OutDir/FoN_unplaced_contigs.txt | wc -l
+```
 
 ```
+Number of MIMPs in syntenous regions:
+10
+Number of MIMPs in unplaced regions:
+197
+```
+
+
+The 10 MIMPs in syntenous regions were in:
+
+```
+FoN_contig_16	34774	34789	1.0
+FoN_contig_19	394088	394103	1.0
+FoN_contig_19	395353	395368	1.0
+FoN_contig_32	188261	188276	1.0
+FoN_contig_172	26824	26839	1.0
+FoN_contig_172	62081	62096	1.0
+FoN_contig_172	27026	27041	1.0
+FoN_contig_172	62277	62292	1.0
+FoN_contig_196	44262	44277	1.0
+FoN_contig_232	11510	11525	1.0
+```
+
+```bash
+cat $OutDir/FoN_FoL_linked_contigs.txt | grep -w -e 'FoN_contig_16' -e 'FoN_contig_19' -e 'FoN_contig_32' -e 'FoN_contig_172' -e 'FoN_contig_196' -e 'FoN_contig_232'
+```
+
+```
+FoL_CM000590.1	FoN_contig_19 (chr2 x2)
+FoL_CM000597.1	FoN_contig_196 (chr9 x1)
+FoL_CM000598.1	FoN_contig_232 (chr10 x1)
+FoL_CM000599.1	FoN_contig_32 (chr11 x1)
+FoL_CM000600.1	FoN_contig_16 (chr12 x1)
+FoL_DS231739.1	FoN_contig_172 (unplaced x4)
+```
+<!--
+
 ## Preparing genome and .conf files
 
 ```bash

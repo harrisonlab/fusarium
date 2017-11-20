@@ -34,13 +34,12 @@ ap.add_argument('--CAZY_list',required=True,type=str,help='A file containing res
 
 ap.add_argument('--InterPro',required=True,type=str,help='The Interproscan functional annotation .tsv file')
 ap.add_argument('--Swissprot',required=True,type=str,help='A parsed table of BLAST results against the Swissprot database. Note - must have been parsed with swissprot_parser.py')
-# ap.add_argument('--Antismash',required=True,type=str,help='Output of Antismash parsed into a tsv file of gene names, contig, secmet function and cluster ID')
+ap.add_argument('--Antismash',required=True,type=str,help='Output of Antismash parsed into a tsv file of gene names, contig, secmet function and cluster ID')
 # ap.add_argument('--Smurf',required=True,type=str,help='Output of Smurf parsed into a tsv file of gene names, contig, secmet function and cluster ID')
 ap.add_argument('--TFs',required=True,type=str,help='Tab seperated of putative transcription factors and their domains as identified by interpro2TFs.py')
 ap.add_argument('--orthogroups', required=True,type=str,help='A file containing results of orthology analysis')
 ap.add_argument('--strain_id',required=True,type=str,help='The identifier of this strain as used in the orthology analysis')
 ap.add_argument('--OrthoMCL_all',required=True,type=str,nargs='+',help='The identifiers of all strains used in the orthology analysis')
-
 
 conf = ap.parse_args()
 
@@ -54,8 +53,8 @@ with open(conf.InterPro) as f:
     InterPro_lines = f.readlines()
 with open(conf.Swissprot) as f:
     swissprot_lines = f.readlines()
-# with open(conf.Antismash) as f:
-#     antismash_lines = f.readlines()
+with open(conf.Antismash) as f:
+    antismash_lines = f.readlines()
 # with open(conf.Smurf) as f:
 #     smurf_lines = f.readlines()
 with open(conf.TFs) as f:
@@ -220,14 +219,19 @@ for line in swissprot_lines:
 # Build a dictionary of Secondary Metabolite annotations
 #-----------------------------------------------------
 #
-# antismash_dict = defaultdict(list)
-# for line in antismash_lines:
-#     line = line.rstrip("\n")
-#     split_line = line.split("\t")
-#     gene_id = split_line[0]
-#     secmet_func = split_line[2]
-#     cluster = "AS_" + split_line[3]
-#     antismash_dict[gene_id].extend([secmet_func, cluster])
+i = 0
+antismash_dict = defaultdict(list)
+for line in antismash_lines:
+    i += 1
+    cluster = "cluster_" + str(i)
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    secmet_func = split_line[2]
+    cluster_genes = split_line[3].split(";")
+    for gene in cluster_genes:
+        gene = re.sub("_\d$", "", gene)
+        antismash_dict[gene].extend([secmet_func, cluster])
+        # print "\t".join([gene, secmet_func, cluster])
 #
 # smurf_dict = defaultdict(list)
 # for line in smurf_lines:
@@ -368,7 +372,7 @@ print ("\t".join([
 "Within_2Kb_of_MIMP",
 "Signal_peptide", "Trans-membrane_domain", "GPI_anchor_site", "Secreted",
 "EffectorP", "CAZY",
-# "Cluster_ID", "SecMet_function", "SecMet_program", "Secmet_cluster",
+"Cluster_ID", "SecMet_function",
 "TF",
 "Swissprot_organism", "Swissprot_hit", "Swissprot_function",
 "Interpro_annotations",
@@ -418,34 +422,13 @@ for gene_id in gene_id_list:
     else:
         useful_columns.append("")
 
-    # if antismash_dict[gene_id] or smurf_dict[gene_id]:
-    #     if in_cluster == False: # group antismash and smurf clusters into a single set of clusters
-    #         cluster_num += 1
-    #         cluster_name = "SecMet_cluster_" + str(cluster_num)
-    #         in_cluster=True
-    #     if antismash_dict[gene_id] and smurf_dict[gene_id]:
-    #         # print gene_id
-    #         antismash_cols = antismash_dict[gene_id]
-    #         smurf_cols = smurf_dict[gene_id]
-    #         prog = "antismash;smurf"
-    #         secmet_func = ";".join([antismash_cols[0], smurf_cols[0]])
-    #         cluster = ";".join([antismash_cols[1], smurf_cols[1]])
-    #     elif antismash_dict[gene_id]:
-    #         antismash_cols = antismash_dict[gene_id]
-    #         prog = "antismash"
-    #         secmet_func = antismash_cols[0]
-    #         cluster = antismash_cols[1]
-    #     elif smurf_dict[gene_id]:
-    #         smurf_cols = smurf_dict[gene_id]
-    #         prog = "smurf"
-    #         secmet_func = smurf_cols[0]
-    #         cluster = smurf_cols[1]
-    #     else:
-    #         continue
-    #     useful_columns.extend([cluster_name, secmet_func, prog, cluster])
-    # else:
-    #     useful_columns.extend(["","","",""])
-    #     in_cluster=False
+    if antismash_dict[base_id]:
+        antismash_cols = antismash_dict[base_id]
+        secmet_func = antismash_cols[0]
+        cluster = antismash_cols[1]
+        useful_columns.extend([cluster, secmet_func])
+    else:
+        useful_columns.extend(["",""])
 
     if TF_dict[gene_id]:
         TF_functions = TF_dict[gene_id]

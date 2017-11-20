@@ -185,6 +185,7 @@ number of unique groups of inparalogs
 
 ## 3.6) Extracting fasta files for all orthogroups
 
+
 ```bash
 # IsolateAbrv=FoC_vs_Fo_vs_FoL_publication
 WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
@@ -202,6 +203,28 @@ $ProgDir/orthoMCLgroups2fasta.py --orthogroups $WorkDir/"$IsolateAbrv"_orthogrou
 # echo "The numbe of singleton genes extracted is:"
 # cat $OutDir/singleton_genes.fa | grep '>' | wc -l
 ```
+
+A combined dataset for nucleotide data was made for all gene models:
+
+```bash
+  mkdir -p $WorkDir/FTF
+  nuc_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/*/final_genes_combined.gene.fasta)
+  cat $nuc_file | sed "s/>/>FoN|/g" | cut -f1 -d ' ' > $WorkDir/goodProteins/nucleotide_seq.fa
+  nuc_file=$(ls gene_pred/final_genes/F.oxysporum_fsp_cepae/Fus2_canu_new/*/final_genes_combined.gene.fasta)
+  cat $nuc_file | sed "s/>/>FoC|/g" | cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
+  nuc_file=$(ls assembly/external_group/F.oxysporum/fo47/broad/fusarium_oxysporum_fo47_1_genes.fasta)
+  cat $nuc_file | sed "s/FOZG/fo47|FOZG/g" |cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
+  nuc_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_transcripts_20110522.nt.fasta)
+  cat $nuc_file | sed "s/>.*FOXG/>FoL|FOXG/g" | cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
+
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | sed -r "s/-t\S+? / /g" | sed -r "s/.t. / /g" | sed -r "s/T. / /g" > $OutDir/"$IsolateAbrv"_orthogroups_mod.txt
+  OutDir=$WorkDir/orthogroups_fasta_nuc
+  mkdir -p $OutDir
+  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
+  $ProgDir/orthoMCLgroups2fasta.py --orthogroups $OutDir/"$IsolateAbrv"_orthogroups_mod.txt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
+  rm $OutDir/"$IsolateAbrv"_orthogroups_mod.txt
+```
+
 
 ## 3.7) Extracting ortholog groups for SIX gene homologs:
 

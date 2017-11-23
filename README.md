@@ -326,6 +326,37 @@ done
 	The mode kmer abundance is:  21 <- pass
 ```
 
+## Estimate coverage
+
+For Miseq data:
+```bash
+for RawData in $(ls qc_dna/paired/*/*/*/*.fq.gz | grep -e 'N139'); do
+echo $RawData;
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $RawData;
+GenomeSz=57
+OutDir=$(dirname $RawData)
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
+```
+
+```bash
+  for StrainDir in $(ls -d qc_dna/paired/*/* | grep -w -e 'N139'); do
+    Strain=$(basename $StrainDir)
+    printf "$Strain\t"
+    for File in $(ls qc_dna/paired/*/"$Strain"/*/*.txt); do
+      echo $(basename $File);
+      cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+    done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+  done
+```
+```
+
+```
+
+
+
+
 #Assembly
 
 Assembly was performed with:

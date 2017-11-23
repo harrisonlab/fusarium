@@ -462,27 +462,27 @@ PHIbase database:
 The PHIbase database was searched agasinst the assembled genomes using tBLASTx.
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/*/*/*/final_genes_combined.pep.fasta | grep 'N139_ncbi'); do
+for Proteome in $(ls gene_pred/final_genes/*/*/*/final_genes_combined.gene.fasta | grep 'N139_ncbi'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
-# ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
-# qsub $ProgDir/run_blast2csv.sh $Query dna $Assembly $OutDir
-qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh $Proteome protein ../../phibase/v4.4/phi_accessions.fa
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh ../../phibase/v4.4/phi_accessions.fa protein $Proteome $OutDir
+# qsub /home/armita/git_repos/emr_repos/tools/pathogen/blast/blast_pipe.sh $Proteome protein ../../phibase/v4.4/phi_accessions.fa
 done
 ```
 
 ```bash
-	PhibaseDir=/home/groups/harrisonlab/phibase/v3.8
-	PhibaseHeaders=$PhibaseDir/PHI_headers.csv
-	PhibaseVirulence=$PhibaseDir/PHI_virulence.csv
-	for BlastCSV in $(ls analysis/blast_homology/F*/*/*_PHI_accessions.fa_homologs.csv); do
-		Strain=$(echo $BlastCSV | rev | cut -f2 -d'/' | rev)
-		echo "$Strain"
-		OutDir=$(dirname $BlastCSV)
-		paste -d '\t' $PhibaseHeaders $PhibaseVirulence $BlastCSV | cut -f-3,1185- > $OutDir/"$Strain"_PHIbase_virulence.csv
-		cat $OutDir/"$Strain"_PHIbase_virulence.csv | grep 'NODE_' | cut -f2 | sort | uniq -c | tee $OutDir/"$Strain"_PHIbase_virulence.txt
-	done
+PhibaseDir=/home/groups/harrisonlab/phibase/v4.4
+PhibaseHeaders=$PhibaseDir/PHI_headers.csv
+PhibaseVirulence=$PhibaseDir/PHI_virulence.csv
+for BlastCSV in $(ls analysis/blast_homology/F*/*/*_phi_accessions.fa_homologs.csv | grep 'N139_ncbi'); do
+Strain=$(echo $BlastCSV | rev | cut -f2 -d'/' | rev)
+echo "$Strain"
+OutDir=$(dirname $BlastCSV)
+paste -d '\t' $PhibaseHeaders $PhibaseVirulence $BlastCSV | cut -f-3,1185- > $OutDir/"$Strain"_PHIbase_virulence.csv
+cat $OutDir/"$Strain"_PHIbase_virulence.csv | cut -f2 | sort | uniq -c | tee $OutDir/"$Strain"_PHIbase_virulence.txt
+done
 ```
 
 
@@ -495,7 +495,7 @@ FoC genes:
 TF_list="FOXG_14257 FOXG_17260 FOXG_17266 FOXG_14201 FOXG_14230 FOXG_14211 FOXG_14275 FOXG_14277 FOXG_14274"
 num=0
 OrthoTxt=$(ls /home/groups/harrisonlab/project_files/fusarium/analysis/orthology/orthomcl/FoN_vs_FoC_vs_FoL_vs_Fo/FoN_vs_FoC_vs_FoL_vs_Fo_orthogroups.txt)
-AnnotTab=$(ls gene_pred/annotation/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_gene_annotations.tab)
+AnnotTab=$(ls gene_pred/annotation/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_annotation_ncbi.tsv)
 for TF in $TF_list; do
 num=$(($num +1))
 echo "TF"$num

@@ -49,6 +49,18 @@
 
 ``` -->
 
+Data quality was visualised once again following trimming:
+
+```bash
+for RawData in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq); do
+echo $RawData;
+GenomeSz=53
+OutDir=$(dirname $RawData)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
+```
+
 
 
 Assembly stats were collected using quast

@@ -83,7 +83,7 @@ Contig orientation was used to edit the circos .conf file manually
 ```bash
   GffMimpSecreted=analysis/mimps/F.oxysporum_fsp_narcissi/FON_63/FON_63_genes_in_2kb_mimp_secreted.gff
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/gff2circos_scatterplot.py --gff $GffMimpSecreted --feature gene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_mimp_plot.txt
+  $ProgDir/gff2circos_scatterplot.py --gff $GffMimpSecreted --feature gene --value 1 | sed -e 's/^/FoN_/g' > $OutDir/FoM_mimp_plot.txt
 ```
 <!--
 # Plot location of Fus2 mimps and secreted effectorP genes as a scatterplot

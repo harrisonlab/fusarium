@@ -67,6 +67,7 @@ for Organism in $(cat $OutDir/target_organisms.txt); do
 done
 ```
 
+## Download assemblies
 
 ncbi accession numbers for the genomes in van dam et al 2017 were downloaded
 
@@ -104,6 +105,41 @@ cp $File analysis/metagenomics/reference_genomes/van_dam/renamed/"${Organism}_${
 done
 ```
 
+
+### Download additional ncbi genomes
+
+
+Additional F. solani (nectria haematococca) genomes were downloaded:
+
+```bash
+  ProjectDir=/home/groups/harrisonlab/project_files/fusarium
+  cd $ProjectDir
+  OutDir=analysis/metagenomics/reference_genomes/additional
+  Species="F.solani"
+  Strain="JS-169"
+  mkdir -p $OutDir/$Species/$Strain
+  wget -P $OutDir/$Species/$Strain ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/MS/JJ/MSJJ02/MSJJ02.1.fsa_nt.gz
+  Species="F.solani"
+  Strain="IMV_00293"
+  mkdir -p $OutDir/$Species/$Strain
+  wget -P $OutDir/$Species/$Strain ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/NG/ZQ/NGZQ01/NGZQ01.1.fsa_nt.gz
+  Species="F.solani"
+  Strain="77-13-4"
+  mkdir -p $OutDir/$Species/$Strain
+  wget -P $OutDir/$Species/$Strain http://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/ac/ACJF01.fasta.gz
+  gunzip $OutDir/*/*/*.f*.gz
+  for File in $(ls $OutDir/*/*/*.f* | grep -e 'fsa' -e 'fasta'); do
+    Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    mv $File analysis/metagenomics/reference_genomes/renamed/"$Organism"_"$Strain".fna
+  done
+```
+
+## FoN FoM analysis
+
+### Prepare queries FoN FoM
+
 Create a list of genes from FoM and FoN LS regions
 ```bash
 for File in $(ls analysis/mimps/F.oxysporum_fsp_*/*/*_genes_in_2kb_mimp_LS.fa); do
@@ -112,6 +148,8 @@ for File in $(ls analysis/mimps/F.oxysporum_fsp_*/*/*_genes_in_2kb_mimp_LS.fa); 
   cat $File | sed "s/>/>${Strain}|/g"
 done > analysis/AHDB_blast/FoM_FoN_sec_mimps.fa
 ```
+
+### Perform BLAST
 
 Blast vs the reference genome databases:
 
@@ -131,7 +169,9 @@ qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_sec_mimps.fa dna $Ref
 done
 ```
 
-Create a list of genes from FoC and FoL LS regions
+## FoN FoM FoC analysis
+
+Create a list of genes from FoC LS regions
 
 ```bash
 Organism="F.oxysporum_fsp_cepae"
@@ -157,7 +197,7 @@ $ProgDir/extract_from_fasta.py --fasta $Genes --headers $OutDir/${Strain}_genes_
 cat $OutDir/${Strain}_genes_in_2kb_mimp_secreted.fa | grep '>' | wc -l
 ``` -->
 
-Blast vs the reference genome databases:
+Blast vs the van dam reference genome databases:
 
 ```bash
 cat analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp_secreted.fa | sed 's/>/>FoC|/g' > analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa
@@ -177,6 +217,25 @@ mkdir -p $OutDir
 # cd $OutDir
 # cp -sf $CurDir/$RefGenome ${Prefix}_genome.fa
 # cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna $RefGenome $OutDir
+done
+```
+
+Blast vs additional ncbi genomes:
+
+```bash
+cat analysis/mimps/F.oxysporum_fsp_cepae/Fus2_canu_new/Fus2_canu_new_genes_in_2kb_mimp_secreted.fa | sed 's/>/>FoC|/g' > analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa
+cat analysis/AHDB_blast/FoM_FoN_sec_mimps.fa >> analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa
+for RefGenome in $(ls analysis/metagenomics/reference_genomes/renamed/*.fna | grep 'solani' | grep -v '77-13-4'); do
+Prefix=$(basename $RefGenome .fna)
+echo $Prefix
+OutDir=analysis/AHDB_blast/vs_ref_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+cp -sf $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
 ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
 qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna $RefGenome $OutDir
 done
@@ -225,19 +284,53 @@ qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna 
 done
 ```
 
+Blast vs work in progress genomes:
+
+```bash
+for RefGenome in $(ls assembly/spades/F.*/*/filtered_contigs/contigs_min_500bp*.fasta | grep -w -e 'FON129' -e 'FON77' -e 'FON81' -e 'FON89' -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074' -e 'A1-2' -e 'HB6' -e 'D2' -e 'PG8' -e 'L5' -e 'A1-2' -e 'HB6' -e 'D2' -e 'PG8' -e 'L5' -e 'A1-2' -e 'HB6'); do
+Prefix=$(echo $RefGenome | cut -f3,4 -d '/' --output-delimiter '_')
+echo $Prefix
+OutDir=analysis/AHDB_blast/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna $RefGenome $OutDir
+done
+for RefGenome in $(ls assembly/spades_pacbio/F.*/*/filtered_contigs/contigs_min_500bp.fasta | grep -w -e '55'); do
+Prefix=$(echo $RefGenome | cut -f3,4 -d '/' --output-delimiter '_')
+echo $Prefix
+OutDir=analysis/AHDB_blast/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna $RefGenome $OutDir
+done
+```
 
 ## Summarise blast hists
 
 ```bash
-CsvFiles=$(ls analysis/AHDB_blast/vs_*_genomes/*/*FoM_FoN_FoC_sec_mimps.fa_hits.csv | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1')
+# CsvFiles=$(ls analysis/AHDB_blast/vs_*_genomes/*/*FoM_FoN_FoC_sec_mimps.fa_hits.csv | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1' | grep -v -e 'Fusarium_asiaticum' -e 'Fusarium_azukicol' -e 'Fusarium_brasiliense_NRRL_31757/' -e 'Fusarium_circinatum' -e 'Fusarium_cuneirostrum' -e 'Fusarium_euwallaceae' -e 'Fusarium_fujikuroi' -e 'Fusarium_graminearum' -e 'Fusarium_langsethiae' -e 'Fusarium_meridionale' -e 'Fusarium_nygamai' -e 'Fusarium_oxysporum_f._melongenae' -e 'Fusarium_oxysporum_f._sp._ciceris' -e 'Fusarium_oxysporum_f._sp._lycopersici' -e 'Fusarium_oxysporum_f._sp._medicaginis' -e 'Fusarium_oxysporum_f._sp._niveum' -e 'Fusarium_phaseoli' -e 'Fusarium_praegraminearum' -e 'Fusarium_pseudograminearum' -e 'Fusarium_temperatum' -e 'Fusarium_tucumaniae' -e 'Fusarium_udum' -e 'Fusarium_verticillioides' -e 'Fusarium_virguliforme' -e 'Fusarium_oxysporum_f._sp._conglutinans')
+CsvFiles=$(ls analysis/AHDB_blast/vs_*_genomes/*/*FoM_FoN_FoC_sec_mimps.fa_hits.csv | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v -e 'GCA_000599445.1' -e '77-13-4')
+# CsvFiles=$(ls analysis/AHDB_blast/vs_*_genomes/*/*FoM_FoN_FoC_sec_mimps.fa_hits.csv | grep -e 'vs_ref_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1')
 Headers=$(echo $CsvFiles | sed 's&analysis/AHDB_blast/vs_ref_genomes/&&g' | sed 's&analysis/AHDB_blast/vs_seq_genomes/&&g' | sed -r "s&_FoM_FoN_FoC_sec_mimps.fa_hits.csv&&g" | sed -r "s&/\S*&&g"  | sed 's&/van_dam&&g')
 OutDir=analysis/AHDB_blast/vs_ref_genomes/extracted
 mkdir -p $OutDir
 # ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
 # $ProgDir/blast_parse.py --blast_csv $CsvFiles --headers $Headers --identity 0.50 --evalue 1e-30 > $OutDir/FoM_FoN_FoC_sec_mimps.tsv
-Genomes=$(ls analysis/AHDB_blast/vs_*_genomes/*/*_genome.fa | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1')
+# Genomes=$(ls analysis/AHDB_blast/vs_*_genomes/*/*_genome.fa | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1' | grep -v -e 'Fusarium_asiaticum' -e 'Fusarium_azukicol' -e 'Fusarium_brasiliense_NRRL_31757/' -e 'Fusarium_circinatum' -e 'Fusarium_cuneirostrum' -e 'Fusarium_euwallaceae' -e 'Fusarium_fujikuroi' -e 'Fusarium_graminearum' -e 'Fusarium_langsethiae' -e 'Fusarium_meridionale' -e 'Fusarium_nygamai' -e 'Fusarium_oxysporum_f._melongenae' -e 'Fusarium_oxysporum_f._sp._ciceris' -e 'Fusarium_oxysporum_f._sp._lycopersici' -e 'Fusarium_oxysporum_f._sp._medicaginis' -e 'Fusarium_oxysporum_f._sp._niveum' -e 'Fusarium_phaseoli' -e 'Fusarium_praegraminearum' -e 'Fusarium_pseudograminearum' -e 'Fusarium_temperatum' -e 'Fusarium_tucumaniae' -e 'Fusarium_udum' -e 'Fusarium_verticillioides' -e 'Fusarium_virguliforme' -e 'Fusarium_oxysporum_f._sp._conglutinans')
+Genomes=$(ls analysis/AHDB_blast/vs_*_genomes/*/*_genome.fa | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1' | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v -e 'GCA_000599445.1' -e '77-13-4')
+# Genomes=$(ls analysis/AHDB_blast/vs_*_genomes/*/*_genome.fa | grep -e 'vs_ref_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1')
 ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/AHDB_project/blast_searches
-rm analysis/AHDB_blast/vs_ref_genomes/extracted/*
+# rm analysis/AHDB_blast/vs_ref_genomes/extracted/*
 $ProgDir/blast_parse_AHDB.py --blast_csv $CsvFiles --headers $Headers --genomes $Genomes --identity 0.50 --evalue 1e-30 --out_prefix $OutDir/FoM_FoN_FoC_sec_mimps
 ```
 

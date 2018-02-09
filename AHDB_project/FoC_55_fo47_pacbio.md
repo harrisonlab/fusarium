@@ -25,7 +25,16 @@
 Data coverage was assessed:
 
 ```bash
-for RawData in $(ls raw_dna/pacbio/F.*/*/extracted/concatenated_pacbio.fastq.gz | grep -e 'fo47' -e '55'); do
+# for RawData in $(ls raw_dna/pacbio/F.*/*/extracted/concatenated_pacbio.fastq.gz | grep -e 'fo47' -e '55'); do
+for RawData in $(ls raw_dna/pacbio/F.*/*/extracted/concatenated_pacbio.fastq.gz | grep -e 'Fus2'); do
+echo $RawData;
+GenomeSz=53
+OutDir=$(dirname $RawData)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
+
+for RawData in $(ls qc_dna/paired/F.*/*/*/*_trim.fq.gz | grep -e '55'); do
 echo $RawData;
 GenomeSz=53
 OutDir=$(dirname $RawData)
@@ -33,6 +42,20 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
 qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
 done
 ```
+
+Find predicted coverage for these isolates:
+
+```bash
+for StrainDir in $(ls -d qc_dna/paired/*/* | grep '55'); do
+Strain=$(basename $StrainDir)
+printf "$Strain\t"
+for File in $(ls qc_dna/paired/*/"$Strain"/*/*.txt); do
+echo $(basename $File);
+cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+done
+```
+
 
 ## Assembly
 
@@ -51,19 +74,157 @@ done
   done
 ```
 
+Assembly stats were collected using quast
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/canu-1.4/F.*/*/55_canu.contigs.fasta | grep '55'); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
 
 ### Assembbly using SMARTdenovo
 
 ```bash
-for CorrectedReads in $(ls assembly/canu-1.4/F.*/*/*.trimmedReads.fasta.gz  | grep -e 'fo47' -e '55'); do
-Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-Prefix="$Strain"_smartdenovo
-OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
-qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+  for CorrectedReads in $(ls assembly/canu-1.4/F.*/*/*.trimmedReads.fasta.gz  | grep -e 'fo47' -e '55'); do
+    Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+    Prefix="$Strain"_smartdenovo
+    OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
+    qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+  done
+```
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/SMARTdenovo/*/*/*_smartdenovo.dmo.lay.utg | grep '55'); do
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    OutDir=$(dirname $Assembly)/filtered_contigs
+    mkdir -p $OutDir
+    echo "" > tmp.txt
+    ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    $ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/"$Strain"_smartdenovo_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+  done
+```
+
+Assembly stats were collected using quast
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/*/*/filtered_contigs/*_smartdenovo_min_500bp_renamed.fasta | grep '55'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
 done
 ```
+
+
+Assemblies were polished using Pilon
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/filtered_contigs/*_smartdenovo_min_500bp_renamed.fasta | grep '55'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev | sed 's/_canu//g')
+IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+OutDir=$(dirname $Assembly)../pilon
+Iterations=5
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
+qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+done
+```
+
+## SMARTdenovo assembly using TGAC trimmed reads
+
+
+```bash
+  for CorrectedReads in $(ls ../../../../scratch/groups/harrisonlab/fusarium/F.*/*/*/data/filtered_subreads.fasta| grep -e 'fo47' -e '55'  | grep -e 'fo47' -e '55'); do
+    Organism=$(echo $CorrectedReads | rev | cut -f5 -d '/' | rev)
+    Strain=$(echo $CorrectedReads | rev | cut -f4 -d '/' | rev)
+    Prefix="$Strain"_smartdenovo
+    OutDir=assembly/SMARTdenovo/$Organism/"$Strain"_tgac_filtered
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
+    qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+  done
+```
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*_tgac_filtered/*.dmo.lay.utg); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)/filtered_contigs
+mkdir -p $OutDir
+touch tmp.csv
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+rm tmp.csv
+done
+```
+
+Assembly stats were collected using quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/SMARTdenovo/*/*/filtered_contigs/*_contigs_renamed.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    OutDir=$(dirname $Assembly)
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+
+```bash
+  for Assembly in $(ls assembly/SMARTdenovo/*/*/filtered_contigs/*_contigs_renamed.fasta); do
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+    BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+    OutDir=gene_pred/busco/$Organism/$Strain/assembly
+    qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+  done
+```
+
+```bash
+  for File in $(ls gene_pred/busco/*/*/assembly/*/short_summary_*.txt); do
+  Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
+  Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
+  Complete=$(cat $File | grep "(C)" | cut -f2)
+  Single=$(cat $File | grep "(S)" | cut -f2)
+  Fragmented=$(cat $File | grep "(F)" | cut -f2)
+  Missing=$(cat $File | grep "(M)" | cut -f2)
+  Total=$(cat $File | grep "Total" | cut -f2)
+  echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
+  done
+```
+
+Assemblies were polished using Pilon
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/filtered_contigs/*_contigs_renamed.fasta | grep '55'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev | sed 's/_tgac_filtered//g')
+IlluminaDir=$(ls -d qc_dna/paired/*/$Strain)
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+OutDir=$(dirname $Assembly)/../pilon
+Iterations=5
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
+qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+done
+```
+
 
 
 <!-- Default error rate is set at 0.025 for pacbio reads. However it is recomended to increase the error rate to 0.035 for coverage <20X and decrease it to 0.015 for reads with coverage >60X
@@ -80,7 +241,7 @@ done
   qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir $SpecFile
 
 ``` -->
-
+<!--
 ### Spades hybrid Assembly
 
 
@@ -111,7 +272,7 @@ Assembly stats were collected using quast
 
 ```bash
   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/spades_pacbio/F.oxysporum_fsp_cepae/55_auto_cuttoff/contigs.fasta); do
+  for Assembly in $(ls assembly/spades_pacbio/F.oxysporum_fsp_cepae/55*/contigs.fasta); do
     Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
     Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
     # OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
@@ -120,91 +281,10 @@ Assembly stats were collected using quast
   done
 ```
 
-<!--
-Assembly stats were collected using quast
-
-```bash
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta | grep -w 'Fus2'); do
-    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-    OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
-    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-  done
-``` -->
-
-Contigs were renamed in accordance with ncbi recomendations
-
-```bash
-  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-  touch tmp.csv
-  printf "contig_17\tsplit\t780978\t780971\tcanu:missassembly\n"
-  for Assembly in $(ls assembly/canu/*/*/*_canu.contigs.fasta | grep -w 'Fus2'); do
-    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-    OutDir=assembly/canu/$Organism/$Strain/filtered_contigs
-    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_canu_contigs_renamed.fasta --coord_file tmp.csv
-  done
-  rm tmp.csv
-```
-
-After investigation it was found that contig_17 should be split.
-
-```bash
-  ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-  touch tmp.csv
-  printf "contig_17\tmanual edit\tsplit\t780978\t780978\tcanu:missassembly\n" > tmp.csv
-  for Assembly in $(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_canu_contigs_renamed.fasta); do
-    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
-    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    OutDir=assembly/canu/$Organism/$Strain/edited_contigs
-    mkdir -p $OutDir
-    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_canu_contigs_modified.fasta --coord_file tmp.csv
-  done
-  rm tmp.csv
-```
-
-Assemblies were polished using Pilon
-
-```bash
-  for Assembly in $(ls assembly/canu/*/Fus2/edited_contigs/*_canu_contigs_modified.fasta); do
-    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-    TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
-    TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
-    OutDir=assembly/canu/$Organism/$Strain/edited_contigs
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
-    qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
-  done
-```
-
-
-### Spades Assembly
-
-```bash
-  for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_cepae/Fus2/extracted/concatenated_pacbio.fastq); do
-    Organism=$(echo $PacBioDat | rev | cut -f4 -d '/' | rev)
-    Strain=$(echo $PacBioDat | rev | cut -f3 -d '/' | rev)
-    IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-    TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
-    TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
-    TrimF2_Read=$(ls $IlluminaDir/F/FUS2_S2_L001_R1_001_trim.fq.gz);
-    TrimR2_Read=$(ls $IlluminaDir/R/FUS2_S2_L001_R2_001_trim.fq.gz);
-    OutDir=assembly/spades_pacbio/$Organism/"$Strain"
-    echo $TrimR1_Read
-    echo $TrimR1_Read
-    echo $TrimF2_Read
-    echo $TrimR2_Read
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades/multiple_libraries
-    qsub $ProgDir/subSpades_2lib_pacbio.sh $PacBioDat $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $OutDir 20
-  done
-```
-
 Contigs shorter thaan 500bp were removed from the assembly
 
 ```bash
-  for Contigs in $(ls assembly/spades_pacbio/*/*/contigs.fasta); do
+  for Contigs in $(ls assembly/spades_pacbio/*/*/contigs.fasta | grep '55'); do
     AssemblyDir=$(dirname $Contigs)
     mkdir $AssemblyDir/filtered_contigs
     FilterDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/abyss
@@ -317,19 +397,83 @@ Fus2 was temporarily renamed for preliminary analysis
   cp -r assembly/canu/F.oxysporum_fsp_cepae/Fus2 assembly/canu/F.oxysporum_fsp_cepae/Fus2_pacbio_test_canu
   cp -r assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2 assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_pacbio_test_merged
   cp -r assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged_richards
+``` -->
+
+## Copying over TGAC assemblies
+
+```bash
+for Assembly in $(ls ../../../../scratch/groups/harrisonlab/fusarium/F.*/*/*/data/polished_assembly.fasta); do
+Strain=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f5 -d '/' | rev)  
+echo "$Organism - $Strain"
+OutDir=assembly/TGAC/$Organism/$Strain
+mkdir -p $OutDir
+cp $Assembly $OutDir/.
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+touch tmp.csv
+mkdir -p $OutDir/filtered_contigs
+$ProgDir/remove_contaminants.py --inp $OutDir/polished_assembly.fasta --out $OutDir/filtered_contigs/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+rm tmp.csv
+done
 ```
+
+Assembly stats were collected using quast
+
+```bash
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  for Assembly in $(ls assembly/TGAC/*/*/filtered_contigs/*_contigs_renamed.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    OutDir=$(dirname $Assembly)
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+  done
+```
+
+
+```bash
+  for Assembly in $(ls assembly/TGAC/*/*/filtered_contigs/*_contigs_renamed.fasta); do
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+    BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+    OutDir=gene_pred/busco/$Organism/$Strain/assembly
+    qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+  done
+```
+
+```bash
+  for File in $(ls gene_pred/busco/*/*/assembly/*/short_summary_*.txt); do
+  Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
+  Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
+  Complete=$(cat $File | grep "(C)" | cut -f2)
+  Single=$(cat $File | grep "(S)" | cut -f2)
+  Fragmented=$(cat $File | grep "(F)" | cut -f2)
+  Missing=$(cat $File | grep "(M)" | cut -f2)
+  Total=$(cat $File | grep "Total" | cut -f2)
+  echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
+  done
+```
+
+
+
 
 # Repeatmasking assemblies
 
+The renamed assembly was used to perform repeatmasking.
+
 ```bash
-  # Fus2_pacbio_canu=$(ls assembly/canu/F.oxysporum_fsp_cepae/Fus2_pacbio_test_canu/filtered_contigs/Fus2_canu_contigs_renamed.fasta)
-  Fus2_pacbio_merged=$(ls assembly/merged_canu_spades/*/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta)
-  # for Assembly in $(ls $Fus2_pacbio_merged $Fus2_pacbio_canu); do
-  for Assembly in $(ls $Fus2_pacbio_merged); do
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-    qsub $ProgDir/rep_modeling.sh $Assembly
-    qsub $ProgDir/transposonPSI.sh $Assembly
-  done
+# for Assembly in $(ls assembly/TGAC/*/*/filtered_contigs/*_contigs_renamed.fasta); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/filtered_contigs/*_contigs_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism"
+echo "$Strain"
+OutDir=repeat_masked/$Organism/$Strain/ncbi_edits_repmask
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+done
 ```
 
 # Preliminary analysis

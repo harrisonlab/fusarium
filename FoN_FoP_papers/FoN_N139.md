@@ -329,6 +329,7 @@ done
 
 
 Subset the table for secreted genes within 2 Kb of a mimp
+Also extract fasta sequence for these genes.
 
 ```bash
 for GeneGff in $(ls gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/final/final_genes_appended.gff3); do
@@ -339,22 +340,76 @@ cat $OutDir/"$Strain"_annotation_ncbi.tsv | grep 'MIMP' > $OutDir/"$Strain"_anno
 cat $OutDir/"$Strain"_annotation_ncbi_MIMP.tsv | grep -v 'ncbi_gene_id' | wc -l
 cat $OutDir/"$Strain"_annotation_ncbi.tsv | grep 'MIMP' | grep 'SigP' | grep -v 'GPI' | grep -v 'TM' > $OutDir/"$Strain"_annotation_ncbi_MIMP_secreted.tsv
 cat $OutDir/"$Strain"_annotation_ncbi_MIMP_secreted.tsv | grep -v 'ncbi_gene_id' | wc -l
+cat $OutDir/"$Strain"_annotation_ncbi_MIMP_secreted.tsv | grep -v 'ncbi_gene_id' | cut -f2 > $OutDir/"$Strain"_annotation_ncbi_MIMP_secreted_headers.txt
+CDS=$(ls gene_pred/final_genes/F.oxysporum_fsp_narcissi/N139_ncbi/final/final_genes_combined.cdna.fasta)
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $CDS --headers $OutDir/"$Strain"_annotation_ncbi_MIMP_secreted_headers.txt  > $OutDir/"$Strain"_annotation_ncbi_MIMP_secreted.fasta
 done
 ```
 
+Blast these genes vs other FoN genomes:
+
 ```bash
-for AnnotTab in $(ls gene_pred/annotation/F.venenatum/WT/WT_annotation_ncbi.tsv); do
-  Strain=$(echo $AnnotTab | rev | cut -f2 -d '/' | rev)
-  Organism=$(echo $AnnotTab | rev | cut -f3 -d '/' | rev)
-  OutDir=$(ls -d analysis/transcription_factors/$Organism/$Strain)
-  echo "Total number of clusters:"
-  cat $AnnotTab | grep 'SecMet_cluster_' | cut -f7 | sort | uniq | wc -l
-  cat $AnnotTab | grep 'SecMet_cluster_' | cut -f1,7 | cut -f1 > $OutDir/WT_SecMet_headers.txt
-  cat $OutDir/WT_SecMet_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
-  cat $AnnotTab | grep -e 'AS_' -e 'SM_' | cut -f1,14 | grep -v -e "\s$" | cut -f1 > $OutDir/WT_TF_SecMet_headers.txt
-  cat $OutDir/WT_TF_SecMet_headers.txt | wc -l
+for RefGenome in $(ls repeat_masked/F.oxysporum_fsp_narcissi/*/*/*_contigs_unmasked.fa); do
+Prefix=$(echo $RefGenome | cut -f2,3 -d '/' --output-delimiter '_')
+echo $Prefix
+QueryFasta=$(ls gene_pred/annotation/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_annotation_ncbi_MIMP_secreted.fasta)
+OutDir=analysis/blast_homology/FoN_blast/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $QueryFasta dna $RefGenome $OutDir
 done
+
+for RefGenome in $(ls assembly/external_group/F.oxysporum_fsp_narcissi/Na5/GCA_002233775_1/NJCV01.1.fsa_nt); do
+Prefix=$(echo $RefGenome | cut -f3,4 -d '/' --output-delimiter '_')
+echo $Prefix
+QueryFasta=$(ls gene_pred/annotation/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_annotation_ncbi_MIMP_secreted.fasta)
+OutDir=analysis/blast_homology/FoN_blast/vs_ref_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $QueryFasta dna $RefGenome $OutDir
+done
+
+for RefGenome in $(ls repeat_masked/F.*/*/*/*_contigs_unmasked.fa | grep -e 'Fus2' -e 'fo47' -e '4287'| grep -v -e 'old' -e 'broad' -e 'tgac' -e 'chromosomal' | grep '4287'); do
+Prefix=$(echo $RefGenome | cut -f2,3 -d '/' --output-delimiter '_')
+echo $Prefix
+QueryFasta=$(ls gene_pred/annotation/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_annotation_ncbi_MIMP_secreted.fasta)
+OutDir=analysis/blast_homology/FoN_blast/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $QueryFasta dna $RefGenome $OutDir
+done
+
 ```
+
+
+## Summarise blast hists
+
+```bash
+CsvFiles=$(ls analysis/blast_homology/FoN_blast/vs_*_genomes/*/*_hits.csv)
+Headers=$(echo $CsvFiles | sed 's&analysis/blast_homology/FoN_blast/vs_ref_genomes/&&g' | sed 's&analysis/blast_homology/FoN_blast/vs_seq_genomes/&&g' | sed -r "s&/\w+?&&g" | sed 's/.fasta_hits.csv//g')
+OutDir=analysis/blast_homology/FoN_blast/extracted
+mkdir -p $OutDir
+Genomes=$(ls analysis/blast_homology/FoN_blast/vs_*_genomes/*/*_genome.fa)
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/AHDB_project/blast_searches
+$ProgDir/blast_parse_AHDB.py --blast_csv $CsvFiles --headers $Headers --genomes $Genomes --identity 0.50 --evalue 1e-30 --out_prefix $OutDir/FoN_mimp_secreted
+```
+
 
 
 

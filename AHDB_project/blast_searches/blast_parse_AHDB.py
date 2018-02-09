@@ -56,6 +56,7 @@ num = 0
 fasta_dict = defaultdict(list)
 # out_records = []
 for organism, csv_file, genome_f in zip(headers, csv_files, ref_genomes):
+    # print "\t".join([organism, csv_file, genome_f])
     num += 1
     # print num
     # header = csv_file.split("/")[-1].replace(".csv", "")
@@ -66,7 +67,7 @@ for organism, csv_file, genome_f in zip(headers, csv_files, ref_genomes):
     # fasta_obj_parsed = []
     for record in fasta_obj:
         record_id = record.id.split()[0]
-        record.id = record_id[4:]
+        # record.id = record_id[4:]
         # print record.id
     print organism
     record_dict = SeqIO.to_dict(fasta_obj)
@@ -99,6 +100,7 @@ for organism, csv_file, genome_f in zip(headers, csv_files, ref_genomes):
                     if perc_identity_accross_hit >= thresh_perc_id and hit_eval <= thresh_eval:
                         over_threshold += 1
                         # print hit_contig
+                        # print record_dict.keys()
                         # print str(thresh_perc_id) + "\t" + str(hit_perc_id)
                         # print str(thresh_eval) + "\t" + str(hit_eval)
 

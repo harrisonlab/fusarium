@@ -216,10 +216,10 @@ A combined dataset for nucleotide data was made for all gene models:
   cat $nuc_file | sed "s/FOZG/fo47|FOZG/g" |cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
   nuc_file=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287/Fusox1/Fusox1_GeneCatalog_transcripts_20110522.nt.fasta)
   cat $nuc_file | sed "s/>.*FOXG/>FoL|FOXG/g" | cut -f1 -d ' ' >> $WorkDir/goodProteins/nucleotide_seq.fa
-
-  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | sed -r "s/-t\S+? / /g" | sed -r "s/.t. / /g" | sed -r "s/T. / /g" > $OutDir/"$IsolateAbrv"_orthogroups_mod.txt
+  GoodProt=$WorkDir/goodProteins/nucleotide_seq.fa
   OutDir=$WorkDir/orthogroups_fasta_nuc
   mkdir -p $OutDir
+  cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | sed -r "s/-t\S+? / /g" | sed -r "s/.t. / /g" | sed -r "s/T. / /g" > $OutDir/"$IsolateAbrv"_orthogroups_mod.txt
   ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
   $ProgDir/orthoMCLgroups2fasta.py --orthogroups $OutDir/"$IsolateAbrv"_orthogroups_mod.txt --fasta $GoodProt --out_dir $OutDir > $OutDir/extractionlog.txt
   rm $OutDir/"$IsolateAbrv"_orthogroups_mod.txt
@@ -232,5 +232,22 @@ A combined dataset for nucleotide data was made for all gene models:
 IsolateAbrv=FoN_vs_FoC_vs_FoL_vs_Fo
 WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
 cat $WorkDir/"$IsolateAbrv"_orthogroups.txt | grep -w -e 'FoN|NS_09200' -e 'FoN|g17549' -e 'FoN|g16592' -e 'FoN|g16591'
+```
 
+
+## 3.7) Extracting ortholog groups for secreted MIMP genes:
+
+This script still has problems with Fo47 genes not being extracted from the commands above
+
+```bash
+  IsolateAbrv=FoN_vs_FoC_vs_FoL_vs_Fo
+  WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+  OutDir=$WorkDir/sec_mimps
+  mkdir $OutDir
+  cat gene_pred/annotation/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_annotation_ncbi_MIMP_secreted.tsv | cut -f22 | grep 'orthogroup' > $OutDir/N139_ncbi_MIMP_secreted_orthogroups.txt
+
+  for Orthogroup in $(cat $OutDir/N139_ncbi_MIMP_secreted_orthogroups.txt); do
+    echo $Orthogroup
+    cp $WorkDir/orthogroups_fasta_nuc/$Orthogroup.fa $OutDir/.
+  done
 ```

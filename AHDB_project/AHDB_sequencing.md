@@ -125,6 +125,7 @@ Sequence data was moved into the appropriate directories
   cd $OutDir/R
   cp -s $RawDatDir/15-074_S4_L001_R2_001.fastq.gz .
 
+
   cd $ProjectDir
 ```
 

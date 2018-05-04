@@ -43,7 +43,7 @@ ssh nanopore@nanopore
 # upgrade albacore
 wget https://mirror.oxfordnanoportal.com/software/analysis/ont_albacore-2.2.7-cp34-cp34m-manylinux1_x86_64.whl
 ~/.local/bin/read_fast5_basecaller.py --version
-pip3 install --user ont_albacore-2.1.10-cp34-cp34m-manylinux1_x86_64.whl --upgrade
+pip3 install --user ont_albacore-2.2.7-cp34-cp34m-manylinux1_x86_64.whl --upgrade
 ~/.local/bin/read_fast5_basecaller.py --version
 
 mkdir FoLatucae_26-04-18
@@ -54,7 +54,7 @@ Organism=F.oxysporum_fsp_lactucae
 Strain=AJ516
 Date=22-02-18
 FlowCell="FLO-MIN106"
-Kit="SQK-RBK001"
+Kit="SQK-LSK108"
 RawDatDir=/data/seq_data/minion/2018/20180222_AJ516/AJ516/GA10000/reads
 OutDir=~/FoLatucae_26-04-18/$Organism/$Strain/$Date
 
@@ -70,14 +70,34 @@ cd $OutDir
   --output_format fastq,fast5 \
   --reads_per_fastq_batch 4000
 
+cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
+
+FinalDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+mkdir -p $FinalDir
+mv $OutDir/${Strain}_${Date}_albacore_v2.2.7.* $FinalDir/.
+chmod +rw -R $FinalDir
+
+
+	# OutDir=/data/scratch/nanopore_tmp_data/Fusarium/albacore_v2.2.7
+  # mkdir -p $OutDir
+  # chmod +w $OutDir
+  # cp Alt_albacore_v2.10_barcode0*.fastq.gz $OutDir/.
+  # chmod +rw $OutDir/Alt_albacore_v2.10_barcode0*.fastq.gz
+  # scp Alt_albacore_v2.10_barcode*.fastq.gz armita@192.168.1.200:$OutDir/.
+  # tar -cz -f Alt_albacore_v2.10_demultiplexed.tar.gz Alt_albacore_v2.10_demultiplexed
+  # OutDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+  # mv Alt_albacore_v2.10_demultiplexed.tar.gz $OutDir/.
+  # chmod +rw $OutDir/Alt_albacore_v2.10_demultiplexed.tar.gz
+
 	# Oxford nanopore AJ516 Run 2
 	Organism=F.oxysporum_fsp_lactucae
 	Strain=AJ516
 	Date=18-04-18
 	FlowCell="FLO-MIN106"
-	Kit="SQK-RBK001"
+	Kit="SQK-LSK108"
 	RawDatDir=/data/seq_data/minion/2018/20180418_AJ16/AJ16/GA10000/reads
-	OutDir=/data/scratch/nanopore_tmp_data/FoLatucae_26-04-18/$Organism/$Strain/$Date
+	OutDir=~/FoLatucae_26-04-18/$Organism/$Strain/$Date
 	mkdir -p $OutDir
 
 	mkdir -p $OutDir
@@ -92,64 +112,74 @@ cd $OutDir
 	  --output_format fastq,fast5 \
 	  --reads_per_fastq_batch 4000
 
-		# Oxford nanopore AJ520 Run 1
-		Organism=F.oxysporum_fsp_lactucae
-		Strain=AJ520
-		Date=22-02-18
-		FlowCell="FLO-MIN106"
-		Kit="SQK-RBK001"
-		RawDatDir=/data/seq_data/minion/2018/20180222_AJ520/AJ520/GA20000/reads
-		OutDir=/data/scratch/nanopore_tmp_data/FoLatucae_26-04-18/$Organism/$Strain/$Date
-		mkdir -p $OutDir
+	cd ~/FoLatucae_26-04-18
+	cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+	tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
 
-		mkdir -p $OutDir
-		cd $OutDir
-		~/.local/bin/read_fast5_basecaller.py \
-		  --flowcell $FlowCell \
-		  --kit $Kit \
-		  --input $RawDatDir \
-		  --recursive \
-		  --worker_threads 24 \
-		  --save_path albacore_v2.2.7 \
-		  --output_format fastq,fast5 \
-		  --reads_per_fastq_batch 4000
+	FinalDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+	mkdir -p $FinalDir
+	mv ${Strain}_${Date}_albacore_v2.2.7.* $FinalDir/.
+	chmod +rw -R $FinalDir
 
-			# Oxford nanopore AJ516 Run 2
-			Organism=F.oxysporum_fsp_lactucae
-			Strain=AJ520
-			Date=18-04-18
-			FlowCell="FLO-MIN106"
-			Kit="SQK-RBK001"
-			# The second run of AJ520 reads have not yet been copied over.
-			# RawDatDir=/data/seq_data/minion/2018/20180222_AJ520/AJ520/GA30000/reads
-			OutDir=/data/scratch/nanopore_tmp_data/FoLatucae_26-04-18/$Organism/$Strain/$Date
-			mkdir -p $OutDir
+	# Oxford nanopore AJ520 Run 1
+	Organism=F.oxysporum_fsp_lactucae
+	Strain=AJ520
+	Date=22-02-18
+	FlowCell="FLO-MIN106"
+	Kit="SQK-RBK001"
+	RawDatDir=/data/seq_data/minion/2018/20180222_AJ520/AJ520/GA20000/reads
+	OutDir=~/FoLatucae_26-04-18/$Organism/$Strain/$Date
+	mkdir -p $OutDir
 
-			mkdir -p $OutDir
-			cd $OutDir
-			~/.local/bin/read_fast5_basecaller.py \
-			  --flowcell $FlowCell \
-			  --kit $Kit \
-			  --input $RawDatDir \
-			  --recursive \
-			  --worker_threads 24 \
-			  --save_path albacore_v2.2.7 \
-			  --output_format fastq,fast5 \
-			  --reads_per_fastq_batch 4000
+	mkdir -p $OutDir
+	cd $OutDir
+	~/.local/bin/read_fast5_basecaller.py \
+	  --flowcell $FlowCell \
+	  --kit $Kit \
+	  --input $RawDatDir \
+	  --recursive \
+	  --worker_threads 24 \
+	  --save_path albacore_v2.2.7 \
+	  --output_format fastq,fast5 \
+	  --reads_per_fastq_batch 4000
 
-	#
-  # cat Alt_albacore_v2.10_demultiplexed/workspace/pass/barcode01/*.fastq | gzip -cf > Alt_albacore_v2.10_barcode01.fastq.gz
-  # cat Alt_albacore_v2.10_demultiplexed/workspace/pass/barcode02/*.fastq | gzip -cf > Alt_albacore_v2.10_barcode02.fastq.gz
-  # OutDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
-  # mkdir -p $OutDir
-  # chmod +w $OutDir
-  # cp Alt_albacore_v2.10_barcode0*.fastq.gz $OutDir/.
-  # chmod +rw $OutDir/Alt_albacore_v2.10_barcode0*.fastq.gz
-  # scp Alt_albacore_v2.10_barcode*.fastq.gz armita@192.168.1.200:$OutDir/.
-  tar -cz -f Alt_albacore_v2.10_demultiplexed.tar.gz Alt_albacore_v2.10_demultiplexed
-  OutDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
-  mv Alt_albacore_v2.10_demultiplexed.tar.gz $OutDir/.
-  chmod +rw $OutDir/Alt_albacore_v2.10_demultiplexed.tar.gz
+	cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+	tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
+
+	FinalDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+	mkdir -p $FinalDir
+	mv ${Strain}_${Date}_albacore_v2.2.7.* $FinalDir/.
+	chmod +rw -R $FinalDir
+
+	# Oxford nanopore AJ516 Run 2
+	Organism=F.oxysporum_fsp_lactucae
+	Strain=AJ520
+	Date=18-04-18
+	FlowCell="FLO-MIN106"
+	Kit="SQK-LSK108"
+	# The second run of AJ520 reads have not yet been copied over.
+	# RawDatDir=/data/seq_data/minion/2018/20180222_AJ520/AJ520/GA30000/reads
+	OutDir=~/FoLatucae_26-04-18/$Organism/$Strain/$Date
+	mkdir -p $OutDir
+
+	mkdir -p $OutDir
+	cd $OutDir
+	~/.local/bin/read_fast5_basecaller.py \
+	  --flowcell $FlowCell \
+	  --kit $Kit \
+	  --input $RawDatDir \
+	  --recursive \
+	  --worker_threads 24 \
+	  --save_path albacore_v2.2.7 \
+	  --output_format fastq,fast5 \
+	  --reads_per_fastq_batch 4000
+		cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+		tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
+
+		FinalDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+		mkdir -p $FinalDir
+		mv ${Strain}_${Date}_albacore_v2.2.7.* $FinalDir/.
+		chmod +rw -R $FinalDir
 ```
 
 Sequence data was moved into the appropriate directories

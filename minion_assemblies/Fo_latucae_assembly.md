@@ -185,9 +185,24 @@ chmod +rw -R $FinalDir
 Sequence data was moved into the appropriate directories
 
 ```bash
-	RawDatDir=/home/miseq_data/minion/2017/FON-63_2017-05-22		
 	ProjectDir=/home/groups/harrisonlab/project_files/fusarium
-	cp $RawDatDir/all_reads_albacore1.1.1.fastq.gz $ProjectDir/raw_dna/minion/F.oxysporum_fsp_narcissi/FON_63/.
+	cd $ProjectDir
+
+	Species="F.oxysporum_fsp_lactucae"
+	Strain="AJ516"
+	OutDir=$ProjectDir/raw_dna/minion/$Species/$Strain
+	mkdir -p $OutDir
+	RawDatDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+	cp -s $RawDatDir/AJ516_18-04-18_albacore_v2.2.7.fastq.gz $OutDir/.
+	cp -s $RawDatDir/AJ516_22-02-18_albacore_v2.2.7.fastq.gz $OutDir/.
+
+	Species="F.oxysporum_fsp_lactucae"
+	Strain="AJ520"
+	OutDir=$ProjectDir/raw_dna/minion/$Species/$Strain
+	mkdir -p $OutDir
+	RawDatDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+	cp $RawDatDir/AJ520_18-04-18_albacore_v2.2.7.fastq.gz $OutDir/.
+	cp $RawDatDir/AJ520_22-02-18_albacore_v2.2.7.fastq.gz $OutDir/.
 ```
 
 ### MiSeq data
@@ -212,6 +227,22 @@ Sequence data was moved into the appropriate directories
   cd $ProjectDir
 ```
 
+
+## Assembly
+
+### Removal of adapters
+
+Splitting reads and trimming adapters using porechop
+```bash
+	for RawReads in $(ls  raw_dna/minion/*/*/*.fastq.gz | grep 'fsp_lactucae'); do
+    Organism=$(echo $RawReads| rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+  	OutDir=qc_dna/minion/$Organism/$Strain
+  	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+  	qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
+  done
+```
 
 #### QC of MiSeq data
 
@@ -242,7 +273,7 @@ Data quality was visualised using fastqc:
 ```
 
 # Identify sequencing coverage
-<!--
+
 For Minion data:
 ```bash
 	for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'lactucae'); do

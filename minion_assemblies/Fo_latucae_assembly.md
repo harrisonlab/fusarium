@@ -276,13 +276,13 @@ Data quality was visualised using fastqc:
 
 For Minion data:
 ```bash
-	for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'lactucae'); do
-		echo $RawData;
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
-		GenomeSz=60
-		OutDir=$(dirname $RawData)
-		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
-	done
+for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'lactucae'); do
+echo $RawData;
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+GenomeSz=60
+OutDir=$(dirname $RawData)
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
 ```
 
 ```bash
@@ -298,7 +298,7 @@ For Minion data:
 MinION coverage was:
 ```
 Stocks4	65.05
-``` -->
+```
 
 For Miseq data:
 ```bash
@@ -327,3 +327,127 @@ Miseq coverage was:
 ```
 Stocks4	58.66
 ```
+
+
+### Read correction using Canu
+
+```bash
+for TrimReads in $(ls qc_dna/minion/*/*/*q.gz); do
+Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
+OutDir=assembly/canu-1.6/$Organism/"$Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
+qsub $ProgDir/sub_canu_correction.sh $TrimReads 58m $Strain $OutDir
+done
+```
+
+
+### Assembbly using SMARTdenovo
+
+```bash
+for CorrectedReads in $(ls assembly/canu-1.6/*/*/*.trimmedReads.fasta.gz | grep 'F.oxysporum_fsp_lactucae'); do
+Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+Prefix="$Strain"_smartdenovo
+OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
+qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+done
+```
+
+
+Quast and busco were run to assess the effects of racon on assembly quality:
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae'); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+	echo "$Organism - $Strain"
+  OutDir=$(dirname $Assembly)
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	OutDir=gene_pred/busco/$Organism/$Strain/assembly
+	BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+	qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+
+Error correction using racon:
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae' | grep 'AJ520'); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+ReadsFq=$(ls qc_dna/minion/*/$Strain/*q.gz)
+Iterations=10
+OutDir=$(dirname $Assembly)"/racon_$Iterations"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
+qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq $Iterations $OutDir
+done
+```
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae' | grep 'AJ516'); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+ReadsFq=$(ls qc_dna/minion/*/$Strain/*q.gz)
+Iterations=10
+OutDir=$(dirname $Assembly)"/racon_$Iterations"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
+qsub $ProgDir/sub_racon_2libs.sh $Assembly $ReadsFq $Iterations $OutDir
+done
+```
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/*.fasta | grep 'round_10' | grep 'F.oxysporum_fsp_lactucae'); do
+OutDir=$(dirname $Assembly)
+echo "" > tmp.txt
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/racon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+done
+```
+
+Quast and busco were run to assess the effects of racon on assembly quality:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep 'F.oxysporum_fsp_lactucae'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+<!--
+
+```bash
+# for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/*.fasta | grep 'FON_63' | grep 'racon_min_500bp_renamed'); do
+for Assembly in $(ls assembly/SMARTdenovo/A.*/*/racon2_10/*.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+# OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
+```bash
+printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+for File in $(ls gene_pred/busco/A*/*/assembly/*/short_summary_*.txt); do
+FileName=$(basename $File)
+Complete=$(cat $File | grep "(C)" | cut -f2)
+Duplicated=$(cat $File | grep "(D)" | cut -f2)
+Fragmented=$(cat $File | grep "(F)" | cut -f2)
+Missing=$(cat $File | grep "(M)" | cut -f2)
+Total=$(cat $File | grep "Total" | cut -f2)
+printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
+done
+```
+ -->

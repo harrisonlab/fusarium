@@ -144,6 +144,7 @@ chmod +rw -R $FinalDir
 	  --reads_per_fastq_batch 4000
 
 	cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+	# cat /data/seq_data/minion/2018/20180426_AJ520_GA30000/GA30000/*.fastq > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
 	tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
 
 	FinalDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
@@ -158,7 +159,7 @@ chmod +rw -R $FinalDir
 	FlowCell="FLO-MIN106"
 	Kit="SQK-LSK108"
 	# The second run of AJ520 reads have not yet been copied over.
-	# RawDatDir=/data/seq_data/minion/2018/20180222_AJ520/AJ520/GA30000/reads
+	RawDatDir=/data/seq_data/minion/2018/20180426_AJ520_GA30000/GA30000/reads
 	OutDir=~/FoLatucae_26-04-18/$Organism/$Strain/$Date
 	mkdir -p $OutDir
 
@@ -286,7 +287,7 @@ done
 ```
 
 ```bash
-  for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'Stocks4'); do
+  for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae'); do
     Strain=$(basename $StrainDir)
     printf "$Strain\t"
     for File in $(ls $StrainDir/*.txt); do
@@ -297,30 +298,31 @@ done
 ```
 MinION coverage was:
 ```
-Stocks4	65.05
+AJ516   57.57
+AJ520   6.08
 ```
 
 For Miseq data:
 ```bash
-	for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'lactucae'); do
-		echo $RawData;
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
-		qsub $ProgDir/run_fastqc.sh $RawData;
-		GenomeSz=60
-		OutDir=$(dirname $RawData)
-		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
-	done
+for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'lactucae'); do
+echo $RawData;
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $RawData;
+GenomeSz=60
+OutDir=$(dirname $RawData)
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
 ```
 
 ```bash
-	for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'lactucae'); do
-		Strain=$(basename $StrainDir)
-		printf "$Strain\t"
-		for File in $(ls $StrainDir/*/*.txt); do
-			echo $(basename $File);
-			cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
-		done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
-	done
+for StrainDir in $(ls -d qc_dna/paired/*/* | grep 'lactucae'); do
+Strain=$(basename $StrainDir)
+printf "$Strain\t"
+for File in $(ls $StrainDir/*/*.txt); do
+echo $(basename $File);
+cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
+done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
+done
 ```
 
 Miseq coverage was:
@@ -332,7 +334,13 @@ Stocks4	58.66
 ### Read correction using Canu
 
 ```bash
-for TrimReads in $(ls qc_dna/minion/*/*/*q.gz); do
+for ReadDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae' | grep 'AJ516'); do
+	Strain=$(echo $TrimReads | rev | cut -f1 -d '/' | rev)
+	cat $ReadDir/*_trim.fastq.gz > $ReadDir/${Strain}_trim_appended.fastq.gz
+done
+
+
+for TrimReads in $(ls qc_dna/minion/*/*/*_trim_appended.fastq.gz | grep 'AJ516'); do
 Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
 OutDir=assembly/canu-1.6/$Organism/"$Strain"
@@ -342,7 +350,7 @@ done
 ```
 
 
-### Assembbly using SMARTdenovo
+### Assembly using SMARTdenovo
 
 ```bash
 for CorrectedReads in $(ls assembly/canu-1.6/*/*/*.trimmedReads.fasta.gz | grep 'F.oxysporum_fsp_lactucae'); do
@@ -423,16 +431,14 @@ OutDir=$(dirname $Assembly)
 qsub $ProgDir/sub_quast.sh $Assembly $OutDir
 done
 ```
-<!--
 
 ```bash
-# for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/*.fasta | grep 'FON_63' | grep 'racon_min_500bp_renamed'); do
-for Assembly in $(ls assembly/SMARTdenovo/A.*/*/racon2_10/*.fasta); do
+for Assembly in $(ls assembly/SMARTdenovo/F.*/*/racon*/*.fasta | grep 'F.oxysporum_fsp_lactucae'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
 OutDir=gene_pred/busco/$Organism/$Strain/assembly
 # OutDir=$(dirname $Assembly)
 qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
@@ -440,7 +446,7 @@ done
 ```
 ```bash
 printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
-for File in $(ls gene_pred/busco/A*/*/assembly/*/short_summary_*.txt); do
+for File in $(ls gene_pred/busco/*/*/assembly/*/short_summary_*.txt  | grep 'F.oxysporum_fsp_lactucae'); do
 FileName=$(basename $File)
 Complete=$(cat $File | grep "(C)" | cut -f2)
 Duplicated=$(cat $File | grep "(D)" | cut -f2)
@@ -450,4 +456,44 @@ Total=$(cat $File | grep "Total" | cut -f2)
 printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
- -->
+
+# Nanopolish
+
+
+For AJ516
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+# Step 1 extract reads as a .fq file which contain info on the location of the fast5 files
+# Note - the full path from home must be used
+ReadDir=raw_dna/nanopolish/$Organism/$Strain
+mkdir -p $ReadDir
+ReadsFq=$(ls raw_dna/minion/*/$Strain/*.fastq.gz | grep '2017-12-03')
+# cat $ReadsFq > $ReadDir/${Strain}_appended.fastq.gz
+CurDir=$PWD
+ScratchDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
+# tar -zxvf $ScratchDir/AJ516_18-04-18_albacore_v2.2.7.tar.gz -C $ReadDir
+tar -zxvf $ScratchDir/AJ516_22-02-18_albacore_v2.2.7.tar.gz -C $ReadDir
+Fast5Dir=$(ls -d $PWD/$ReadDir/home/nanopore/FoNarcissi_2018-05-04/F.oxysporum_fsp_narcissi/FON139/2017-12-03/albacore_v2.2.7/workspace/pass/)
+nanopolish index -d $Fast5Dir $ReadsFq
+done
+
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+# Step 1 extract reads as a .fq file which contain info on the location of the fast5 files
+# Note - the full path from home must be used
+# ReadDir=raw_dna/nanopolish/$Organism/$Strain
+# mkdir -p $ReadDir
+ReadsFq=$(ls raw_dna/minion/*/$Strain/*.fastq.gz | grep '2017-12-03')
+OutDir=$(dirname $Assembly)/nanopolish
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+# submit alignments for nanoppolish
+qsub $ProgDir/sub_minimap2_nanopolish.sh $Assembly $ReadsFq $OutDir/nanopolish
+done
+```

@@ -143,8 +143,9 @@ chmod +rw -R $FinalDir
 	  --output_format fastq,fast5 \
 	  --reads_per_fastq_batch 4000
 
-	cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
-	# cat /data/seq_data/minion/2018/20180426_AJ520_GA30000/GA30000/*.fastq > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+	cd ~/FoLatucae_26-04-18
+	cat $OutDir/albacore_v2.2.7/workspace/pass/unclassified/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
+
 	tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
 
 	FinalDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
@@ -152,7 +153,7 @@ chmod +rw -R $FinalDir
 	mv ${Strain}_${Date}_albacore_v2.2.7.* $FinalDir/.
 	chmod +rw -R $FinalDir
 
-	# Oxford nanopore AJ516 Run 2
+	# Oxford nanopore AJ520 Run 2
 	Organism=F.oxysporum_fsp_lactucae
 	Strain=AJ520
 	Date=18-04-18
@@ -174,6 +175,8 @@ chmod +rw -R $FinalDir
 	  --save_path albacore_v2.2.7 \
 	  --output_format fastq,fast5 \
 	  --reads_per_fastq_batch 4000
+
+		cd ~/FoLatucae_26-04-18
 		cat $OutDir/albacore_v2.2.7/workspace/pass/*.fastq | gzip -cf > ${Strain}_${Date}_albacore_v2.2.7.fastq.gz
 		tar -cz -f ${Strain}_${Date}_albacore_v2.2.7.tar.gz $OutDir
 
@@ -202,8 +205,8 @@ Sequence data was moved into the appropriate directories
 	OutDir=$ProjectDir/raw_dna/minion/$Species/$Strain
 	mkdir -p $OutDir
 	RawDatDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
-	cp $RawDatDir/AJ520_18-04-18_albacore_v2.2.7.fastq.gz $OutDir/.
-	cp $RawDatDir/AJ520_22-02-18_albacore_v2.2.7.fastq.gz $OutDir/.
+	cp -s $RawDatDir/AJ520_18-04-18_albacore_v2.2.7.fastq.gz $OutDir/.
+	cp -s $RawDatDir/AJ520_22-02-18_albacore_v2.2.7.fastq.gz $OutDir/.
 ```
 
 ### MiSeq data
@@ -235,7 +238,7 @@ Sequence data was moved into the appropriate directories
 
 Splitting reads and trimming adapters using porechop
 ```bash
-	for RawReads in $(ls  raw_dna/minion/*/*/*.fastq.gz | grep 'fsp_lactucae'); do
+	for RawReads in $(ls  raw_dna/minion/*/*/*.fastq.gz | grep 'fsp_lactucae' | grep 'AJ520'); do
     Organism=$(echo $RawReads| rev | cut -f3 -d '/' | rev)
     Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
     echo "$Organism - $Strain"
@@ -277,7 +280,7 @@ Data quality was visualised using fastqc:
 
 For Minion data:
 ```bash
-for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'lactucae'); do
+for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'lactucae' | grep 'AJ520'); do
 echo $RawData;
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
 GenomeSz=60
@@ -287,7 +290,7 @@ done
 ```
 
 ```bash
-  for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae'); do
+  for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae'| grep 'AJ520'); do
     Strain=$(basename $StrainDir)
     printf "$Strain\t"
     for File in $(ls $StrainDir/*.txt); do
@@ -334,13 +337,13 @@ Stocks4	58.66
 ### Read correction using Canu
 
 ```bash
-for ReadDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae' | grep 'AJ516'); do
-	Strain=$(echo $TrimReads | rev | cut -f1 -d '/' | rev)
+for ReadDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae'); do
+	Strain=$(echo $ReadDir | rev | cut -f1 -d '/' | rev)
 	cat $ReadDir/*_trim.fastq.gz > $ReadDir/${Strain}_trim_appended.fastq.gz
 done
 
 
-for TrimReads in $(ls qc_dna/minion/*/*/*_trim_appended.fastq.gz | grep 'AJ516'); do
+for TrimReads in $(ls qc_dna/minion/*/*/*_trim_appended.fastq.gz | grep 'AJ520'); do
 Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
 OutDir=assembly/canu-1.6/$Organism/"$Strain"
@@ -353,7 +356,7 @@ done
 ### Assembly using SMARTdenovo
 
 ```bash
-for CorrectedReads in $(ls assembly/canu-1.6/*/*/*.trimmedReads.fasta.gz | grep 'F.oxysporum_fsp_lactucae'); do
+for CorrectedReads in $(ls assembly/canu-1.6/*/*/*.trimmedReads.fasta.gz | grep 'F.oxysporum_fsp_lactucae'| grep 'AJ516'); do
 Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
 Prefix="$Strain"_smartdenovo
@@ -367,7 +370,7 @@ done
 Quast and busco were run to assess the effects of racon on assembly quality:
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae' | grep 'AJ516'); do
   Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
   Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
 	echo "$Organism - $Strain"
@@ -385,11 +388,11 @@ done
 Error correction using racon:
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae' | grep 'AJ520'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae' | grep 'AJ516'); do
 Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
-ReadsFq=$(ls qc_dna/minion/*/$Strain/*q.gz)
+ReadsFq=$(ls qc_dna/minion/*/$Strain/*_trim_appended.fastq.gz)
 Iterations=10
 OutDir=$(dirname $Assembly)"/racon_$Iterations"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
@@ -397,7 +400,7 @@ qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq $Iterations $OutDir
 done
 ```
 
-```bash
+<!-- ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg | grep 'F.oxysporum_fsp_lactucae' | grep 'AJ516'); do
 Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
@@ -408,7 +411,7 @@ OutDir=$(dirname $Assembly)"/racon_$Iterations"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/racon
 qsub $ProgDir/sub_racon_2libs.sh $Assembly $ReadsFq $Iterations $OutDir
 done
-```
+``` -->
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast

@@ -455,6 +455,80 @@ Fus2 genes g16859 and g10474 were identified as FTF1 and FTF2 homologs.
 cat $OutDir/"$Strain"_FTF_hits_intersected.bed | grep -w 'gene' | cut -f18 | cut -f1 -d ';' | sort | uniq
 ```
 
+Following identification of other FTF genes from other Fuarium spp. and building
+a phylogeny the tree was exported from geneious and visualised using:
+
+```r
+setwd("/Users/armita/Downloads/FoN/analysis/FTF")
+#===============================================================================
+#       Load libraries
+#===============================================================================
+
+library(ape)
+library(ggplot2)
+
+library(ggtree)
+library(phangorn)
+library(treeio)
+
+tree <- read.tree("geneious_NJ_FTF_tree.newick")
+
+mydata <- read.csv("traits.csv", stringsAsFactors=FALSE)
+rownames(mydata) <- mydata$tiplabel
+mydata <- mydata[match(tree$tip.label,rownames(mydata)),]
+
+t <- ggtree(tree, aes(linetype=nodes$support)) # Core tree
+# Adjust terminal branch lengths:
+# branches <- t$data
+#tree$edge.length[branches$isTip] <- 1
+#Tree <- branches$branch.length
+#rescale_tree(t, branches$branch.length)
+
+t <- t + geom_treescale(offset=-1.0, fontsize = 3) # Add scalebar
+# t <- t + xlim(0, 0.025) # Add more space for labels
+
+
+
+# Colouring labels by values in another df
+t <- t %<+% mydata # Allow colouring of nodes by another df
+#t <- t + geom_tiplab(aes(color=Source), size=3, hjust=0) +
+scale_color_manual(values=c("gray39","black")) # colours as defined by col2rgb
+
+tips <- data.frame(t$data)
+tips$label <- tips$newlabel
+t <- t + geom_tiplab(data=tips, aes(color=study), size=3, hjust=0, offset = 0.01) +
+scale_color_manual(values=c("gray39","black")) # colours as defined by col2rgb
+
+# Format nodes by values
+nodes <- data.frame(t$data)
+#nodes <- nodes[!nodes$isTip,]
+nodes$label[nodes$isTip] <- ''
+nodes$label[(!nodes$isTip) & (nodes$label == '')] <- 100
+
+nodes$label <- as.numeric(nodes$label)
+nodes$label <- lapply(nodes$label,round,0)
+
+#nodes$label[nodes$label < 0.80] <- ''
+nodes$support[nodes$isTip] <- 'supported'
+# nodes$support[(!nodes$isTip) & (nodes$label == '100')] <- 'supported'
+nodes$support[(!nodes$isTip) & (nodes$label > 80)] <- 'supported'
+nodes$support[(!nodes$isTip) & (nodes$label < 80)] <- 'unsupported'
+#nodes$support[(!nodes$isTip) & (nodes$label == '')] <- 'supported'
+t <- t + aes(linetype=nodes$support)
+nodes$label[nodes$label > 80] <- ''
+t <- t + geom_nodelab(data=nodes, size=2, hjust=-0.05) # colours as defined by col2rgb
+
+
+# Annotate a clade with a bar line
+t <- t + geom_cladelabel(node=55, label='FTF1', align=T, colour='black', offset=0.14)
+t <- t + geom_cladelabel(node=86, label='FTF2', align=T, colour='black', offset=0.14)
+
+# Save as PDF and force a 'huge' size plot
+t <- ggsave("ftf.pdf", width =20, height = 30, units = "cm", limitsize = FALSE)
+
+
+
+```
 
 ## 5.2 Identifying PHIbase homologs
 <!--

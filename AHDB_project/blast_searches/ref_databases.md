@@ -340,9 +340,13 @@ Fo ff.spp., but were absent in other isolates. The orthogroups that these genes 
 
 
 ```bash
-OutDir=analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps
+# OutDir=analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps
+OutDir=analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps_additional_stocks
 mkdir -p $OutDir
-GeneList="FoC|g13457.t1 FoC|g16851.t1 FoC|g17143.t1 FoC|PGN_04464.t1 Stocks4|g16926.t1 Stocks4|g17043.t1 Stocks4|g18886.t1 Stocks4|g19207.t1 Stocks4|g19979.t1 FON_63|g16080.t1 FON_63|g20157.t1"
+# GeneList="FoC|g13457.t1 FoC|g16851.t1 FoC|g17143.t1 FoC|PGN_04464.t1 Stocks4|g16926.t1 Stocks4|g17043.t1 Stocks4|g18886.t1 Stocks4|g19207.t1 Stocks4|g19979.t1 FON_63|g16080.t1 FON_63|g20157.t1"
+# GeneList="Stocks4|g18921.t1"
+GeneList="Stocks4|g16885.t1 Stocks4|g16926.t1 Stocks4|g16947.t1 Stocks4|g16948.t1 Stocks4|g16953.t1 Stocks4|g17043.t1 Stocks4|g17165.t1 Stocks4|g17244.t1 Stocks4|g18886.t1 Stocks4|g18920.t1 Stocks4|g18921.t1 Stocks4|g19207.t1 Stocks4|g19979.t1"
+
 # Extracting proteins sequences
 echo $GeneList | sed 's/Stocks4/FoM/g' | sed 's/FON_63/FoN/g' | sed "s/ /\n/g" > $OutDir/potential_marker_gene_headers.txt
 OrthoFile=$(ls analysis/orthology/orthomcl/Fo_FoC_FoL_FoN_FoM/Fo_FoC_FoL_FoN_FoM_orthogroups.txt)

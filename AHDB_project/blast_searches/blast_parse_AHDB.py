@@ -105,6 +105,9 @@ for organism, csv_file, genome_f in zip(headers, csv_files, ref_genomes):
                         # print str(thresh_eval) + "\t" + str(hit_eval)
 
                         hit_contig_rec = record_dict[hit_contig]
+                        # if hit_contig not in record_dict.keys():
+                        #     continue
+                        hit_contig_rec = record_dict[hit_contig]
                         # hit_contig_seq = fasta_obj[hit_contig]
                         contig_name = hit_contig_rec.name
                         hit_contig_seq = hit_contig_rec.seq

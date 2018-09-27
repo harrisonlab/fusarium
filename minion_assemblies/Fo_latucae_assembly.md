@@ -548,7 +548,7 @@ done
  nanopolish correction
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ520'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep -e 'AJ516'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -581,35 +581,28 @@ done
 A subset of nanopolish jobs needed to be resubmitted as the ran out of RAM
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'FON129' -e 'FON139' -e 'FON77' -e 'FON81'| grep -e 'FON81'); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-OutDir=$(dirname $Assembly)/nanopolish
-# ReadsFq=$(ls raw_dna/minion/*/$Strain/*.fastq.gz | grep '2017-12-03')
-ReadsFq=$(ls raw_dna/minion/*/$Strain/*.fastq.gz)
-AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep -e 'AJ520'); do
+	Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+	Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+	echo "$Organism - $Strain"
+	OutDir=$(dirname $Assembly)/nanopolish
+	# ReadsFq=$(ls raw_dna/minion/*/$Strain/*.fastq.gz | grep '2017-12-03')
+	ReadsFq=$(ls raw_dna/minion/*/$Strain/*.fastq.gz)
+	AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
 
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_makerange.py $Assembly --segment-length 50000 > $OutDir/nanopolish_range.txt
+	NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+	# python $NanoPolishDir/nanopolish_makerange.py $Assembly --segment-length 50000 > $OutDir/nanopolish_range.txt
 
-Ploidy=1
-echo "nanopolish log:" > $OutDir/nanopolish_log.txt
-# For FON81
-for Region in $(cat $OutDir/nanopolish_range.txt | grep -e 'contig_14:850000-900200'); do
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-while [ $Jobs -gt 1 ]; do
-sleep 1m
-printf "."
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-done		
-printf "\n"
-echo $Region
-echo $Region >> $OutDir/nanopolish_log.txt
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_nanopolish_variants_high_mem.sh $Assembly $ReadsFq $AlignedReads $Ploidy $Region $OutDir/$Region
-done
-done
+	Ploidy=1
+	echo "nanopolish log:" > $OutDir/nanopolish_high_mem_log.txt
+	ls -lh $OutDir/*/*.fa | grep -v ' 0 ' | cut -f8 -d '/' | sed 's/_consensus.fa//g' > $OutDir/files_present.txt
+	for Region in $(cat $OutDir/nanopolish_range.txt | grep -vwf "$OutDir/files_present.txt"); do
+	echo $Region
+	echo $Region >> $OutDir/nanopolish_high_mem_log.txt
+	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+	qsub $ProgDir/sub_nanopolish_variants_high_mem.sh $Assembly $ReadsFq $AlignedReads $Ploidy $Region $OutDir/$Region
+	done
+	done
 ```
 
 ```bash

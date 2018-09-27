@@ -275,23 +275,6 @@ gene_pred/final_genes/F.oxysporum_fsp_narcissi/FON_63/final
 ```
 
 
-```bash
-for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended.gff3 | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do
-	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
-	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
-	echo "$Strain - $Organism"
-	cat $Gff | grep -w 'gene' | wc -l
-done
-```
-
-```
-Stocks4 - F.oxysporum_fsp_mathioli
-20361
-FON_63 - F.oxysporum_fsp_narcissi
-20545
-```
-
-
 In preperation for submission to ncbi, gene models were renamed and duplicate gene features were identified and removed.
  * no duplicate genes were identified
 
@@ -321,6 +304,22 @@ $ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renam
 # be changed
 sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
 done
+```
+
+```bash
+for Gff in $(ls gene_pred/final_genes/*/*/final/final_genes_appended_renamed.gff3 | grep -w -e 'FON_63' -e 'Stocks4'); do
+	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
+	echo "$Strain - $Organism"
+	cat $Gff | grep -w 'gene' | wc -l
+done
+```
+
+```
+Stocks4 - F.oxysporum_fsp_mathioli
+20361
+FON_63 - F.oxysporum_fsp_narcissi
+20545
 ```
 
 

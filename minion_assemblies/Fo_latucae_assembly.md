@@ -238,7 +238,7 @@ Sequence data was moved into the appropriate directories
 
 Splitting reads and trimming adapters using porechop
 ```bash
-	for RawReads in $(ls  raw_dna/minion/*/*/*.fastq.gz | grep 'fsp_lactucae' | grep 'AJ520'); do
+	for RawReads in $(ls raw_dna/minion/*/*/*.fastq.gz | grep 'fsp_lactucae' | grep 'AJ520'); do
     Organism=$(echo $RawReads| rev | cut -f3 -d '/' | rev)
     Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
     echo "$Organism - $Strain"
@@ -293,7 +293,7 @@ done
   for StrainDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae'| grep 'AJ520'); do
     Strain=$(basename $StrainDir)
     printf "$Strain\t"
-    for File in $(ls $StrainDir/*.txt); do
+    for File in $(ls $StrainDir/*cov.txt); do
       echo $(basename $File);
       cat $File | tail -n1 | rev | cut -f2 -d ' ' | rev;
     done | grep -v '.txt' | awk '{ SUM += $1} END { print SUM }'
@@ -302,7 +302,7 @@ done
 MinION coverage was:
 ```
 AJ516   57.57
-AJ520   6.08
+AJ520	81.4
 ```
 
 For Miseq data:
@@ -343,13 +343,23 @@ for ReadDir in $(ls -d qc_dna/minion/*/* | grep 'lactucae'); do
 done
 
 
-for TrimReads in $(ls qc_dna/minion/*/*/*_trim_appended.fastq.gz | grep 'AJ520'); do
+for TrimReads in $(ls qc_dna/minion/*/*/*_trim_appended.fastq.gz | grep 'AJ516'); do
 Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
 Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
 OutDir=assembly/canu-1.6/$Organism/"$Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
 qsub $ProgDir/sub_canu_correction.sh $TrimReads 58m $Strain $OutDir
 done
+
+# For AJ520
+TrimReads=$(ls qc_dna/minion/*/*/*_trim.fastq.gz| grep 'AJ520'); do
+Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
+echo $TrimReads
+OutDir=assembly/canu-1.6/$Organism/"$Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
+qsub $ProgDir/sub_canu_correction_2lib.sh $TrimReads 58m $Strain $OutDir
+
 ```
 
 
@@ -524,7 +534,7 @@ mkdir -p $TmpDir
 ScratchDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
 # tar -zxvf $ScratchDir/AJ520_18-04-18_albacore_v2.2.7.tar.gz -C $TmpDir
 Fast5Dir1=$(ls -d /data/scratch/armita/FoL/F.oxysporum_fsp_lactucae/AJ520/home/nanopore/FoLatucae_26-04-18/F.oxysporum_fsp_lactucae/AJ520/18-04-18/albacore_v2.2.7/workspace/pass/)
-nanopolish index -d $Fast5Dir1 $ReadsFq
+# nanopolish index -d $Fast5Dir1 $ReadsFq
 done
 
 for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ520'); do
@@ -548,7 +558,7 @@ done
  nanopolish correction
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep -e 'AJ516'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep -e 'AJ520'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -562,7 +572,7 @@ python $NanoPolishDir/nanopolish_makerange.py $Assembly --segment-length 50000 >
 
 Ploidy=1
 echo "nanopolish log:" > $OutDir/nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish_range.txt); do
+for Region in $(cat $OutDir/nanopolish_range.txt | grep 'contig_1:100000-150200'); do
 Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 1m
@@ -591,12 +601,12 @@ for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.f
 	AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
 
 	NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-	# python $NanoPolishDir/nanopolish_makerange.py $Assembly --segment-length 50000 > $OutDir/nanopolish_range.txt
+	python $NanoPolishDir/nanopolish_makerange.py $Assembly --segment-length 50000 > $OutDir/nanopolish_range.txt
 
 	Ploidy=1
 	echo "nanopolish log:" > $OutDir/nanopolish_high_mem_log.txt
 	ls -lh $OutDir/*/*.fa | grep -v ' 0 ' | cut -f8 -d '/' | sed 's/_consensus.fa//g' > $OutDir/files_present.txt
-	for Region in $(cat $OutDir/nanopolish_range.txt | grep -vwf "$OutDir/files_present.txt"); do
+	for Region in $(cat $OutDir/nanopolish_range.txt | grep -vwf "$OutDir/files_present.txt" | head -n1); do
 	echo $Region
 	echo $Region >> $OutDir/nanopolish_high_mem_log.txt
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
@@ -606,7 +616,7 @@ for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.f
 ```
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'FON129' -e 'FON139' -e 'FON77' -e 'FON81'| grep 'FON81'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -626,7 +636,7 @@ done
 Quast and busco were run to assess the effects of nanopolish on assembly quality:
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep -e 'FON129' -e 'FON139' -e 'FON77' | grep 'FON81'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 # Quast
@@ -652,4 +662,144 @@ done
   Total=$(cat $File | grep "Total" | cut -f2)
   echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
   done
+```
+
+
+### Pilon assembly correction
+
+Assemblies were polished using Pilon
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+IlluminaDir=$(ls -d qc_dna/paired/*/$Strain)
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n1)
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n1)
+OutDir=$(dirname $Assembly)/../pilon
+Iterations=10
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
+qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+done
+```
+
+Contigs were renamed
+```bash
+echo "" > tmp.txt
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'pilon_10'| grep -e 'AJ516' -e 'AJ520'); do
+OutDir=$(dirname $Assembly)
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+done
+```
+
+Quast and busco were run to assess the effects of pilon on assembly quality:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep -e 'AJ516' -e 'AJ520'); do
+  Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+  OutDir=$(dirname $Assembly)
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+
+```bash
+printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep -e 'AJ516' -e 'AJ520'); do
+FileName=$(basename $File)
+Complete=$(cat $File | grep "(C)" | cut -f2)
+Duplicated=$(cat $File | grep "(D)" | cut -f2)
+Fragmented=$(cat $File | grep "(F)" | cut -f2)
+Missing=$(cat $File | grep "(M)" | cut -f2)
+Total=$(cat $File | grep "Total" | cut -f2)
+printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
+done
+```
+
+```
+short_summary_AJ516_smartdenovo.dmo.lay.txt	990	6	694	2041	3725
+short_summary_AJ516_smartdenovo_racon_round_1.txt	2678	24	540	507	3725
+short_summary_AJ516_smartdenovo_racon_round_2.txt	2757	22	519	449	3725
+short_summary_AJ516_smartdenovo_racon_round_3.txt	2775	25	508	442	3725
+short_summary_AJ516_smartdenovo_racon_round_4.txt	2817	26	483	425	3725
+short_summary_AJ516_smartdenovo_racon_round_5.txt	2812	22	499	414	3725
+short_summary_AJ516_smartdenovo_racon_round_6.txt	2819	25	502	404	3725
+short_summary_AJ516_smartdenovo_racon_round_7.txt	2796	28	513	416	3725
+short_summary_AJ516_smartdenovo_racon_round_8.txt	2800	23	501	424	3725
+short_summary_AJ516_smartdenovo_racon_round_9.txt	2803	24	502	420	3725
+short_summary_AJ516_smartdenovo_racon_round_10.txt	2828	22	487	410	3725
+short_summary_racon_min_500bp_renamed.txt	2828	22	487	410	3725
+short_summary_AJ516_nanoplish_min_500bp_renamed.txt	3345	36	183	197	3725
+
+short_summary_AJ520_smartdenovo.dmo.lay.txt	62	0	94	3569	3725
+short_summary_AJ520_smartdenovo_racon_round_1.txt	1274	5	321	2130	3725
+short_summary_AJ520_smartdenovo_racon_round_2.txt	1386	4	285	2054	3725
+short_summary_AJ520_smartdenovo_racon_round_3.txt	1404	7	287	2034	3725
+short_summary_AJ520_smartdenovo_racon_round_4.txt	1407	6	268	2050	3725
+short_summary_AJ520_smartdenovo_racon_round_5.txt	1430	7	259	2036	3725
+short_summary_AJ520_smartdenovo_racon_round_6.txt	1423	8	257	2045	3725
+short_summary_AJ520_smartdenovo_racon_round_7.txt	1441	5	240	2044	3725
+short_summary_AJ520_smartdenovo_racon_round_8.txt	1412	7	273	2040	3725
+short_summary_AJ520_smartdenovo_racon_round_9.txt	1421	8	271	2033	3725
+short_summary_AJ520_smartdenovo_racon_round_10.txt	1426	7	265	2034	3725
+short_summary_racon_min_500bp_renamed.txt	1426	7	265	2034	3725
+short_summary_AJ520_nanoplish_min_500bp_renamed.txt	1731	8	97	1897	3725
+
+```
+
+# Repeat Masking
+
+Repeat masking was performed on the non-hybrid assembly.
+
+```bash
+	for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520'); do
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
+		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+		qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+		qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+	done
+```
+
+The TransposonPSI masked bases were used to mask additional bases from the
+repeatmasker / repeatmodeller softmasked and hardmasked files.
+
+```bash
+
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'AJ516' -e 'AJ520'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa  | grep -e 'AJ516' -e 'AJ520'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+done
 ```

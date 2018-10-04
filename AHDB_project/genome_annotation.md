@@ -47,10 +47,7 @@ First, RNAseq data was aligned to Fusarium genomes.
 
 #### Aligning
 
-Insert sizes of the RNA seq library were unknown until a draft alignment could
-be made. To do this tophat and cufflinks were run, aligning the reads against a
-single genome. The fragment length and stdev were printed to stdout while
-cufflinks was running.
+RNAseq data was aligned to the assemblies using STAR to provide evidence for gene models
 
 ```bash
   for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep -w -e 'Stocks4'); do

@@ -1,5 +1,5 @@
-# Nectria_haematococca
-Commands for the analysis of Nectria haematococca (F. solani) ex. pea genomes.
+# F. oxysporum ex. statice
+Commands for the analysis of F. oxysporum ex. statice genomes
 
 This document details the commands used to assemble and annotate minion sequence data.
 
@@ -76,28 +76,21 @@ gridion - as such they were recalled and used for nanopolish later
 	chmod +rw -R $FinalDir
 ```
 
-<!--
+
 ### MiSeq data
 
 ```bash
-  RawDatDir=/data/seq_data/miseq/2018/RAW/180213_M04465_0067_000000000-BJ4DR/Data/Intensities/BaseCalls
+  RawDatDir=/data/seq_data/miseq/2018/RAW/180716_M04465_0083_000000000-BM8CL/Data/Intensities/BaseCalls
   ProjectDir=/home/groups/harrisonlab/project_files/fusarium
-  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_lactucae/AJ516
+  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_statice/Stat10
   mkdir -p $OutDir/F
   mkdir -p $OutDir/R
   cd $OutDir/F
-  cp -s $RawDatDir/AJ516_S1_L001_R1_001.fastq.gz .
+  cp -s $RawDatDir/Stat10_S1_L001_R1_001.fastq.gz .
   cd $OutDir/R
-  cp -s $RawDatDir/AJ516_S1_L001_R2_001.fastq.gz .
-  OutDir=$ProjectDir/raw_dna/paired/F.oxysporum_fsp_lactucae/AJ520
-  mkdir -p $OutDir/F
-  mkdir -p $OutDir/R
-  cd $OutDir/F
-  cp -s $RawDatDir/AJ520_S2_L001_R1_001.fastq.gz .
-  cd $OutDir/R
-  cp -s $RawDatDir/AJ520_S2_L001_R2_001.fastq.gz .
+  cp -s $RawDatDir/Stat10_S1_L001_R2_001.fastq.gz .
   cd $ProjectDir
-``` -->
+```
 
 
 ## Assembly
@@ -115,7 +108,7 @@ Splitting reads and trimming adapters using porechop
   	qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
   done
 ```
-<!--
+
 #### QC of MiSeq data
 
 programs:
@@ -133,16 +126,16 @@ done
 ```
 
 ```bash
-	for StrainPath in $(ls -d raw_dna/paired/*/* | grep 'lactucae'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
-		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
-		ReadsF=$(ls $StrainPath/F/*.fastq*)
-		ReadsR=$(ls $StrainPath/R/*.fastq*)
-		echo $ReadsF
-		echo $ReadsR
-		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
-	done
-``` -->
+for StrainPath in $(ls -d raw_dna/paired/*/* | grep 'statice'); do
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
+IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+ReadsF=$(ls $StrainPath/F/*.fastq*)
+ReadsR=$(ls $StrainPath/R/*.fastq*)
+echo $ReadsF
+echo $ReadsR
+qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+done
+```
 
 # Identify sequencing coverage
 
@@ -427,6 +420,13 @@ ls -lh $OutDir/*/*.fa | grep -v ' 0 ' | cut -f8 -d '/' | sed 's/_consensus.fa//g
 for Region in $(cat $OutDir/nanopolish_range.txt | grep -vwf "$OutDir/files_present.txt"); do
 echo $Region
 echo $Region >> $OutDir/nanopolish_high_mem_log.txt
+Jobs=$(qstat | grep 'sub_nano_h' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 1m
+printf "."
+Jobs=$(qstat | grep 'sub_nano_h' | grep 'qw' | wc -l)
+done		
+printf "\n"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants_high_mem.sh $Assembly $ReadsFq $AlignedReads $Ploidy $Region $OutDir/$Region
 done
@@ -434,7 +434,7 @@ done
 ```
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'FON129' -e 'FON139' -e 'FON77' -e 'FON81' -e 'FON89'| grep -e 'FON81'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'Stat10'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -454,7 +454,7 @@ done
 Quast and busco were run to assess the effects of nanopolish on assembly quality:
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep -e 'FON129' -e 'FON139' -e 'FON77' -e 'FON81' -e 'FON89' | grep -e 'FON81'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep -e 'Stat10'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 # Quast
@@ -498,12 +498,11 @@ rm -r raw_dna/nanopolish/F.oxysporum_fsp_narcissi/FON139/home
 Assemblies were polished using Pilon
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta | grep -e 'FON129' -e 'FON139' -e 'FON77' -e 'FON81' -e 'FON89' | grep -e 'FON81' -e 'FON89'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanoplish_min_500bp_renamed.fasta  | grep -e 'Stat10'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
-Strain_mod=$(echo $Strain | sed 's/FO//g')
-IlluminaDir=$(ls -d ../fusarium/qc_dna/paired/*/*$Strain_mod)
+IlluminaDir=$(ls -d qc_dna/paired/*/$Strain)
 TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n1)
 TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n1)
 OutDir=$(dirname $Assembly)/../pilon
@@ -543,7 +542,7 @@ echo "$Organism - $Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
 BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
 OutDir=gene_pred/busco/$Organism/$Strain/assembly
-qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 

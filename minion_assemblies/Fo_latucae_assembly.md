@@ -352,14 +352,14 @@ qsub $ProgDir/sub_canu_correction.sh $TrimReads 58m $Strain $OutDir
 done
 
 # For AJ520
-TrimReads=$(ls qc_dna/minion/*/*/*_trim.fastq.gz| grep 'AJ520'); do
-Organism=$(echo $TrimReads | rev | cut -f3 -d '/' | rev)
-Strain=$(echo $TrimReads | rev | cut -f2 -d '/' | rev)
+TrimReads1=$(ls qc_dna/minion/*/*/*_trim.fastq.gz| grep 'AJ520' | head -n1 | tail -n1)
+TrimReads2=$(ls qc_dna/minion/*/*/*_trim.fastq.gz| grep 'AJ520' | head -n2 | tail -n1)
+Organism=$(echo $TrimReads1 | rev | cut -f3 -d '/' | rev)
+Strain=$(echo $TrimReads1 | rev | cut -f2 -d '/' | rev)
 echo $TrimReads
 OutDir=assembly/canu-1.6/$Organism/"$Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
-qsub $ProgDir/sub_canu_correction_2lib.sh $TrimReads 58m $Strain $OutDir
-
+qsub $ProgDir/sub_canu_correction_2lib.sh $TrimReads1 $TrimReads2 58m $Strain $OutDir
 ```
 
 
@@ -373,6 +373,7 @@ Prefix="$Strain"_smartdenovo
 OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/SMARTdenovo
 qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+# $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
 done
 ```
 
@@ -534,7 +535,7 @@ mkdir -p $TmpDir
 ScratchDir=/data/scratch/nanopore_tmp_data/Alternaria/albacore_v2.2.7
 # tar -zxvf $ScratchDir/AJ520_18-04-18_albacore_v2.2.7.tar.gz -C $TmpDir
 Fast5Dir1=$(ls -d /data/scratch/armita/FoL/F.oxysporum_fsp_lactucae/AJ520/home/nanopore/FoLatucae_26-04-18/F.oxysporum_fsp_lactucae/AJ520/18-04-18/albacore_v2.2.7/workspace/pass/)
-# nanopolish index -d $Fast5Dir1 $ReadsFq
+nanopolish index -d $Fast5Dir1 $ReadsFq
 done
 
 for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ520'); do
@@ -572,7 +573,7 @@ python $NanoPolishDir/nanopolish_makerange.py $Assembly --segment-length 50000 >
 
 Ploidy=1
 echo "nanopolish log:" > $OutDir/nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish_range.txt | grep 'contig_1:100000-150200'); do
+for Region in $(cat $OutDir/nanopolish_range.txt); do
 Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 1m
@@ -616,7 +617,7 @@ for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.f
 ```
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon_10/racon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep -e 'AJ520'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -715,7 +716,7 @@ echo "$Organism - $Strain"
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
 BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
 OutDir=gene_pred/busco/$Organism/$Strain/assembly
-qsub $ProgDir/sub_busco2.sh $Assembly $BuscoDB $OutDir
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 

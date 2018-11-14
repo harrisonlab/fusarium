@@ -546,3 +546,41 @@ done
 Number of masked bases:
 9075386
 ```
+
+
+
+
+## 5.1  Identifying SIX gene homologs
+
+## 5.1.a) Performing BLAST searches
+
+BLast searches were performed against the genome:
+
+```bash
+  for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'FON_63'); do
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    Query=../fusarium/analysis/blast_homology/six_genes/six-appended_parsed.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+```
+
+```
+
+## 5.1.b) Converting BLAST results to gff annotations
+
+Once blast searches had completed, the BLAST hits were converted to GFF
+annotations:
+
+```bash
+	for BlastHits in $(ls analysis/blast_homology/*/*/*_six-appended_parsed.fa_homologs.csv  | grep 'FON_63'); do
+		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)  
+		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		HitsGff=analysis/blast_homology/$Organism/$Strain/"$Strain"_six-appended_parsed.fa_homologs.gff
+		Column2=BLAST_hit
+		NumHits=1
+		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+	done
+```

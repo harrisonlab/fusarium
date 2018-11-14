@@ -144,7 +144,7 @@ For Minion data:
 for RawData in $(ls qc_dna/minion/*/*/*q.gz | grep 'statice'); do
 echo $RawData;
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
-GenomeSz=58
+GenomeSz=70
 OutDir=$(dirname $RawData)
 qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
 done
@@ -164,17 +164,17 @@ MinION coverage was:
 ```
 
 ```
-<!--
+
 For Miseq data:
 ```bash
-	for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'lactucae'); do
-		echo $RawData;
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
-		qsub $ProgDir/run_fastqc.sh $RawData;
-		GenomeSz=60
-		OutDir=$(dirname $RawData)
-		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
-	done
+for RawData in $(ls qc_dna/paired/*/*/*/*q.gz | grep 'statice'); do
+echo $RawData;
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $RawData;
+GenomeSz=70
+OutDir=$(dirname $RawData)
+qsub $ProgDir/sub_count_nuc.sh $GenomeSz $RawData $OutDir
+done
 ```
 
 ```bash
@@ -190,9 +190,9 @@ For Miseq data:
 
 Miseq coverage was:
 ```
-Stocks4	58.66
+
 ```
--->
+
 
 ### Read correction using Canu
 
@@ -470,7 +470,7 @@ done
 ```
 
 ```bash
-  for File in $(ls gene_pred/busco/*/*/assembly/*/short_summary_*.txt); do
+  for File in $(ls gene_pred/busco/*/*/assembly/*/short_summary_*.txt | grep -e 'Stat10'); do
   Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
   Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
   Version=$(echo $File | rev | cut -d '/' -f2 | rev)
@@ -515,7 +515,7 @@ done
 Contigs were renamed
 ```bash
 echo "" > tmp.txt
-Assembly=$(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'FON_63' | grep 'pilon_10')
+Assembly=$(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'Stat10' | grep 'pilon_10')
 OutDir=$(dirname $Assembly)
 ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
 $ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
@@ -525,7 +525,7 @@ Quast and busco were run to assess the effects of pilon on assembly quality:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'FON_63' | grep 'pilon_min_500bp_renamed.fasta'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'Stat10' | grep 'pilon_min_500bp_renamed.fasta'); do
   Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
   Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
   OutDir=$(dirname $Assembly)
@@ -535,7 +535,7 @@ done
 
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'FON_63'); do
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/*.fasta | grep 'Stat10'); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -549,7 +549,7 @@ done
 
 ```bash
 printf "Filename\tComplete\tDuplicated\tFragmented\tMissing\tTotal\n"
-for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'FON_63'); do  
+for File in $(ls gene_pred/busco/F*/*/assembly/*/short_summary_*.txt | grep 'Stat10'); do  
 FileName=$(basename $File)
 Complete=$(cat $File | grep "(C)" | cut -f2)
 Duplicated=$(cat $File | grep "(D)" | cut -f2)
@@ -558,4 +558,175 @@ Missing=$(cat $File | grep "(M)" | cut -f2)
 Total=$(cat $File | grep "Total" | cut -f2)
 printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
+```
+
+
+# Repeat Masking
+
+Repeat masking was performed on the non-hybrid assembly.
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stat10'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+done
+```
+
+The TransposonPSI masked bases were used to mask additional bases from the
+repeatmasker / repeatmodeller softmasked and hardmasked files.
+
+```bash
+
+for File in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'Stat10'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+for File in $(ls repeat_masked/*/*/*/*_contigs_hardmasked.fa  | grep -e 'AJ516' -e 'AJ520'); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+done
+```
+
+# Gene prediction
+
+## RNA QC
+
+RNAseq data has been previously qc'd as part of the commands contatined in the
+Fusarium repository README document.
+
+## Alignment
+
+Then Rnaseq data was aligned to each genome assembly:
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'Stat10'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+# echo "$Organism - $Strain"
+# echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v 'control'); do
+Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+# OutDir=alignment/$Organism/$Strain/$Timepoint
+Jobs=$(qstat | grep 'sub_sta' | grep 'qw'| wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 1m
+printf "."
+Jobs=$(qstat | grep 'sub_sta' | grep 'qw'| wc -l)
+done
+# printf "\n"
+# printf "\n"
+echo "$Organism - $Strain - $Timepoint"
+# echo $FileF
+# echo $FileR
+# Prefix=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+OutDir=../../../../../data/scratch/armita/fusarium/alignment/star/$Organism/$Strain/$Timepoint
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+echo "$Strain\t$Timepoint" >> alignment.log
+done
+done
+```
+
+Alignments were concatenated prior to gene prediction. This step was done through
+a qlogin session on the cluster.
+
+```bash
+	for StrainDir in $(ls -d ../../../../../data2/scratch/armita/fusarium/alignment/star/*/* | grep 'lactucae'); do
+	BamFiles=$(ls $StrainDir/*/*/star_aligmentAligned.sortedByCoord.out.bam | tr -d '\n' | sed 's/.bam/.bam /g')
+	OutDir=$StrainDir/concatenated
+	mkdir -p $OutDir
+	samtools merge -f $OutDir/all_reads_concatenated.bam $BamFiles
+	done
+```
+
+
+
+
+
+
+
+# 5. Genomic analysis
+
+
+## 5.1  Identifying SIX gene homologs
+
+## 5.1.a) Performing BLAST searches
+
+BLast searches were performed against the genome:
+
+```bash
+  for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep 'Stat10'); do
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    Query=analysis/blast_homology/six_genes/six-appended_parsed.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+```bash
+cat analysis/blast_homology/F.oxysporum_fsp_statice/Stat10/Stat10_six-appended_parsed.fa_homologs.csv | cut -f1,5,6
+```
+
+```
+ID	No.hits	Hit
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six11_(SIX11)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six13_(SIX13)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six14_(SIX14)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_1_(SIX1)_gene,_complete_cds	1	contig_20
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_2_(SIX2)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_IPO3_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_SIX3_gene_for_Secreted_in_xylem_3_protein	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_4_(SIX4)_gene,_complete_cds	1	contig_25
+Fusarium_oxysporum_f._sp._lycopersici_Six5_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds	0
+Fusarium_oxysporum_f._sp._passiflorae_SIX6_gene,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._niveum_SIX6_gene,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._vasinfectum_SIX6_gene,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six6_(SIX6)_mRNA,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._melonis_isolate_NRRL_26406_secreted_in_xylem_6-like_protein_(SIX6)_gene,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._radicis-cucumerinum_isolate_Afu-3_secreted_in_xylem_6-like_protein_(SIX6)_gene,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_6_(SIX6)_gene,_complete_cds	1	contig_23
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_7_(SIX7)_gene,_complete_cds	0
+Fusarium_oxysporum_SIX8_gene,_complete_cds	1	contig_25
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds	1	contig_24
+
+```
+
+## 5.1.b) Converting BLAST results to gff annotations
+
+Once blast searches had completed, the BLAST hits were converted to GFF
+annotations:
+
+```bash
+	for BlastHits in $(ls analysis/blast_homology/*/*/*_six-appended_parsed.fa_homologs.csv | grep 'Stat10'); do
+		Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)  
+		Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+		ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+		HitsGff=analysis/blast_homology/$Organism/$Strain/"$Strain"_six-appended_parsed.fa_homologs.gff
+		Column2=BLAST_hit
+		NumHits=1
+		$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+	done
 ```

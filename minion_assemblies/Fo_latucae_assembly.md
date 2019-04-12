@@ -892,8 +892,7 @@ directory:
 	cp /home/armita/prog/genemark/gm_key_64 ~/.gm_key
 ```
 
-```bash
-
+<!-- ```bash
 for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e 'AJ516' -e 'AJ520' | grep 'AJ520'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -905,6 +904,52 @@ rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
 qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
+``` -->
+
+
+Gene prediction was run on the new cluster from a screen session with a ssh connection to a worker node:
+
+```bash
+screen -a
+ssh compute03
+
+ProjDir=/oldhpc/home/groups/harrisonlab/project_files/fusarium
+
+for Assembly in $(ls $ProjDir/repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+
+
+WorkDir=$HOME/tmp/braker_Fus_${Strain}
+OutDir=$ProjDir/gene_pred/braker/$Organism/${Strain}_UTR
+AcceptedHits=$(ls /oldhpc/data/scratch/armita/fusarium/alignment/star/*/${Strain}/concatenated/all_reads_concatenated.bam)
+GeneModelName="$Organism"_"$Strain"_braker
+CurDir=$PWD
+
+mkdir -p $WorkDir
+cd $WorkDir
+
+cp $Assembly assembly.fa
+cp $AcceptedHits alignedRNA.bam
+
+braker.pl \
+  --cores 40 \
+  --overwrite \
+  --fungus \
+  --UTR=on \
+  --gff3 \
+  --softmasking on \
+  --species=$GeneModelName \
+  --genome="assembly.fa" \
+  --bam="alignedRNA.bam"
+
+mkdir -p $CurDir/$OutDir
+cp -r braker/* $CurDir/$OutDir/.
+done
+
+# rm -r $WorkDir
+
 ```
 
 Fasta and gff files were extracted from Braker1 output.

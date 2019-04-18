@@ -944,8 +944,8 @@ braker.pl \
   --genome="assembly.fa" \
   --bam="alignedRNA.bam"
 
-mkdir -p $CurDir/$OutDir
-cp -r braker/* $CurDir/$OutDir/.
+mkdir -p $OutDir
+cp -r braker/* $OutDir/.
 done
 
 # rm -r $WorkDir
@@ -955,16 +955,37 @@ done
 Fasta and gff files were extracted from Braker1 output.
 
 ```bash
-for File in $(ls gene_pred/braker/*/*_braker/*/augustus.gff3 | grep -e 'FON_63' -e 'Stocks4'); do
-getAnnoFasta.pl $File
-OutDir=$(dirname $File)
-echo "##gff-version 3" > $OutDir/augustus_extracted.gff
-cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+for File in $(ls gene_pred/braker/*/*_UTR/*/augustus.hints.gff3 | grep -e 'AJ516' -e 'AJ520' ); do
+	Strain=$(echo $File | rev | cut -d '/' -f3 | rev | sed 's/_UTR//g')
+	Organism=$(echo $File | rev | cut -d '/' -f4 | rev)
+	echo "$Organism - $Strain"
+	echo "number of genes:"
+	cat $File | grep -v '#' | grep -w 'gene' | wc -l
+	echo "number of genes with predicted UTRs"
+	cat ${File%.gff3}_utr.gff | grep -v '#' | grep -w 'gene' | wc -l
+
+	getAnnoFasta.pl $File
+	OutDir=$(dirname $File)
+	echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+	cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
 done
 ```
 
+```
+	F.oxysporum_fsp_lactucae - AJ516
+	number of genes:
+	17374
+	number of genes with predicted UTRs
+	16260
+	F.oxysporum_fsp_lactucae - AJ520
+	number of genes:
+	16603
+	number of genes with predicted UTRs
+	15735
+```
 
-## Supplimenting Braker gene models with CodingQuary genes
+
+## Supplementing Braker gene models with CodingQuary genes
 
 Additional genes were added to Braker gene predictions, using CodingQuary in
 pathogen mode to predict additional regions.
@@ -1018,15 +1039,19 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -e 'AJ516' -e 'AJ520'); do
-Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker//g')
+# for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.gff3 | grep -e 'AJ516' -e 'AJ520'); do
+# Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker//g')
+# Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+for BrakerGff in $(ls gene_pred/braker/F.*/*/*/augustus.hints.gff3 | grep -e 'AJ516' -e 'AJ520' | grep 'AJ516'); do
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_UTR//g')
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 Assembly=$(ls repeat_masked/$Organism/$Strain/filtered_contigs/*_softmasked_repeatmasker_TPSI_appended.fa)
 CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
 PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
 AddDir=gene_pred/codingquary/$Organism/$Strain/additional
-FinalDir=gene_pred/final/$Organism/$Strain/final
+# FinalDir=gene_pred/final/$Organism/$Strain/final
+FinalDir=gene_pred/final/$Organism/$Strain/publication
 AddGenesList=$AddDir/additional_genes.txt
 AddGenesGff=$AddDir/additional_genes.gff
 FinalGff=$AddDir/combined_genes.gff
@@ -1063,15 +1088,99 @@ done
 ```
 
 ```
-gene_pred/final_genes/F.oxysporum_fsp_mathioli/Stocks4/final
-19185
-1197
-20382
+F.oxysporum_fsp_lactucae - AJ516
+Genome fasta parsed
+NS_02920: upstream edited -
+NS_05731: upstream edited -
+CUFF_11431_1_62: upstream edited -
+NS_10610: upstream edited +
+NS_12018: upstream edited +
+NS_12300: upstream edited -
+NS_12505: upstream edited +
+NS_13067: upstream edited -
+NS_13068: upstream edited +
+NS_13138: upstream edited +
+CUFF_12370_1_28: upstream edited -
+NS_13176: upstream edited +
+NS_13177: upstream edited +
+NS_13527: upstream edited -
+NS_13642: upstream edited +
+NS_13713: upstream edited -
+NS_13951: upstream edited -
+NS_13953: upstream edited -
+NS_13954: upstream edited -
+NS_14106: upstream edited +
+NS_14274: upstream edited -
+NS_14345: upstream edited -
+NS_14346: upstream edited -
+Genome fasta parsed
+g1: upstream edited +
+g3102: upstream edited -
+g6383: upstream edited -
+g6431: upstream edited -
+g8760: upstream edited +
+g11547: upstream edited -
+g11548: upstream edited -
+g11773: upstream edited +
+g11907: upstream edited -
+g13216: upstream edited +
+g13719: upstream edited -
+g14902: upstream edited +
+g16581: upstream edited -
+g17306: upstream edited +
+g17323: upstream edited +
 
-gene_pred/final_genes/F.oxysporum_fsp_narcissi/FON_63/final
-19243
-1443
-20686
+F.oxysporum_fsp_lactucae - AJ520
+Genome fasta parsed
+NS_00830: upstream edited -
+NS_05752: upstream edited +
+PGN_16225: upstream edited -
+NS_07976: upstream edited -
+NS_07977: upstream edited -
+NS_08169: upstream edited -
+NS_08170: upstream edited -
+NS_08171: upstream edited -
+NS_09058: upstream edited +
+NS_09059: upstream edited +
+NS_09232: upstream edited +
+NS_09804: upstream edited -
+CUFF_11773_1_12: upstream edited -
+NS_10138: upstream edited -
+NS_10516: upstream edited +
+NS_12584: upstream edited +
+NS_12585: upstream edited +
+NS_10688: upstream edited +
+NS_11166: upstream edited +
+NS_11195: upstream edited -
+NS_11380: upstream edited -
+NS_11381: upstream edited -
+NS_11859: upstream edited -
+NS_11932: upstream edited +
+NS_11963: upstream edited -
+NS_12399: upstream edited -
+NS_12432: upstream edited +
+NS_12470: upstream edited +
+NS_12520: upstream edited -
+NS_12562: upstream edited +
+NS_12567: upstream edited +
+NS_12568: upstream edited +
+NS_12812: upstream edited +
+NS_12813: upstream edited +
+Genome fasta parsed
+g1518: upstream edited -
+g4427: upstream edited -
+g6830: upstream edited -
+g6860: upstream edited -
+g9912: upstream edited -
+g9913: upstream edited +
+g11071: upstream edited -
+g12759: upstream edited -
+g14278: upstream edited -
+g15167: upstream edited -
+g15835: upstream edited -
+g16280: upstream edited +
+g16332: upstream edited +
+g16603: upstream edited -
 ```
 
 
@@ -1096,11 +1205,16 @@ genes were predicted in regions of the genome, not containing Braker gene
 models:
 
 ```bash
-for GffAppended in $(ls gene_pred/final/*/*/final/final_genes_appended.gff3 | grep -e 'AJ516' -e 'AJ520'); do
-Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+# for GffAppended in $(ls gene_pred/final/*/*/final/final_genes_appended.gff3 | grep -e 'AJ516' -e 'AJ520'); do
+# Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+# Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+# echo "$Organism - $Strain"
+# FinalDir=gene_pred/final/$Organism/$Strain/final
+for GffAppended in $(ls gene_pred/final/*/*/publication/final_genes_appended.gff3 | grep -e 'AJ516' -e 'AJ520' | grep 'AJ516'); do
+Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev | sed 's/_UTR//g')
 Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
-FinalDir=gene_pred/final/$Organism/$Strain/final
+FinalDir=gene_pred/final/$Organism/$Strain/publication
 GffFiltered=$FinalDir/filtered_duplicates.gff
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 $ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
@@ -1110,15 +1224,15 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
 $ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
 rm $GffFiltered
 Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_unmasked_wrapped.fa)
-$ProgDir/gff2fasta.pl $Assembly $GffRenamed gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed
+$ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed
 # The proteins fasta file contains * instead of Xs for stop codons, these should
 # be changed
-sed -i 's/\*/X/g' gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.pep.fasta
+sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
 done
 ```
 
 ```bash
-for Gff in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.gff3  | grep -e 'AJ516' -e 'AJ520'); do
+for Gff in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.gff3  | grep -e 'AJ516' -e 'AJ520'); do
 	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
 	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
 	echo "$Strain - $Organism"
@@ -1126,18 +1240,27 @@ for Gff in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.gff3  | g
 done
 ```
 
+<!--
 ```
 AJ516 - F.oxysporum_fsp_lactucae
 22217
 AJ520 - F.oxysporum_fsp_lactucae
 20614
 ```
+-->
+
+```bash
+AJ516 - F.oxysporum_fsp_lactucae
+22129
+AJ520 - F.oxysporum_fsp_lactucae
+20639
+```
 
 
 ## Assessing the Gene space in predicted transcriptomes:
 
 ```bash
-for Assembly in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.gene.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Assembly in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.gene.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1150,13 +1273,75 @@ done
 ```
 
 ```bash
-	for File in $(ls gene_pred/busco/*/*/genes/*/short_summary_*.txt); do  
-		echo $File;
-		cat $File | grep -e '(C)' -e 'Total';
-	done
+for File in $(ls gene_pred/busco/*/*/genes/*/short_summary_*.txt | grep -e 'AJ516' -e 'AJ520'); do  
+echo $File;
+cat $File | grep -e '(C)' -e 'Total';
+done
+```
+<!--
+```
+gene_pred/busco/F.oxysporum_fsp_lactucae/AJ516/genes/run_final_genes_appended_renamed.gene/short_summary_final_genes_appended_renamed.gene.txt
+	3670	Complete BUSCOs (C)
+	3725	Total BUSCO groups searched
+gene_pred/busco/F.oxysporum_fsp_lactucae/AJ520/genes/run_final_genes_appended_renamed.gene/short_summary_final_genes_appended_renamed.gene.txt
+	3673	Complete BUSCOs (C)
+	3725	Total BUSCO groups searched
+```
+ -->
+
 ```
 
+```
 
+## FunGap
+
+Gene prediction was run on the new cluster from a screen session with a ssh connection to a worker node:
+
+```bash
+screen -a
+ssh compute03
+
+ProjDir=/oldhpc/home/groups/harrisonlab/project_files/fusarium
+
+for Assembly in $(ls $ProjDir/repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+
+
+WorkDir=$HOME/tmp/fungap_Fus_${Strain}
+OutDir=$ProjDir/gene_pred/fungap/$Organism/${Strain}
+AcceptedHits=$(ls /oldhpc/data/scratch/armita/fusarium/alignment/star/*/${Strain}/concatenated/all_reads_concatenated.bam)
+GeneModelName="$Organism"_"$Strain"_fungap
+CurDir=$PWD
+
+mkdir -p $WorkDir
+cd $WorkDir
+
+cp $Assembly assembly.fa
+cp $AcceptedHits alignedRNA.bam
+
+conda activate fungap
+
+
+fungap \
+  --num_cores 40 \
+  --output_dir out \
+  -1 $TrimF \
+	-2 $TrimR \
+  --genome_assembly assembly.fa \
+  --augustus_species $GeneModelName \
+  --sister_proteome $RefProteome \
+  --species=$GeneModelName \
+  --trans_bam "alignedRNA.bam"
+
+mkdir -p $OutDir
+cp -r braker/* $OutDir/.
+done
+
+# rm -r $WorkDir
+
+```
 
 #Functional annotation
 
@@ -1168,7 +1353,7 @@ Annotation was run using the commands below:
 Note: This is a long-running script. As such, these commands were run using
 'screen' to allow jobs to be submitted and monitored in the background.
 This allows the session to be disconnected and reconnected over time.
-<!--
+
 Screen ouput detailing the progress of submission of interporscan jobs
 was redirected to a temporary output file named interproscan_submission.log .
 
@@ -1176,7 +1361,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+	for Genes in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do  
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1187,7 +1372,7 @@ commands:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-for Proteins in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+for Proteins in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"

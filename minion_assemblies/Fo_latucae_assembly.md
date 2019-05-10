@@ -1303,15 +1303,21 @@ ssh compute03
 
 ProjDir=/oldhpc/home/groups/harrisonlab/project_files/fusarium
 
-for Assembly in $(ls $ProjDir/repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e 'AJ516' -e 'AJ520'); do
+cat /oldhpc/home/groups/harrisonlab/project_files/fusarium/qc_rna/paired/F.oxysporum_fsp_cepae/[^control]*[^prelim][^prelim_rep1]/F/*_trim.fq.gz > $HOME/tmp/concat_1.fastq.gz
+cat /oldhpc/home/groups/harrisonlab/project_files/fusarium/qc_rna/paired/F.oxysporum_fsp_cepae/[^control]*[^prelim][^prelim_rep1]/R/*_trim.fq.gz > $HOME/tmp/concat_2.fastq.gz
+
+gunzip $HOME/tmp/concat*.fastq.gz
+
+for Assembly in $(ls $ProjDir/repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -e 'AJ516' -e 'AJ520' | grep 'AJ516'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 
-
 WorkDir=$HOME/tmp/fungap_Fus_${Strain}
 OutDir=$ProjDir/gene_pred/fungap/$Organism/${Strain}
 AcceptedHits=$(ls /oldhpc/data/scratch/armita/fusarium/alignment/star/*/${Strain}/concatenated/all_reads_concatenated.bam)
+RefProteome=$(ls /oldhpc/home/groups/harrisonlab/project_files/fusarium/gene_pred/published/F.oxysporum_fsp_lycopersici/4287_chromosomal/4287_published_genes.fa.pep.fasta)
+
 GeneModelName="$Organism"_"$Strain"_fungap
 CurDir=$PWD
 
@@ -1321,10 +1327,12 @@ cd $WorkDir
 cp $Assembly assembly.fa
 cp $AcceptedHits alignedRNA.bam
 
+TrimF=$(ls ../concat_1.fastq)
+TrimR=$(ls ../concat_2.fastq)
+
 conda activate fungap
 
-
-fungap \
+fungap.py \
   --num_cores 40 \
   --output_dir out \
   -1 $TrimF \
@@ -1332,7 +1340,6 @@ fungap \
   --genome_assembly assembly.fa \
   --augustus_species $GeneModelName \
   --sister_proteome $RefProteome \
-  --species=$GeneModelName \
   --trans_bam "alignedRNA.bam"
 
 mkdir -p $OutDir

@@ -780,6 +780,77 @@ short_summary_AJ520_nanoplish_min_500bp_renamed.txt	1731	8	97	1897	3725
 
 ```
 
+
+
+## Identifying Mitochondrial genes in assemblies
+<!--
+Using a blast based approach of Mt genes:
+
+```bash
+for Assembly in $(ls assembly/merged_SMARTdenovo_spades/*/1166/pilon/pilon_min_500bp_renamed.fasta assembly/SMARTdenovo/A.gaisen/650/pilon/pilon_min_500bp_renamed.fasta); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo $Assembly
+Query=$(ls ../../../../home/groups/harrisonlab/project_files/alternaria/analysis/blast_homology/Mt_dna/Mt_genes_A.alternata_Liao_2017.fasta)
+OutDir=analysis/Mt_genes/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query protein $Assembly $OutDir
+done
+```
+
+Using an exclusion database with deconseq:
+
+
+```bash
+  for Assembly in $(ls assembly/merged_SMARTdenovo_spades/*/1166/pilon/pilon_min_500bp_renamed.fasta assembly/SMARTdenovo/A.gaisen/650/pilon/pilon_min_500bp_renamed.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    echo "$Organism - $Strain"
+    for Exclude_db in "Aalt_mtDNA"; do
+      AssemblyDir=$(dirname $Assembly)
+      OutDir=$AssemblyDir/../deconseq_$Exclude_db
+      ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+      qsub $ProgDir/sub_deconseq_no_retain.sh $Assembly $Exclude_db $OutDir
+    done
+  done
+```
+
+Results were summarised using the commands:
+
+```bash
+for Exclude_db in "Aalt_mtDNA"; do
+echo $Exclude_db
+for File in $(ls assembly/*/*/*/*/log.txt | grep "$Exclude_db"); do
+Name=$(echo $File | rev | cut -f3 -d '/' | rev);
+Good=$(cat $File |cut -f2 | head -n1 | tail -n1);
+Bad=$(cat $File |cut -f2 | head -n3 | tail -n1);
+printf "$Name\t$Good\t$Bad\n";
+done
+done
+```
+
+```
+Aalt_mtDNA
+1166	22	1
+650	23	1
+650	27	1
+```
+
+Quast was run on the removed mtDNA:
+
+```bash
+for Assembly in $(ls assembly/*/A*/*/deconseq_Aalt_mtDNA/*_cont.fa); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+ -->
+
+
 # Repeat Masking
 
 Repeat masking was performed on the non-hybrid assembly.
@@ -1290,7 +1361,12 @@ gene_pred/busco/F.oxysporum_fsp_lactucae/AJ520/genes/run_final_genes_appended_re
  -->
 
 ```
-
+gene_pred/busco/F.oxysporum_fsp_lactucae/AJ516/genes/run_final_genes_appended_renamed.gene/short_summary_final_genes_appended_renamed.gene.txt
+	3667	Complete BUSCOs (C)
+	3725	Total BUSCO groups searched
+gene_pred/busco/F.oxysporum_fsp_lactucae/AJ520/genes/run_final_genes_appended_renamed.gene/short_summary_final_genes_appended_renamed.gene.txt
+	3669	Complete BUSCOs (C)
+	3725	Total BUSCO groups searched
 ```
 
 ## FunGap
@@ -1395,7 +1471,7 @@ done
 
 
 ```bash
-for Proteome in $(ls gene_pred/final_genes/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+for Proteome in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -1405,7 +1481,6 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swis
 qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
 done
 ```
--->
 
 # C) Identifying secreted proteins
 

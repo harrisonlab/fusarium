@@ -602,16 +602,88 @@ done
 ```
 -->
 
+
+
+# Identifying Mitochondrial genes in assemblies
+
+Using a blast based approach of Mt genes:
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stocks4'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo $Assembly
+Query=$(ls analysis/blast_homology/Mt_genes/F.spp._mt_prots_Al-Reedy_et_al._2012.fasta)
+OutDir=analysis/Mt_genes/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query protein $Assembly $OutDir
+done
+```
+
+Using an exclusion database with deconseq:
+
+
+```bash
+  for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stocks4'); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    echo "$Organism - $Strain"
+    for Exclude_db in "Fo_mtDNA"; do
+      AssemblyDir=$(dirname $Assembly)
+      OutDir=$AssemblyDir/../deconseq_$Exclude_db
+      ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+      qsub $ProgDir/sub_deconseq_no_retain.sh $Assembly $Exclude_db $OutDir
+    done
+  done
+```
+
+Results were summarised using the commands:
+
+```bash
+for Exclude_db in "Fo_mtDNA"; do
+echo $Exclude_db
+for File in $(ls assembly/*/*/*/*/log.txt | grep "$Exclude_db"); do
+Name=$(echo $File | rev | cut -f3 -d '/' | rev);
+Good=$(cat $File |cut -f2 | head -n1 | tail -n1);
+Bad=$(cat $File |cut -f2 | head -n3 | tail -n1);
+printf "$Name\t$Good\t$Bad\n";
+done
+done
+```
+
+```
+Fo_mtDNA
+
+	AJ516	93	1
+	AJ520	104	1
+	Stocks4	39	1
+```
+
+Quast was run on the removed mtDNA:
+
+```bash
+for Assembly in $(ls assembly/*/*/*/deconseq_Fo_mtDNA/*_cont.fa); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+
 # Repeat Masking
 
 Repeat masking was performed on the non-hybrid assembly.
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stocks4'); do
+for Assembly in $(ls assembly/*/*/*/deconseq_Fo_mtDNA/contigs_min_500bp_filtered_renamed.fasta | grep -e 'Stocks4'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
-OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
+OutDir=repeat_masked/$Organism/"$Strain"/filtered_ncbi
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
 qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
 qsub $ProgDir/transposonPSI.sh $Assembly $OutDir

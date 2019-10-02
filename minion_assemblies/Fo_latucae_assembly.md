@@ -1302,8 +1302,53 @@ sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
 done
 ```
 
+ * A number of cufflinks predicted genes were identified as being located completely within other cufflinks predicted gene models
+ These were removed:
+
+Removing g7395 g8688 for AJ516:
 ```bash
-for Gff in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.gff3  | grep -e 'AJ516' -e 'AJ520'); do
+ for Gff in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.gff3  | grep 'AJ516'); do
+ 	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
+ 	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
+	FinalDir=gene_pred/final/$Organism/$Strain/publication
+	GffFiltered=$FinalDir/filtered_nested.gff
+	cat $Gff | grep -w -v -e 'g7395' -e 'g8688' > $GffFiltered
+	GffRenamed=$FinalDir/final_genes_appended_renamed_ncbi.gff3
+	LogFile=$FinalDir/final_genes_appended_renamed_ncbi.log
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+	$ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+	rm $GffFiltered
+	Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_unmasked_wrapped.fa)
+	$ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed_ncbi
+	# The proteins fasta file contains * instead of Xs for stop codons, these should
+	# be changed
+	sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed_ncbi.pep.fasta
+done
+```
+
+Removing g2170 g14553 g16714 for AJ520:
+```bash
+ for Gff in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.gff3  | grep 'AJ520'); do
+ 	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
+ 	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
+	FinalDir=gene_pred/final/$Organism/$Strain/publication
+	GffFiltered=$FinalDir/filtered_nested.gff
+	cat $Gff | grep -w -v -e 'g2170' -e 'g14553' -e 'g16714' > $GffFiltered
+	GffRenamed=$FinalDir/final_genes_appended_renamed_ncbi.gff3
+	LogFile=$FinalDir/final_genes_appended_renamed_ncbi.log
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+	$ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+	rm $GffFiltered
+	Assembly=$(ls repeat_masked/$Organism/$Strain/*/*_unmasked_wrapped.fa)
+	$ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed_ncbi
+	# The proteins fasta file contains * instead of Xs for stop codons, these should
+	# be changed
+	sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed_ncbi.pep.fasta
+done
+```
+
+```bash
+for Gff in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed_ncbi.gff3  | grep -e 'AJ516' -e 'AJ520'); do
 	Strain=$(echo $Gff | rev | cut -d '/' -f3 | rev)
 	Organism=$(echo $Gff | rev | cut -d '/' -f4 | rev)
 	echo "$Strain - $Organism"
@@ -1318,20 +1363,26 @@ AJ516 - F.oxysporum_fsp_lactucae
 AJ520 - F.oxysporum_fsp_lactucae
 20614
 ```
--->
-
-```bash
+```
 AJ516 - F.oxysporum_fsp_lactucae
 22129
 AJ520 - F.oxysporum_fsp_lactucae
 20639
+```
+-->
+
+```
+AJ516 - F.oxysporum_fsp_lactucae
+22127
+AJ520 - F.oxysporum_fsp_lactucae
+20636
 ```
 
 
 ## Assessing the Gene space in predicted transcriptomes:
 
 ```bash
-for Assembly in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.gene.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Assembly in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed_ncbi.gene.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1358,7 +1409,6 @@ gene_pred/busco/F.oxysporum_fsp_lactucae/AJ520/genes/run_final_genes_appended_re
 	3673	Complete BUSCOs (C)
 	3725	Total BUSCO groups searched
 ```
- -->
 
 ```
 gene_pred/busco/F.oxysporum_fsp_lactucae/AJ516/genes/run_final_genes_appended_renamed.gene/short_summary_final_genes_appended_renamed.gene.txt
@@ -1367,6 +1417,11 @@ gene_pred/busco/F.oxysporum_fsp_lactucae/AJ516/genes/run_final_genes_appended_re
 gene_pred/busco/F.oxysporum_fsp_lactucae/AJ520/genes/run_final_genes_appended_renamed.gene/short_summary_final_genes_appended_renamed.gene.txt
 	3669	Complete BUSCOs (C)
 	3725	Total BUSCO groups searched
+```
+-->
+
+```
+
 ```
 
 ## FunGap
@@ -1444,7 +1499,7 @@ was redirected to a temporary output file named interproscan_submission.log .
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
 	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-	for Genes in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do  
+	for Genes in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do  
 	echo $Genes
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
@@ -1455,7 +1510,7 @@ commands:
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-for Proteins in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Proteins in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -1471,7 +1526,7 @@ done
 
 
 ```bash
-for Proteome in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Proteome in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/swissprot/$Organism/$Strain
@@ -1495,7 +1550,7 @@ the following commands:
 SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
 CurPath=$PWD
-for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/final_genes_split/$Organism/$Strain
@@ -1549,7 +1604,7 @@ cytoplasmic or apoplastic effectors.
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices

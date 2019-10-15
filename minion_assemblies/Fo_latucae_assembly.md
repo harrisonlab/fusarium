@@ -860,7 +860,7 @@ for Assembly in $(ls assembly/*/*/*/deconseq_Fo_mtDNA/contigs_min_500bp_filtered
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
-OutDir=repeat_masked/$Organism/"$Strain"/filtered_ncbi
+OutDir=repeat_masked/$Organism/"$Strain"/filtered_contigs
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
 qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
 qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
@@ -891,6 +891,22 @@ bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
 done
 ```
 
+Quast and busco was run on the final assembly:
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa  | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+# qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+OutDir=gene_pred/busco/$Organism/$Strain/assembly
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
+
 
 # Gene prediction
 
@@ -904,7 +920,7 @@ Fusarium repository README document.
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa | grep 'AJ520'); do
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep 'AJ520'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 # echo "$Organism - $Strain"
@@ -1395,7 +1411,7 @@ done
 ```
 
 ```bash
-for File in $(ls gene_pred/busco/*/*/genes/*/short_summary_*.txt | grep -e 'AJ516' -e 'AJ520'); do  
+for File in $(ls gene_pred/busco/*/*/genes/*/short_summary_*.txt | grep -e 'AJ516' -e 'AJ520' | grep '_ncbi.gene.txt'); do  
 echo $File;
 cat $File | grep -e '(C)' -e 'Total';
 done
@@ -1495,6 +1511,7 @@ This allows the session to be disconnected and reconnected over time.
 Screen ouput detailing the progress of submission of interporscan jobs
 was redirected to a temporary output file named interproscan_submission.log .
 
+<!--
 ```bash
 	screen -a
 	cd /home/groups/harrisonlab/project_files/fusarium
@@ -1504,6 +1521,30 @@ was redirected to a temporary output file named interproscan_submission.log .
 	$ProgDir/sub_interproscan.sh $Genes
 	done 2>&1 | tee -a interproscan_submisison.log
 ```
+-->
+
+
+From the new cluster:
+
+```bash
+screen -a
+cd /projects/oldhome/groups/harrisonlab/project_files/fusarium
+
+for Fasta in $(ls gene_pred/interproscan/*/*/final_genes_appended_renamed_ncbi.pep.fasta_split_*.fa | grep -e 'AJ516' -e 'AJ520'); do
+	Jobs=$(squeue -n squeue -n slurm_interproscan.sh -t pd,s,cf,ca,f,to,pr,bf,nf,se | wc -l)
+	while [ $Jobs -gt 3 ]; do
+	sleep 10
+	printf "."
+	Jobs=$(squeue -n squeue -n slurm_interproscan.sh -t pd,s,cf,ca,f,to,pr,bf,nf,se | wc -l)
+	done
+	printf "\n"
+	echo $File
+	OutDir=$(dirname $Fasta)/raw
+	ProgDir=/projects/oldhome/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+	sbatch $ProgDir/slurm_interproscan.sh $Fasta $OutDir
+done
+```
+
 
 Following interproscan annotation split files were combined using the following
 commands:
@@ -1516,14 +1557,13 @@ Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 echo $Strain
 InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
+# InterProRaw=gene_pred/interproscan_old/$Organism/$Strain/raw
 $ProgDir/append_interpro.sh $Proteins $InterProRaw
 done
 ```
 
 
 ## B) SwissProt
-
-
 
 ```bash
 for Proteome in $(ls gene_pred/final/*/*/publication/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
@@ -1638,18 +1678,18 @@ done
 ```
 F.oxysporum_fsp_lactucae - AJ516
 Number of SigP proteins:
-1926
+1921
 Number without transmembrane domains:
 1596
 Number of gene models:
-1593
+1594
 F.oxysporum_fsp_lactucae - AJ520
 Number of SigP proteins:
-1850
+1845
 Number without transmembrane domains:
-1530
+1529
 Number of gene models:
-1526
+1525
 ```
 
 ### C) Identification of MIMP-flanking genes
@@ -1658,7 +1698,7 @@ Number of gene models:
 for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -e 'AJ516' -e 'AJ520'); do
 Organism=$(echo "$Assembly" | rev | cut -d '/' -f4 | rev)
 Strain=$(echo "$Assembly" | rev | cut -d '/' -f3 | rev)
-GeneGff=$(ls gene_pred/final/$Organism/"$Strain"/final/final_genes_appended_renamed.gff3)
+GeneGff=$(ls gene_pred/final/${Organism}/${Strain}/publication/final_genes_appended_renamed_ncbi.gff3)
 OutDir=analysis/mimps/$Organism/$Strain
 mkdir -p "$OutDir"
 echo "$Organism - $Strain"
@@ -1685,14 +1725,14 @@ The number of mimps identified:
 191
 The following transcripts intersect mimps:
 162
-160
+161
 
 F.oxysporum_fsp_lactucae - AJ520
 The number of mimps identified:
 220
 The following transcripts intersect mimps:
-176
 174
+172
 ```
 
 Those genes that were predicted as secreted and within 2Kb of a MIMP
@@ -1711,10 +1751,9 @@ cat $Secretome | grep '>' | tr -d '>' | sed 's/-p.//g' > $SecretedHeaders
 SecretedMimps=$(echo "$File" | sed 's/.txt/_secreted_headers.txt/g')
 cat $ProtsFile $SecretedHeaders | cut -f1 | sort | uniq -d > $SecretedMimps
 cat $SecretedMimps | wc -l
-cat $SecretedHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $File > tmp.txt
+cat $SecretedHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -w -f $File > tmp.txt
 cat tmp.txt | wc -l
-cat $SecretedHeaders | cut -f1 | cut -f1 -d '.' | sort | uniq | grep -f $File > tmp.txt
-cat $SecretedHeaders | cut -f1 | sort | uniq | grep -f $File > tmp2.txt
+cat $SecretedHeaders | cut -f1 | sort | uniq | grep -w -f $File > tmp2.txt
 MimpsGff=$(ls analysis/mimps/$Organism/$Strain/*_mimps.gff)
 GenesIn2Kb=$(ls analysis/mimps/$Organism/$Strain/"$Strain"_genes_in_2kb_mimp.gff)
 SecretedMimpsGff=$(echo $GenesIn2Kb | sed 's/.gff/_secreted.gff/g')
@@ -1728,11 +1767,11 @@ done
 
 ```
 F.oxysporum_fsp_lactucae - AJ516
-25
-25
+27
+27
 F.oxysporum_fsp_lactucae - AJ520
-28
-33
+27
+27
 ```
 
 sequences of these genes were extracted:
@@ -1742,7 +1781,7 @@ for Headers in $(ls analysis/mimps/F.oxysporum_fsp_lactucae/*/*_genes_in_2kb_mim
 	echo $Headers
 	Organism=$(echo "$Headers" | rev | cut -d '/' -f3 | rev)
 	Strain=$(echo "$Headers" | rev | cut -d '/' -f2 | rev)
-	Genes=$(ls gene_pred/final/$Organism/"$Strain"/final/final_genes_appended_renamed.gene.fasta)
+	Genes=$(ls gene_pred/final/$Organism/"$Strain"/publication/final_genes_appended_renamed_ncbi.gene.fasta)
 	HeadersMod=$(echo $Headers | sed 's/_headers.txt/_headers_mod.txt/g')
 	cat $Headers | sed "s/\.t.//g" > $HeadersMod
 	OutFile=$(echo $Headers | sed 's/_headers.txt/.fa/g')
@@ -1758,7 +1797,7 @@ Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations
 at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
 ```bash
-for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
+for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 OutDir=gene_pred/CAZY/$Organism/$Strain
@@ -1788,7 +1827,7 @@ cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
 echo "number of CAZY proteins identified:"
 cat $CazyHeaders | wc -l
 # Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
-Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+Gff=$(ls gene_pred/final/$Organism/$Strain/publication/final_genes_appended_renamed_ncbi.gff3)
 CazyGff=$OutDir/"$Strain"_CAZY.gff
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
@@ -1816,14 +1855,14 @@ number of CAZY proteins identified:
 number of CAZY genes identified:
 964
 number of Secreted CAZY proteins identified:
-408
+403
 number of Secreted CAZY genes identified:
-408
+403
 F.oxysporum_fsp_lactucae - AJ520
 number of CAZY proteins identified:
-947
+948
 number of CAZY genes identified:
-947
+948
 number of Secreted CAZY proteins identified:
 404
 number of Secreted CAZY genes identified:
@@ -1860,7 +1899,7 @@ for CAZY in $(ls gene_pred/CAZY/*/*/*_CAZY.out.dm.ps | grep -e 'AJ516' -e 'AJ520
   OutDir=$(dirname $CAZY)
   echo "$Organism - $Strain"
   Secreted=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
-  Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+  Gff=$(ls gene_pred/final/$Organism/$Strain/publication/final_genes_appended_renamed_ncbi.gff3)
   ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/CAZY
   $ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
 done
@@ -1871,26 +1910,26 @@ F.oxysporum_fsp_lactucae - AJ516
 B-Galactosidases - 2
 A-Galactosidases - 4
 Polygalacturonase - 17
-A-Arabinosidases - 22
+A-Arabinosidases - 21
 Xylanases - 10
 Polygalacturonate lyases - 23
 B-Glucuronidases - 4
 B-Glycosidases - 10
 Cellulases - 19
+other - 292
 Xyloglucanases - 1
-other - 295
 F.oxysporum_fsp_lactucae - AJ520
 B-Galactosidases - 2
 A-Galactosidases - 4
 Polygalacturonase - 17
-A-Arabinosidases - 23
+A-Arabinosidases - 24
 Xylanases - 11
 Polygalacturonate lyases - 23
 B-Glucuronidases - 4
-B-Glycosidases - 13
-Cellulases - 21
+B-Glycosidases - 12
+Cellulases - 20
+other - 286
 Xyloglucanases - 1
-other - 285
 ```
 
 ## D) AntiSMASH
@@ -1949,10 +1988,100 @@ cat $LS_MIMP_secretedFasta | grep '>' | wc -l
  -->
 
 
+### E) Effector-like proteins
 
+### EffectorP
 
+```bash
+for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed_ncbi.pep.fasta | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+BaseName="$Organism"_"$Strain"_EffectorP
+OutDir=analysis/effectorP/$Organism/$Strain
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+done
+```
 
+Those genes that were predicted as secreted and tested positive by effectorP
+were identified:
 
+```bash
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+cat $File | grep 'Effector' | cut -f1 > $Headers
+Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
+cat $OutFileHeaders | wc -l
+Gff=$(ls gene_pred/final/$Organism/$Strain/*/final_genes_appended_renamed_ncbi.gff3)
+EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+cat $EffectorP_Gff | grep -w 'gene' | wc -l
+done > tmp.txt
+```
+
+```
+F.oxysporum_fsp_lactucae - AJ516
+375
+375
+F.oxysporum_fsp_lactucae - AJ520
+347
+347
+```
+
+#### SSCP
+
+Small secreted cysteine rich proteins were identified within secretomes. These
+proteins may be identified by EffectorP, but this approach allows direct control
+over what constitutes a SSCP.
+
+```bash
+for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/sscp/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+$ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
+cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
+printf "number of SSC-rich genes:\t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
+printf "Number of effectors predicted by EffectorP:\t"
+EffectorP=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP_secreted_headers.txt)
+cat $EffectorP | wc -l
+printf "Number of SSCPs predicted by both effectorP and this approach: \t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' > $OutDir/"$Strain"_sscp_headers.txt
+cat $OutDir/"$Strain"_sscp_headers.txt $EffectorP | cut -f1 | sort | uniq -d | wc -l
+echo ""
+done
+```
+
+```
+F.oxysporum_fsp_lactucae - AJ516
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	328
+number of SSC-rich genes:	326
+Number of effectors predicted by EffectorP:	375
+Number of SSCPs predicted by both effectorP and this approach: 	240
+
+F.oxysporum_fsp_lactucae - AJ520
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	299
+number of SSC-rich genes:	299
+Number of effectors predicted by EffectorP:	347
+Number of SSCPs predicted by both effectorP and this approach: 	217
+```
 
 
 
@@ -1968,8 +2097,8 @@ cat $LS_MIMP_secretedFasta | grep '>' | wc -l
 BLast searches were performed against the genome:
 
 ```bash
-  # for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked.fa | grep -e 'AJ516' -e 'AJ520' | grep 'AJ516'); do
-  for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep 'AJ520'); do
+  for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -e 'AJ516' -e 'AJ520'); do
+  # for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep -e 'AJ516' -e 'AJ520' | grep 'AJ520'); do
     ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
     Query=analysis/blast_homology/six_genes/six-appended_parsed.fa
     qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
@@ -1982,6 +2111,8 @@ cat analysis/blast_homology/F.oxysporum_fsp_lactucae/*/*_six-appended_parsed.fa_
 ```
 
 ```
+# AJ516
+
 Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds	0
 Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six11_(SIX11)_mRNA,_complete_cds	0
 Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	0
@@ -2009,6 +2140,36 @@ Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_prot
 Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_7_(SIX7)_gene,_complete_cds	0
 Fusarium_oxysporum_SIX8_gene,_complete_cds	1
 Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds	3
+
+# AJ520
+ID	No.hits
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six11_(SIX11)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six13_(SIX13)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six14_(SIX14)_mRNA,_complete_cds	3
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_1_(SIX1)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_2_(SIX2)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_IPO3_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_SIX3_gene_for_Secreted_in_xylem_3_protein	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_4_(SIX4)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_Six5_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds	0
+Fusarium_oxysporum_f._sp._passiflorae_SIX6_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._niveum_SIX6_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._vasinfectum_SIX6_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six6_(SIX6)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._melonis_isolate_NRRL_26406_secreted_in_xylem_6-like_protein_(SIX6)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._radicis-cucumerinum_isolate_Afu-3_secreted_in_xylem_6-like_protein_(SIX6)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_6_(SIX6)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_7_(SIX7)_gene,_complete_cds	0
+Fusarium_oxysporum_SIX8_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds	2
 ```
 
 
@@ -2069,7 +2230,7 @@ done
 Identify read coverage over each bp
 
 ```bash
-  for Bam in $(ls analysis/genome_alignment/bowtie/*/*/vs_*/*_aligned_sorted.bam | grep 'vs_650'); do
+  for Bam in $(ls analysis/genome_alignment/bowtie/*/*/vs_*/*_aligned_sorted.bam | grep -e 'AJ516' -e 'AJ520'); do
     Target=$(echo $Bam | rev | cut -f2 -d '/' | rev)
     Strain=$(echo $Bam | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Bam | rev | cut -f4 -d '/' | rev)
@@ -2080,21 +2241,74 @@ Identify read coverage over each bp
     $ProgDir/cov_by_window.py --cov $OutDir/${Organism}_${Strain}_${Target}_depth.tsv > $OutDir/${Organism}_${Strain}_${Target}_depth_10kb.tsv
     sed -i "s/$/\t$Strain/g" $OutDir/${Organism}_${Strain}_${Target}_depth_10kb.tsv
   done
-  for Target in "vs_650" "vs_1166"; do
+  for Target in "vs_AJ516" "vs_AJ520"; do
     OutDir=analysis/genome_alignment/bowtie/grouped_${Target}
     mkdir -p $OutDir
     cat analysis/genome_alignment/bowtie/*/*/*/*_*_${Target}_depth_10kb.tsv > $OutDir/${Target}_grouped_depth.tsv
   done
+
+	ls $PWD/analysis/genome_alignment/bowtie/*/*/vs_*/*_depth_10kb.tsv  | grep -e 'AJ516' -e 'AJ520'
+```
+
+
+from my local computer:
+```bash
+cd /Users/armita/Downloads/AHDB/FoL
+scp cluster:/home/groups/harrisonlab/project_files/fusarium/analysis/genome_alignment/bowtie/grouped_vs_AJ520/vs_AJ520_grouped_depth.tsv .
+scp cluster:/home/groups/harrisonlab/project_files/fusarium/analysis/genome_alignment/bowtie/grouped_vs_AJ516/vs_AJ516_grouped_depth.tsv .
 ```
 
 ### Plot read coverage
 
+Plotting coverage vs isolate AJ516
 
 ```R
 library(readr)
-setwd("~/Downloads/Aalt/coverage2")
+setwd("~/Downloads/AHDB/FoL/coverage")
 
-appended_df <- read_delim("~/Downloads/Aalt/coverage2/vs_1166_grouped_depth.tsv", "\t", escape_double = FALSE, col_names = FALSE, col_types = cols(X4 = col_factor(levels = c("675", "97.0013", "97.0016", "650", "648", "24350", "1082", "1164", "635", "743", "1166", "1177"))), trim_ws = TRUE)
+appended_df <- read_delim("~/Downloads/AHDB/FoL/vs_AJ516_grouped_depth.tsv", "\t", escape_double = FALSE, col_names = FALSE, col_types = cols(X4 = col_factor(levels = c("AJ516", "AJ520"))), trim_ws = TRUE)
+
+myFun <- function(x) {
+  c(min = min(x), max = max(x),
+    mean = mean(x), median = median(x),
+    std = sd(x))
+}
+
+colnames(appended_df) <- c("contig","position", "depth", "strain")
+
+appended_df$treatment <- paste(appended_df$strain , appended_df$contig)
+AJ516_stats <- tapply(appended_df$depth, appended_df$treatment, myFun)
+
+df2 <- cbind(do.call(rbind, tapply(appended_df$depth, appended_df$treatment, myFun)))
+write.csv(df2, 'AJ516_contig_coverage.csv')
+
+appended_df$depth <- ifelse(appended_df$depth > 100, 100, appended_df$depth)
+
+# install.packages("ggplot2")
+library(ggplot2)
+require(scales)
+
+for (i in 1:94){
+contig = paste("contig", i, sep = "_")
+p0 <- ggplot(data=appended_df[appended_df$contig == contig, ], aes(x=`position`, y=`depth`, group=1)) +
+geom_line() +
+labs(x = "Position (bp)", y = "Coverage") +
+scale_y_continuous(breaks=seq(0,100,25), limits=c(0,100)) +
+facet_wrap(~strain, nrow = 12, ncol = 1, strip.position = "left")
+outfile = paste("AJ516_contig", i, "cov.jpg", sep = "_")
+ggsave(outfile , plot = p0, device = 'jpg', path = NULL,
+scale = 1, width = 500, height = 500, units = 'mm',
+dpi = 150, limitsize = TRUE)
+}
+```
+
+Coverage for AJ520:
+
+```R
+library(readr)
+setwd("~/Downloads/AHDB/FoL/coverage")
+
+appended_df <- read_delim("~/Downloads/AHDB/FoL/vs_AJ520_grouped_depth.tsv", "\t", escape_double = FALSE, col_names = FALSE, col_types = cols(X4 = col_factor(levels = c("AJ516", "AJ520"))), trim_ws = TRUE)
 
 myFun <- function(x) {
   c(min = min(x), max = max(x),
@@ -2108,7 +2322,7 @@ appended_df$treatment <- paste(appended_df$strain , appended_df$contig)
 tapply(appended_df$depth, appended_df$treatment, myFun)
 
 df2 <- cbind(do.call(rbind, tapply(appended_df$depth, appended_df$treatment, myFun)))
-write.csv(df2, '1166_contig_coverage.csv')
+write.csv(df2, 'AJ520_contig_coverage.csv')
 
 appended_df$depth <- ifelse(appended_df$depth > 100, 100, appended_df$depth)
 
@@ -2116,17 +2330,16 @@ appended_df$depth <- ifelse(appended_df$depth > 100, 100, appended_df$depth)
 library(ggplot2)
 require(scales)
 
-for (i in 1:22){
+for (i in 1:105){
 contig = paste("contig", i, sep = "_")
 p0 <- ggplot(data=appended_df[appended_df$contig == contig, ], aes(x=`position`, y=`depth`, group=1)) +
 geom_line() +
 labs(x = "Position (bp)", y = "Coverage") +
 scale_y_continuous(breaks=seq(0,100,25), limits=c(0,100)) +
 facet_wrap(~strain, nrow = 12, ncol = 1, strip.position = "left")
-outfile = paste("1166_contig", i, "cov.jpg", sep = "_")
+outfile = paste("AJ520_contig", i, "cov.jpg", sep = "_")
 ggsave(outfile , plot = p0, device = 'jpg', path = NULL,
 scale = 1, width = 500, height = 500, units = 'mm',
 dpi = 150, limitsize = TRUE)
 }
-
 ```

@@ -7,8 +7,8 @@ MUMmer was run to align assemblies against the reference genome.
 
 ```bash
 Isolate=AJ516
-Reference=$(ls repeat_masked/*/*/filtered_ncbi/${Isolate}_contigs_unmasked.fa)
-for Query in $(ls repeat_masked/*/*/filtered_ncbi/AJ520_contigs_unmasked.fa); do
+Reference=$(ls repeat_masked/*/*/filtered_contigs/${Isolate}_contigs_unmasked.fa)
+for Query in $(ls repeat_masked/*/*/filtered_contigs/AJ520_contigs_unmasked.fa); do
 Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -23,8 +23,8 @@ done
 
 ```bash
 Isolate=AJ520
-Reference=$(ls repeat_masked/*/*/filtered_ncbi/${Isolate}_contigs_unmasked.fa)
-for Query in $(ls repeat_masked/*/*/filtered_ncbi/AJ516_contigs_unmasked.fa); do
+Reference=$(ls repeat_masked/*/*/filtered_contigs/${Isolate}_contigs_unmasked.fa)
+for Query in $(ls repeat_masked/*/*/filtered_contigs/AJ516_contigs_unmasked.fa); do
 Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -38,8 +38,8 @@ done
 ## 5.1 against the reference f.sp. lycopersici genome
 
 ```bash
-Reference=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa)
-for Query in $(ls repeat_masked/*/*/filtered_ncbi/*_contigs_unmasked.fa | grep -e 'AJ516' -e 'AJ520'); do
+Reference=$(ls repeat_masked/F.oxysporum_fsp_lycopersici/4287_v2/fungidb_repmask/4287_v2_contigs_unmasked.fa)
+for Query in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -e 'AJ516' -e 'AJ520'); do
 Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"

@@ -413,7 +413,7 @@ Create a list of secreted genes within 2Kb of a mimp from F. oxysporum ex. lettu
 Blast vs the reference genome databases:
 
 ```bash
-mkdir -p analysis/AHDB_Fo_lactucae_statice_blast
+mkdir -p analysis/AHDB_Fo_lactucae_statice_blast2
 for File in $(ls analysis/mimps/F.oxysporum_fsp_*/*/*_genes_in_2kb_mimp_secreted.fa | grep -e 'AJ516' -e 'AJ520' -e 'Stat10'); do
   Strain=$(echo $File | cut -f4 -d '/')
   cat $File | sed "s/>/>${Strain}_/g"
@@ -564,4 +564,172 @@ mkdir -p $OutDir
 Genomes=$(ls analysis/AHDB_Fo_lactucae_statice_blast/vs_*_genomes/*/*_genome.fa | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1' | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v -e 'GCA_000599445.1' -e '77-13-4')
 ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/AHDB_project/blast_searches
 $ProgDir/blast_parse_AHDB.py --blast_csv $CsvFiles --headers $Headers --genomes $Genomes --identity 0.50 --evalue 1e-30 --out_prefix $OutDir/FoL_sec_mimpsAHDB
+```
+
+
+
+## lettuce analysis 2
+
+### Prepare queries lettuce
+
+Create a list of secreted genes within 2Kb of a mimp from F. oxysporum ex. lettuce and statice
+
+### Perform BLAST
+
+Blast vs the reference genome databases:
+
+```bash
+mkdir -p analysis/AHDB_Fo_lactucae_statice_blast2
+for File in $(ls analysis/mimps/F.oxysporum_fsp_*/*/*_genes_in_2kb_mimp_secreted.fa | grep -e 'AJ516' -e 'AJ520'); do
+  Strain=$(echo $File | cut -f4 -d '/')
+  cat $File | sed "s/>/>${Strain}_/g"
+done > analysis/AHDB_Fo_lactucae_statice_blast2/Fo_lactucae_sec_mimps.fa
+
+for RefGenome in $(ls analysis/metagenomics/reference_genomes/van_dam/renamed/*.fna | tail -n 60); do
+Prefix=$(basename $RefGenome .fna)
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 20s
+printf "."
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+done
+printf "\n"
+Query=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/Fo_lactucae_sec_mimps.fa)
+OutDir=analysis/AHDB_Fo_lactucae_statice_blast2/vs_ref_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+cp -sf $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $RefGenome $OutDir
+done
+```
+
+Blast vs additional ncbi genomes:
+
+```bash
+for RefGenome in $(ls analysis/metagenomics/reference_genomes/renamed/*.fna); do
+Prefix=$(basename $RefGenome .fna)
+echo $Prefix
+OutDir=analysis/AHDB_Fo_lactucae_statice_blast2/vs_ref_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+cp -sf $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+Query=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/Fo_lactucae_sec_mimps.fa)
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $RefGenome $OutDir
+done
+```
+
+Blast vs sequenced genomes:
+
+```bash
+for RefGenome in $(ls repeat_masked/F.oxysporum_*/*/*/*_contigs_unmasked.fa | grep -v 'old' | grep -v 'filtered_ncbi' | grep -v '4287' | grep -v -e 'FON139' -e 'FON77' -e 'FON89' -e 'FON81' -e 'FON129'); do
+# Prefix=$(basename $RefGenome .fna)
+Prefix=$(echo $RefGenome | cut -f2,3 -d '/' --output-delimiter '_')
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 20s
+printf "."
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+done
+printf "\n"
+OutDir=analysis/AHDB_Fo_lactucae_statice_blast2/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+Query=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/Fo_lactucae_sec_mimps.fa)
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $RefGenome $OutDir
+done
+
+for RefGenome in $(ls repeat_masked/F.proliferatum/A8/*/*_contigs_unmasked.fa); do
+Prefix=$(echo $RefGenome | cut -f2,3 -d '/' --output-delimiter '_')
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+# while [ $Jobs -gt 1 ]; do
+# sleep 20s
+# printf "."
+# Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+# done
+# printf "\n"
+OutDir=analysis/AHDB_Fo_lactucae_statice_blast2/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+Query=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/Fo_lactucae_sec_mimps.fa)
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $RefGenome $OutDir
+done
+
+for RefGenome in $(ls ../fusarium_ex_narcissus/repeat_masked/F.oxysporum_*/*/*/*_contigs_unmasked.fa | grep -e 'FON139' -e 'FON77' -e 'FON89' -e 'FON81' -e 'FON129'); do
+Prefix=$(echo $RefGenome | cut -f4,5 -d '/' --output-delimiter '_')
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 20s
+printf "."
+Jobs=$(qstat | grep 'run_blast' | grep 'qw'| wc -l)
+done
+printf "\n"
+OutDir=analysis/AHDB_Fo_lactucae_statice_blast2/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+Query=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/Fo_lactucae_sec_mimps.fa)
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query dna $RefGenome $OutDir
+done
+```
+<!--
+Blast vs work in progress genomes:
+
+```bash
+for RefGenome in $(ls assembly/spades/F.*/*/filtered_contigs/contigs_min_500bp*.fasta | grep -w -e 'Straw465' -e 'F81' -e 'FOP1-EMR' -e 'R2' -e '15-074' -e 'A1-2' -e 'HB6' -e 'D2' -e 'PG8' -e 'L5' -e 'A1-2' -e 'HB6' -e 'D2' -e 'PG8' -e 'L5' -e 'A1-2' -e 'HB6'); do
+Prefix=$(echo $RefGenome | cut -f3,4 -d '/' --output-delimiter '_')
+echo $Prefix
+OutDir=analysis/AHDB_blast/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna $RefGenome $OutDir
+done
+for RefGenome in $(ls assembly/spades_pacbio/F.*/*/filtered_contigs/contigs_min_500bp.fasta | grep -w -e '55'); do
+Prefix=$(echo $RefGenome | cut -f3,4 -d '/' --output-delimiter '_')
+echo $Prefix
+OutDir=analysis/AHDB_blast/vs_seq_genomes/$Prefix
+mkdir -p $OutDir
+CurDir=$PWD
+cd $OutDir
+rm ${Prefix}_genome.fa
+cp -s $CurDir/$RefGenome ${Prefix}_genome.fa
+cd $CurDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh analysis/AHDB_blast/FoM_FoN_FoC_sec_mimps.fa dna $RefGenome $OutDir
+done
+``` -->
+
+## Summarise blast hists
+
+```bash
+CsvFiles=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/vs_*_genomes/*/*Fo_lactucae_sec_mimps.fa_hits.csv | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v -e 'GCA_000599445.1' -e '77-13-4')
+Headers=$(echo $CsvFiles | sed 's&analysis/AHDB_Fo_lactucae_statice_blast2/vs_ref_genomes/&&g' | sed 's&analysis/AHDB_Fo_lactucae_statice_blast2/vs_seq_genomes/&&g' | sed -r "s&_Fo_lactucae_sec_mimps.fa_hits.csv&&g" | sed -r "s&/\S*&&g"  | sed 's&/van_dam&&g')
+OutDir=analysis/AHDB_Fo_lactucae_statice_blast2/vs_ref_genomes/extracted
+mkdir -p $OutDir
+Genomes=$(ls analysis/AHDB_Fo_lactucae_statice_blast2/vs_*_genomes/*/*_genome.fa | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v 'GCA_000599445.1' | grep -e 'vs_ref_genomes' -e 'vs_seq_genomes' | grep -v 'F.oxysporum_/' | grep -v -e 'GCA_000599445.1' -e '77-13-4')
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/AHDB_project/blast_searches
+$ProgDir/blast_parse_AHDB.py --blast_csv $CsvFiles --headers $Headers --genomes $Genomes --identity 0.50 --evalue 1e-30 --out_prefix $OutDir/FoL_sec_mimpsAHDB
+
+ls $OutDir/FoL_sec_mimpsAHDB.csv
 ```

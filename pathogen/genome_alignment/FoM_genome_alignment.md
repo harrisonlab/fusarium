@@ -4,7 +4,7 @@
 ## 5.1 against the reference f.sp. lycopersici genome
 
 ```bash
-Reference=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_chromosomal/ensembl/Fusarium_oxysporum_chromosome_and_additional_contigs.fa)
+Reference=$(ls repeat_masked/F.oxysporum_fsp_lycopersici/4287_v2/fungidb_repmask/4287_v2_contigs_unmasked.fa)
 for Query in $(ls repeat_masked/*/*/filtered_ncbi/*_contigs_unmasked.fa | grep -e 'Stocks4'); do
 Strain=$(echo $Query | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Query | rev | cut -f4 -d '/' | rev)

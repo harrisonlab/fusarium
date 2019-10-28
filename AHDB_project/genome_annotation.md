@@ -791,3 +791,169 @@ $ProgDir/extract_from_fasta.py --fasta $Genes --headers $LS_MIMP_secretedHeaders
 cat $LS_MIMP_secretedFasta | grep '>' | wc -l
 
 ```
+
+## 5.1  Identifying SIX gene homologs
+
+## 5.1.a) Performing BLAST searches
+
+BLast searches were performed against the genome:
+
+```bash
+  for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -w -e 'FON_63' -e 'Stocks4' | grep 'FON_63'); do
+    ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+    Query=analysis/blast_homology/six_genes/six-appended_parsed.fa
+    qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+  done
+```
+
+
+```bash
+cat analysis/blast_homology/F.oxysporum_fsp_mathioli/*/*_six-appended_parsed.fa_homologs.csv | cut -f1,5
+cat analysis/blast_homology/*/FON_63/*_six-appended_parsed.fa_homologs.csv | cut -f1,5
+
+```
+
+```
+ID	No.hits
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six10_(SIX10)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six11_(SIX11)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six12_(SIX12)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six13_(SIX13)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six14_(SIX14)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_1_(SIX1)_gene,_complete_cds	3
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_2_(SIX2)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_FOL-MM10_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_IPO3_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_14844_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_3_(SIX3)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_SIX3_gene_for_Secreted_in_xylem_3_protein	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_4_(SIX4)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_Six5_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_5_(SIX5)_gene,_partial_cds	0
+Fusarium_oxysporum_f._sp._passiflorae_SIX6_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._niveum_SIX6_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._vasinfectum_SIX6_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six6_(SIX6)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._melonis_isolate_NRRL_26406_secreted_in_xylem_6-like_protein_(SIX6)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._radicis-cucumerinum_isolate_Afu-3_secreted_in_xylem_6-like_protein_(SIX6)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_6_(SIX6)_gene,_complete_cds	0
+Fusarium_oxysporum_f._sp._lycopersici_secreted_in_xylem_Six7_(SIX7)_mRNA,_complete_cds	0
+Fusarium_oxysporum_f._sp._lilii_isolate_NRRL_28395_secreted_in_xylem_7-like_protein_(SIX7)_gene,_complete_cds0
+Fusarium_oxysporum_f._sp._lycopersici_isolate_BFOL-51_secreted_in_xylem_7_(SIX7)_gene,_complete_cds	0
+Fusarium_oxysporum_SIX8_gene,_complete_cds	1
+Fusarium_oxysporum_f._sp._lycopersici_strain_Fol007_Six9_(SIX9)_mRNA,_complete_cds	3
+```
+
+
+## 5.1.b) Converting BLAST results to gff annotations
+
+Once blast searches had completed, the BLAST hits were converted to GFF
+annotations:
+
+```bash
+for BlastHits in $(ls analysis/blast_homology/*/*/*_six-appended_parsed.fa_homologs.csv | grep -w -e 'FON_63' -e 'Stocks4' | grep 'FON_63'); do
+Organism=$(echo $BlastHits | rev | cut -f3 -d '/' | rev)  
+Strain=$(echo $BlastHits | rev | cut -f2 -d '/' | rev)
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+HitsGff=analysis/blast_homology/$Organism/$Strain/"$Strain"_six-appended_parsed.fa_homologs.gff
+Column2=BLAST_hit
+NumHits=3
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+done
+```
+
+
+### E) Effector-like proteins
+
+### EffectorP
+
+```bash
+for Proteome in $(ls gene_pred/final/F.*/*/*/final_genes_appended_renamed.pep.fasta | grep -w -e 'FON_63' -e 'Stocks4'); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+BaseName="$Organism"_"$Strain"_EffectorP
+OutDir=analysis/effectorP/$Organism/$Strain
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+done
+```
+
+Those genes that were predicted as secreted and tested positive by effectorP
+were identified:
+
+```bash
+for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt | grep -w -e 'FON_63' -e 'Stocks4'); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+cat $File | grep 'Effector' | cut -f1 > $Headers
+Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
+cat $OutFileHeaders | wc -l
+Gff=$(ls gene_pred/final/$Organism/$Strain/*/final_genes_appended_renamed.gff3)
+EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+cat $EffectorP_Gff | grep -w 'gene' | wc -l
+done > tmp.txt
+```
+
+```
+F.oxysporum_fsp_mathioli - Stocks4
+332
+332
+F.oxysporum_fsp_narcissi - FON_63
+385
+385
+```
+
+#### SSCP
+
+Small secreted cysteine rich proteins were identified within secretomes. These
+proteins may be identified by EffectorP, but this approach allows direct control
+over what constitutes a SSCP.
+
+```bash
+for Secretome in $(ls gene_pred/final_genes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa | grep -e 'AJ516' -e 'AJ520'); do
+Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/sscp/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+$ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
+cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
+printf "number of SSC-rich genes:\t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
+printf "Number of effectors predicted by EffectorP:\t"
+EffectorP=$(ls analysis/effectorP/$Organism/$Strain/*_EffectorP_secreted_headers.txt)
+cat $EffectorP | wc -l
+printf "Number of SSCPs predicted by both effectorP and this approach: \t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' > $OutDir/"$Strain"_sscp_headers.txt
+cat $OutDir/"$Strain"_sscp_headers.txt $EffectorP | cut -f1 | sort | uniq -d | wc -l
+echo ""
+done
+```
+
+```
+F.oxysporum_fsp_lactucae - AJ516
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	328
+number of SSC-rich genes:	326
+Number of effectors predicted by EffectorP:	375
+Number of SSCPs predicted by both effectorP and this approach: 	240
+
+F.oxysporum_fsp_lactucae - AJ520
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	299
+number of SSC-rich genes:	299
+Number of effectors predicted by EffectorP:	347
+Number of SSCPs predicted by both effectorP and this approach: 	217
+```

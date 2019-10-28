@@ -152,7 +152,7 @@ done
 ```
 
 ```
-The number of ortholog groups shared between all isoaltes is::
+The number of ortholog groups shared between all isolates is::
 11082
 This represented the following number of proteins:
 94649
@@ -183,6 +183,8 @@ The number of orthogroups present:
 ```
 
 ## 3.5.b Plot venn diagrams:
+
+Using OrthoMCL output:
 
 ```bash
   IsolateAbrv=Fo_lactucae_FoL_Fo_FoC
@@ -223,6 +225,15 @@ number of unique groups of inparalogs
 [1] 1032
 [1] 49
 ```
+<!-- 
+using orthofinder output:
+
+```bash
+  IsolateAbrv=Fo_lactucae_FoL_Fo_FoC
+  WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/orthology
+  $ProgDir/${IsolateAbrv}_venn_diag.r --inp $WorkDir/formatted/*/ --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+``` -->
 
 
 ## 3.6) Extracting fasta files for all orthogroups

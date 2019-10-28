@@ -16,8 +16,10 @@ $ProgDir/fasta2circos.py --genome $FoL_genome --contig_prefix "FoL_" > $OutDir/F
 cat $OutDir/FoM_genome.txt > $OutDir/FoM_FoL_genome.txt
 tac $OutDir/FoL_genome.txt >> $OutDir/FoM_FoL_genome.txt
 
+cat $OutDir/FoM_FoL_genome.txt > $OutDir/FoM_FoL_genome_edited.txt
+
 # Contigs smaller than 10Kb were removed
-cat $OutDir/FoM_FoL_genome.txt | grep -v 'DS231' | grep -v -e "0 .... chr" -e "0 ... chr" > $OutDir/FoM_FoL_genome_edited.txt
+# cat $OutDir/FoM_FoL_genome.txt | grep -v 'DS231' | grep -v -e "0 .... chr" -e "0 ... chr" > $OutDir/FoM_FoL_genome_edited.txt
 ```
 
 ```bash
@@ -84,32 +86,67 @@ Contig orientation was used to edit the circos .conf file manually
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
   $ProgDir/gff2circos_scatterplot.py --gff $GffMimpSecreted --feature gene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_mimp_plot.txt
 ```
-<!--
-```bash
-  GffCAZY=gene_pred/CAZY/F.proliferatum/A8_ncbi/A8_ncbi_CAZY_secreted.gff
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/gff2circos_scatterplot.py --gff $GffCAZY --feature gene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/A8_CAZY_plot.txt
-  GffEfFoM=analysis/effectorP/F.proliferatum/A8_ncbi/F.proliferatum_A8_ncbi_EffectorP_secreted.gff
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/gff2circos_scatterplot.py --gff $GffEfFoM --feature gene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/A8_effectorP_plot.txt
-  GffAntiSmash=analysis/antismash/F.proliferatum/A8_ncbi/A8_ncbi_secondary_metabolite_regions.gff
-  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/gff2circos_scatterplot.py --gff $GffAntiSmash --feature indole indole-nrps nrps nrps-t1pks other t1pks t1pks-nrps t3pks terpene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/A8_antismash_plot.txt
 
-  BlastHits=analysis/blast_homology/F.proliferatum/A8_ncbi/A8_ncbi_Fo_path_genes_CRX.fa_homologs.gff
-  GffSix=$OutDir/A8_SIX.gff
-  cat $BlastHits | grep -v -e 'MIMP' -e 'C5' -e 'CRX' > $GffSix
+## Preparing Effector plots
+
+# Plot location of FoM mimps and secreted effectorP genes as a scatterplot
+
+```bash
+Organism="F.oxysporum_fsp_mathioli"
+Strain="Stocks4"
+  GffMimp=$(ls analysis/mimps/${Organism}/${Strain}/${Strain}_mimps.gff)
   ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
-  $ProgDir/gff2circos_scatterplot.py --gff $GffSix --feature SIX_homolog --value 1 | sed -e 's/^/FoM_/g' > $OutDir/A8_SIX_plot.txt
+  $ProgDir/gff2circos_scatterplot.py --gff $GffMimp --feature MIMP_motif --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_mimp_plot.txt
+  GffCAZY=$(ls gene_pred/CAZY/${Organism}/${Strain}/*_CAZY_secreted.gff)
+  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+  $ProgDir/gff2circos_scatterplot.py --gff $GffCAZY --feature gene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_CAZY_plot.txt
+  GffEfFoM=$(ls analysis/effectorP/${Organism}/${Strain}/*_EffectorP_secreted.gff)
+  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+  $ProgDir/gff2circos_scatterplot.py --gff $GffEfFoM --feature gene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_effectorP_plot.txt
+  # GffAntiSmash=analysis/antismash/F.oxysporum_fsp_narcissi/N139_ncbi/N139_ncbi_secondary_metabolite_regions.gff
+  # ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+  # $ProgDir/gff2circos_scatterplot.py --gff $GffAntiSmash --feature indole indole-nrps nrps nrps-t1pks other t1pks t1pks-nrps t3pks terpene --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_antismash_plot.txt
+
+  BlastHits=$(ls analysis/blast_homology/${Organism}/${Strain}/*_six-appended_parsed.fa_homologs.gff)
+  GffSix=$OutDir/FoM_SIX.gff
+  cat $BlastHits | grep -v -e 'MIMP' -e 'C5' -e 'CRX' | grep 'SIX' > $GffSix
+  ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
+  $ProgDir/gff2circos_scatterplot.py --gff $GffSix --feature BLAST_hit --value 1 | sed -e 's/^/FoM_/g' > $OutDir/FoM_SIX_plot.txt
 ```
--->
+
+
+Links were also drawn from whole genome alignments:
+
+```bash
+Organism="F.oxysporum_fsp_mathioli"
+Strain="Stocks4"
+Prefix="FoM"
+OutDir=analysis/circos/F.oxysporum_fsp_mathioli/FoM_FoL_minion
+
+Coords=$(ls analysis/genome_alignment/mummer/${Organism}/${Strain}/${Strain}_vs_4287/${Strain}_vs_4287_coords.tsv)
+ProgDir=/home/armita/git_repos/emr_repos/scripts/alternaria/pathogen/genome_alignment
+$ProgDir/nucmer_coords2circos.py --inp_coords $Coords --queery_id $Prefix --ref_id FoL > $OutDir/${Prefix}_vs_FoL_links_nucmer.txt
+```
+
+```bash
+Organism="F.oxysporum_fsp_mathioli"
+Strain="Stocks4"
+Prefix="FoM"
+OutDir=analysis/circos/F.oxysporum_fsp_mathioli/FoM_FoL_minion
+
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos/FoLactucae/R1_vs_FoL
+$ProgDir/order_Fo_contigs.py --karotype $OutDir/${Prefix}_FoL_genome_edited.txt --links $OutDir/${Prefix}_vs_FoL_links_nucmer.txt
+```
+
 
 ## Running circos
 
 
 ```bash
+OutDir=analysis/circos/F.oxysporum_fsp_mathioli/FoM_FoL_minion
 ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium/AHDB_project/synteny/FoM_FoL
 circos -conf $ProgDir/FoM_FoL_circos.conf -outputdir $OutDir
 mv $OutDir/circos.png $OutDir/FoM_FoL_circos.png
 mv $OutDir/circos.svg $OutDir/FoM_FoL_circos.svg
+ls $PWD/$OutDir/FoM_FoL_circos.png
 ```

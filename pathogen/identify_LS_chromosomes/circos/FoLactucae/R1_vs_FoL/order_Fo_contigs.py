@@ -43,12 +43,14 @@ class ContigLinksObj(object):
     """
     def __init__(self):
         """set the object, defining the dictionary."""
-        dict = defaultdict(int)
-        best_match = ''
+        self.length_dict = defaultdict(int)
+        self.locations_dict = defaultdict(list)
+        self.best_match = ''
+        self.sorted_contig_list = []
     def set_match(self):
-        contig_list = dict.keys()
-        sorted_contig_list = natsorted(contig_list, key=lambda contig: self.dict[contig])
-        best_match = sorted_contig_list[-1]
+        contig_list = self.length_dict.keys()
+        self.sorted_contig_list = natsorted(contig_list, key=lambda contig: self.length_dict[contig])
+        self.best_match = self.sorted_contig_list[-1]
 
 #-----------------------------------------------------
 # Step 3
@@ -77,6 +79,7 @@ for line in karotype_lines:
     contig = split_line[2]
     contig_list.append(contig)
 
+# use link information to identify contigs with greatest alignment lengths
 for line in links_lines:
     line = line.rstrip()
     # print(line)
@@ -84,21 +87,70 @@ for line in links_lines:
     contig = split_line[3]
     start = split_line[1]
     end = split_line[2]
-    ref_contig = split_line[0]
+    query_contig = split_line[0]
+    ref_start = split_line[4]
+    # print(ref_start)
     distance = (int(end) - int(start))
     if distance >= 15000:
         links_dict[contig].append(line)
-    if contigobj_dict[contig]:
-        contigobj_dict[contig][0].dict[ref_contig] += distance
-    else:
-        contigobj_dict[contig] = [ContigLinksObj()]
-        contigobj_dict[contig][0].dict[ref_contig] += distance
+    if not contigobj_dict[query_contig]:
+        contigobj_dict[query_contig] = [ContigLinksObj()]
+    contigobj_dict[query_contig][0].length_dict[contig] += distance
+    contigobj_dict[query_contig][0].locations_dict[contig].append(int(ref_start))
+
+fol_contig_dict = defaultdict(list)
+# identify greatest alignment lengths in contigs
+# input this into a dictionary of Fol contigs, allowing sorting by tupules of
+# ref-contig and location of first hit
+for contig in contigobj_dict.keys():
+    contigobj_dict[contig][0].set_match()
+    best_match = contigobj_dict[contig][0].best_match
+    best_start = contigobj_dict[contig][0].locations_dict[best_match][0]
+    # print("\t".join([contig, best_match, str(best_start)]))
+    fol_contig_dict[best_match].append([contig, best_start])
+
+# iterate through FoL contigs, sorting best matching query contigs by alignment
+# start positions
+contig_order = []
+first = ''
+last = ''
+contig_breaks = []
+for ref_contig in FoL_order:
+    ref_contig = "FoL_" + ref_contig
+    query_contigs_tup = fol_contig_dict[ref_contig]
+    # print fol_contig_dict[ref_contig]
+    # print(query_contigs_tup)
+    sorted_query_contig_tup = natsorted(query_contigs_tup, key=lambda x: x[1])
+    # print(sorted_query_contig_tup)
+    sorted_query_contigs = [x[0] for x in sorted_query_contig_tup]
+    # print(ref_contig)
+    # print(", ".join(sorted_query_contigs))
+    contig_order.extend(sorted_query_contigs)
+    prev_last = last
+    if sorted_query_contigs:
+        first = sorted_query_contigs[0]
+        contig_breaks.append(" ".join(["\t<pairwise", prev_last, first + ">"]))
+        contig_breaks.append("\t\tspacing = 5000r")
+        contig_breaks.append("\t</pairwise>")
+        last = sorted_query_contigs[-1]
+
+unseen_contigs = []
+for contig in contig_list:
+    if contig not in set(contig_order) and not contig.startswith('FoL_'):
+        unseen_contigs.append(contig)
+
+print("contig_order:")
+rev_Fol = FoL_order[::-1]
+rev_Fol = ["FoL_" + contig for contig in rev_Fol]
+print(", ".join(contig_order + unseen_contigs + rev_Fol))
+
+
 
 # print("monkeys")
 # print links_dict
 # print links_dict.keys()
 seen_list = []
-contig_breaks = []
+# contig_breaks = []
 prev_contig = ''
 orientation_dict = defaultdict(list)
 for contig in FoL_order:
@@ -117,9 +169,9 @@ for contig in FoL_order:
             seen = False
             seen_list.append(query_contig)
         if first and not seen:
-            contig_breaks.append(" ".join(["\t<pairwise", prev_contig, query_contig + ">"]))
-            contig_breaks.append("\t\tspacing = 5000r")
-            contig_breaks.append("\t</pairwise>")
+            # contig_breaks.append(" ".join(["\t<pairwise", prev_contig, query_contig + ">"]))
+            # contig_breaks.append("\t\tspacing = 5000r")
+            # contig_breaks.append("\t</pairwise>")
             first = False
         if prev_contig == query_contig:
             if query_start >= prev_start:
@@ -151,10 +203,8 @@ for contig in rev_Fol:
         contig_breaks.append("\t</pairwise>")
     prev_contig = contig
 
-# print(rev_Fol)
-# print(FoL_order[::-1])
-print("contig order:")
-print(", ".join(seen_list + unseen_contigs + rev_Fol))
+# print("contig order:")
+# print(", ".join(seen_list + unseen_contigs + rev_Fol))
 
 def most_common(lst):
     return max(set(lst), key=lst.count)
@@ -175,9 +225,6 @@ for contig in (seen_list + unseen_contigs):
 
 print("contig breaks")
 print("\n".join(contig_breaks))
-
+#
 print("contigs in reverse orientation:")
 print ", ".join(rev_list + rev_Fol)
-# sorted_links_lines = sorted(links_lines, key=lambda line: line.split()[0]):
-#
-# for line in

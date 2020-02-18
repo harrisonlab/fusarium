@@ -5,7 +5,7 @@
 
 SCRIPT_DIR=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
 
-for strain_path in $(ls -d gene_pred/augustus/F.oxysporum_fsp_cepae/*); do 
+for strain_path in $(ls -d gene_pred/augustus/F.oxysporum_fsp_cepae/*); do
 	echo $strain_path
 	STRAIN=$(basename $strain_path)
 	echo $STRAIN
@@ -14,9 +14,9 @@ done
 
 # SigP
 SIGP_SCRIPTS=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-for FILEZ in $(ls -d gene_pred/interproscan/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa_split_*); do   
-echo $FILEZ;  
-qsub $SIGP_SCRIPTS/pred_sigP.sh $FILEZ; 
+for FILEZ in $(ls -d gene_pred/interproscan/F.oxysporum_fsp_cepae/*/*_augustus_preds.aa_split_*); do
+echo $FILEZ;
+qsub $SIGP_SCRIPTS/pred_sigP.sh $FILEZ;
 done
 
 for PATHZ in $(ls -d gene_pred/interproscan/F.oxysporum_fsp_cepae/*); do
@@ -26,11 +26,11 @@ IN_AA_STRING=''
 IN_NEG_STRING=''
 IN_TAB_STRING=''
 IN_TXT_STRING=''
-for GRP in $(ls -l gene_pred/interproscan/$SPECIES/$STRAIN/"$STRAIN"_augustus_preds* | cut -d '_' -f8 | sort -n); do  
-IN_AA_STRING="$IN_AA_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp.aa";  
-IN_NEG_STRING="$IN_NEG_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp_neg.aa";  
-IN_TAB_STRING="$IN_TAB_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp.tab"; 
-IN_TXT_STRING="$IN_TXT_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp.txt";  
+for GRP in $(ls -l gene_pred/interproscan/$SPECIES/$STRAIN/"$STRAIN"_augustus_preds* | cut -d '_' -f8 | sort -n); do
+IN_AA_STRING="$IN_AA_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp.aa";
+IN_NEG_STRING="$IN_NEG_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp_neg.aa";
+IN_TAB_STRING="$IN_TAB_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp.tab";
+IN_TXT_STRING="$IN_TXT_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_augustus_preds_split_$GRP""_sp.txt";
 done
 cat $IN_AA_STRING > gene_pred/sigP/$SPECIES/$STRAIN/"$STRAIN"_sp.aa
 cat $IN_NEG_STRING > gene_pred/sigP/$SPECIES/$STRAIN/"$STRAIN"_neg_sp.aa
@@ -42,10 +42,10 @@ done
 
 # Identify sequences containing the RxLR motif in proteins containing signal peptides
 
-for PATHZ in $(ls -d gene_pred/sigP/F.oxysporum_fsp_cepae/*); do 
-echo $PATHZ; 
-STRAIN=$(printf "$PATHZ" | cut -d '/' -f4); 
-SPECIES=$(printf "$PATHZ" | cut -d '/' -f3); 
+for PATHZ in $(ls -d gene_pred/sigP/F.oxysporum_fsp_cepae/*); do
+echo $PATHZ;
+STRAIN=$(printf "$PATHZ" | cut -d '/' -f4);
+SPECIES=$(printf "$PATHZ" | cut -d '/' -f3);
 echo "strain: $STRAIN    species: $SPECIES";
 mkdir -p analysis/sigP_rxlr/"$SPECIES"/"$STRAIN"
 echo "the number of SigP gene is:"
@@ -56,9 +56,9 @@ cat gene_pred/sigP/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep -B1 'R
 done
 
 # Extract gene features from gff files for genes in the "$STRAIN"_sigP_RxLR.fa file.
-for THIS_DIR in $(ls -d analysis/sigP_rxlr/F.oxysporum_fsp_cepae/*); do 
+for THIS_DIR in $(ls -d analysis/sigP_rxlr/F.oxysporum_fsp_cepae/*); do
 STRAIN=$(echo $THIS_DIR | rev | cut -f1 -d '/' | rev);
-echo $STRAIN; 
+echo $STRAIN;
 GENE_MODELS=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae/$STRAIN/"$STRAIN"_augustus_preds.gtf)
 cat $THIS_DIR/"$STRAIN"_sigP_RxLR.fa  | cut -f1 | grep '>' | sed 's/>//g' | sed 's/\.t.*//g' > "$STRAIN"_id_tmp.txt
 printf "" > $THIS_DIR/"$STRAIN"_sigP_RxLR.gtf
@@ -71,14 +71,14 @@ cp -r gene_pred/sigP gene_pred/sigP_hints
 
 
 # The analysis was repeated on gene predictions not using RNAseq data as hints
-# This provides an idicaiton of the use of infection RNAseq data to predict 
-# pathogenicity gene models. 
+# This provides an idicaiton of the use of infection RNAseq data to predict
+# pathogenicity gene models.
 
 # SigP
 SIGP_SCRIPTS=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-for FILEZ in $(ls -d gene_pred/augustus/F.oxysporum_fsp_cepae_not_as_old/*/*_aug_out.aa_split_*); do   
-echo $FILEZ;  
-qsub $SIGP_SCRIPTS/pred_sigP.sh $FILEZ; 
+for FILEZ in $(ls -d gene_pred/augustus/F.oxysporum_fsp_cepae_not_as_old/*/*_aug_out.aa_split_*); do
+echo $FILEZ;
+qsub $SIGP_SCRIPTS/pred_sigP.sh $FILEZ;
 done
 
 for PATHZ in $(ls -d gene_pred/augustus/F.oxysporum_fsp_cepae/*); do
@@ -88,11 +88,11 @@ IN_AA_STRING=''
 IN_NEG_STRING=''
 IN_TAB_STRING=''
 IN_TXT_STRING=''
-for GRP in $(ls -l gene_pred/sigP/F.oxysporum_fsp_cepae/$STRAIN/split/*_aug_out_split_* | cut -d '_' -f8 | cut -d '.' -f1 | sort -n | uniq); do  
-IN_AA_STRING="$IN_AA_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp.aa";  
-IN_NEG_STRING="$IN_NEG_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp_neg.aa";  
-IN_TAB_STRING="$IN_TAB_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp.tab"; 
-IN_TXT_STRING="$IN_TXT_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp.txt";  
+for GRP in $(ls -l gene_pred/sigP/F.oxysporum_fsp_cepae/$STRAIN/split/*_aug_out_split_* | cut -d '_' -f8 | cut -d '.' -f1 | sort -n | uniq); do
+IN_AA_STRING="$IN_AA_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp.aa";
+IN_NEG_STRING="$IN_NEG_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp_neg.aa";
+IN_TAB_STRING="$IN_TAB_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp.tab";
+IN_TXT_STRING="$IN_TXT_STRING gene_pred/sigP/$SPECIES/$STRAIN/split/$STRAIN""_aug_out_split_$GRP"".fa_sp.txt";
 done
 cat $IN_AA_STRING > gene_pred/sigP/$SPECIES/$STRAIN/"$STRAIN"_sp.aa
 cat $IN_NEG_STRING > gene_pred/sigP/$SPECIES/$STRAIN/"$STRAIN"_neg_sp.aa
@@ -104,17 +104,17 @@ done
 
 # Identify sequences containing the RxLR motif in proteins containing signal peptides
 
-for PATHZ in $(ls -d gene_pred/sigP/F.oxysporum_fsp_cepae/*); do 
-echo $PATHZ; 
-STRAIN=$(printf "$PATHZ" | cut -d '/' -f4); 
-SPECIES=$(printf "$PATHZ" | cut -d '/' -f3); 
+for PATHZ in $(ls -d gene_pred/sigP_no_hints/F.oxysporum_fsp_cepae/*); do
+echo $PATHZ;
+STRAIN=$(printf "$PATHZ" | cut -d '/' -f4);
+SPECIES=$(printf "$PATHZ" | cut -d '/' -f3);
 echo "strain: $STRAIN    species: $SPECIES";
 mkdir -p analysis/sigP_rxlr/"$SPECIES"/"$STRAIN"
 echo "the number of SigP gene is:"
-cat gene_pred/sigP/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep '>' | wc -l
+cat gene_pred/sigP_no_hints/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep '>' | wc -l
 echo "the number of SigP-RxLR genes are:"
-cat gene_pred/sigP/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep 'R.LR' | wc -l
-cat gene_pred/sigP/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep -B1 'R.LR' | grep -vw '\-\-' > analysis/sigP_rxlr/"$SPECIES"/"$STRAIN"/"$STRAIN"_sigP_RxLR.fa
+cat gene_pred/sigP_no_hints/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep -B1 -E '^.{10,110}?R.LR' | grep -v -e '^\-\-' | grep '>' | wc -l
+cat gene_pred/sigP/F.oxysporum_fsp_cepae/"$STRAIN"/"$STRAIN"_sp.aa | grep -B1 -E '^.{10,110}?R.LR' | grep -v -e '^\-\-' > analysis/sigP_rxlr/"$SPECIES"/"$STRAIN"/"$STRAIN"_sigP_RxLR.fa
 done
 
 mv gene_pred/sigP gene_pred/sigP_no_hints
@@ -149,7 +149,7 @@ qdel 6265521
 SCRIPT_DIR="/home/armita/git_repos/emr_repos/tools/pathogen/blast"
 for INFILE in $(ls analysis/blast_homology/F.oxysporum_fsp_cepae/*/*_Fo_path_genes.fa_homologs.csv); do
 OUTFILE=$(echo $INFILE | sed 's/.csv/.gff/g')
-echo "$OUTFILE" 
+echo "$OUTFILE"
 $SCRIPT_DIR/blast2gff.pl Fo_Path_gene 1 "$INFILE" > $OUTFILE
 done
 
@@ -157,16 +157,29 @@ done
 
 
 # Genes flanking Mimps
+
+	# From genes predicted with hints
 ProgPath=/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder
 for Pathz in $(ls -d analysis/mimps/F.oxysporum_fsp_cepae/*); do
 Strain=$(echo "$Pathz" | cut -f4 -d '/')
 echo "$Strain"
 "$ProgPath"/gffexpander.pl + 1000 "$Pathz"/"$Strain"_mimps.gff3 > "$Pathz"/"$Strain"_mimps_exp.gff3
-StrainModels=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae/"$Strain"/*_augustus_preds.gtf) 
+StrainModels=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae/"$Strain"/*_augustus_preds.gtf)
 bedtools intersect -s -a "$StrainModels"  -b "$Pathz"/"$Strain"_mimps_exp.gff3> "$Pathz"/"$Strain"_mimps_ass_genes.bed
-cat "$Pathz"/*_mimps_ass_genes.bed | grep 'gene' | wc -l
+cat "$Pathz"/*_mimps_ass_genes.bed | grep -w 'gene' | wc -l
 done
 
+	# From genes predicted without hints
+ProgPath=/home/armita/git_repos/emr_repos/tools/pathogen/mimp_finder
+for Pathz in $(ls -d analysis/mimps/F.oxysporum_fsp_cepae/Fus2); do
+Strain=$(echo "$Pathz" | cut -f4 -d '/')
+echo "$Strain"
+"$ProgPath"/gffexpander.pl + 1000 "$Pathz"/"$Strain"_mimps.gff3 > "$Pathz"/"$Strain"_mimps_exp.gff3
+StrainModels=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae_old/"$Strain"/*_aug.gff)
+#StrainModels=$(ls gene_pred/augustus/F.oxysporum_fsp_cepae_not_as_old/"$Strain"/*_aug_out.gff)
+bedtools intersect -s -a "$StrainModels"  -b "$Pathz"/"$Strain"_mimps_exp.gff3> "$Pathz"/"$Strain"_mimps_ass_genes_no_hints.bed
+cat "$Pathz"/*_mimps_ass_genes_no_hints.bed | grep -w 'gene' | wc -l
+done
 
 
 
@@ -178,4 +191,3 @@ for Filez in $(ls gene_pred/sigP/F.oxysporum_fsp_cepae/*/*_sp.aa | grep -v _neg_
 	echo "$Filez"
 	qsub "$ProgPath"/sub_sscp.sh "$Filez"
 done
-

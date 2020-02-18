@@ -560,13 +560,150 @@ printf "$FileName\t$Complete\t$Duplicated\t$Fragmented\t$Missing\t$Total\n"
 done
 ```
 
+# Identifying bacterial contamination in the assembly
+
+Submission to NCBI identified presence of a bacterial contaminant, representing contig1:
+
+```bash
+SUBID     	BioProject	BioSample	Organism
+--------------------------------------------------------
+SUB4837029	PRJNA506536	SAMN10462267	Fusarium oxysporum
+
+[] We ran your sequences through our Contamination Screen. The screen found
+contigs that need to be trimmed and/or excluded. Please adjust the
+sequences appropriately and then resubmit your sequences. After you remove the
+contamination, trim any Ns at the ends of the sequence and remove any sequences
+that are shorter than 200 nt and not part of a multi-component scaffold.
+
+Note that hits in eukaryotic genomes to mitochondrial sequences can be ignored
+when specific criteria are met. Those criteria are explained below.
+
+Note that mismatches between the name of the adaptor/primer identified in the screen
+and the sequencing technology used to generate the sequencing data should not be used
+to discount the validity of the screen results as the adaptors/primers of many
+different sequencing platforms share sequence similarity.
+
+
+
+Screened 68 sequences, 70,551,861 bp.
+1 sequence with locations to mask/trim
+
+Trim:
+Sequence name, length, span(s), apparent source
+contig_1	6847288	1111510..1111595,1111965..1112330,4865118..4867429,5917015..5917152,5935479..5935511,5945808..5945919,5954687..5954720	Bordetella avium 197N,Achromobacter xylosoxidans NH44784-1996
+```
+
+The bacterial database was used within deconseq to remove any bactrial contigs:
+
+
+```bash
+  for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stat10'); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    echo "$Organism - $Strain"
+    for Exclude_db in "achromobacter"; do
+      AssemblyDir=$(dirname $Assembly)
+      OutDir=$AssemblyDir/../deconseq_$Exclude_db
+      ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+      qsub $ProgDir/sub_deconseq_no_retain.sh $Assembly $Exclude_db $OutDir
+    done
+  done
+```
+
+Results were summarised using the commands:
+
+```bash
+for Exclude_db in "achromobacter"; do
+echo $Exclude_db
+for File in $(ls assembly/*/*/*/*/log.txt | grep "$Exclude_db"); do
+Name=$(echo $File | rev | cut -f3 -d '/' | rev);
+Good=$(cat $File |cut -f2 | head -n1 | tail -n1);
+Bad=$(cat $File |cut -f2 | head -n3 | tail -n1);
+printf "$Name\t$Good\t$Bad\n";
+done
+done
+```
+
+```
+achromobacter
+Stat10	67	1
+```
+
+
+# Identifying Mitochondrial genes in assemblies
+
+Using a blast based approach of Mt genes:
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/../deconseq_achromobacter/contigs_min_500bp_filtered_renamed.fasta | grep 'Stat10'); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+echo $Assembly
+Query=$(ls analysis/blast_homology/Mt_genes/F.spp._mt_prots_Al-Reedy_et_al._2012.fasta)
+OutDir=analysis/Mt_genes/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/blast
+qsub $ProgDir/run_blast2csv.sh $Query protein $Assembly $OutDir
+done
+```
+
+Using an exclusion database with deconseq:
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/../deconseq_achromobacter/contigs_min_500bp_filtered_renamed.fasta | grep 'Stat10'); do
+    Strain=$(echo $Assembly | rev | cut -f5 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f6 -d '/' | rev)
+    echo "$Organism - $Strain"
+    for Exclude_db in "Fo_mtDNA"; do
+      AssemblyDir=$(dirname $Assembly)
+      OutDir=$AssemblyDir/../deconseq_$Exclude_db
+      ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+      qsub $ProgDir/sub_deconseq_no_retain.sh $Assembly $Exclude_db $OutDir
+    done
+  done
+```
+
+Results were summarised using the commands:
+
+```bash
+for Exclude_db in "Fo_mtDNA"; do
+echo $Exclude_db
+for File in $(ls assembly/*/*/*/*/log.txt | grep "$Exclude_db" | grep 'Stat10'); do
+Name=$(echo $File | rev | cut -f3 -d '/' | rev);
+Good=$(cat $File |cut -f2 | head -n1 | tail -n1);
+Bad=$(cat $File |cut -f2 | head -n3 | tail -n1);
+printf "$Name\t$Good\t$Bad\n";
+done
+done
+```
+
+```
+Fo_mtDNA
+Stat10	66	1
+```
+
+Quast was run on the removed mtDNA:
+
+```bash
+for Assembly in $(ls assembly/*/*/*/deconseq_Fo_mtDNA/*_cont.fa | grep 'Stat10'); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+
 
 # Repeat Masking
 
 Repeat masking was performed on the non-hybrid assembly.
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/pilon/pilon_min_500bp_renamed.fasta | grep 'Stat10'); do
+for Assembly in $(ls assembly/*/*/*/deconseq_Fo_mtDNA/contigs_min_500bp_filtered_renamed.fasta | grep 'Stat10'); do
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -601,6 +738,13 @@ bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
 done
 ```
 
+
+```
+repeat_masked/F.oxysporum_fsp_statice/Stat10/filtered_contigs/Stat10_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+11270789
+```
+
 # Gene prediction
 
 ## RNA QC
@@ -623,11 +767,13 @@ Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 FileF=$(ls $RNADir/F/*_trim.fq.gz)
 FileR=$(ls $RNADir/R/*_trim.fq.gz)
 # OutDir=alignment/$Organism/$Strain/$Timepoint
-Jobs=$(qstat | grep 'sub_sta' | grep 'qw'| wc -l)
+# Jobs=$(qstat | grep 'sub_sta' | grep 'qw'| wc -l)
+Jobs=$(squeue -n 'slurm_star.sh' -t 'PD' | wc -l)
 while [ $Jobs -gt 1 ]; do
 sleep 1m
 printf "."
-Jobs=$(qstat | grep 'sub_sta' | grep 'qw'| wc -l)
+# Jobs=$(qstat | grep 'sub_sta' | grep 'qw'| wc -l)
+Jobs=$(squeue -n 'slurm_star.sh' -t 'PD' | wc -l)
 done
 # printf "\n"
 # printf "\n"
@@ -635,10 +781,13 @@ echo "$Organism - $Strain - $Timepoint"
 # echo $FileF
 # echo $FileR
 # Prefix=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
-OutDir=../../../../../data/scratch/armita/fusarium/alignment/star/$Organism/$Strain/$Timepoint
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
-echo "$Strain\t$Timepoint" >> alignment.log
+# OutDir=../../../../../data/scratch/armita/fusarium/alignment/star/$Organism/$Strain/$Timepoint
+OutDir=../../../../../data/scratch/armita/fusarium/alignment/star2/$Organism/$Strain/$Timepoint
+# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+ProgDir=/projects/oldhome/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+# qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+sbatch $ProgDir/slurm_star.sh $Assembly $FileF $FileR $OutDir
+# echo "$Strain\t$Timepoint" >> alignment.log
 done
 done
 ```
@@ -720,19 +869,19 @@ done
 Secondly, genes were predicted using CodingQuary:
 
 ```bash
-Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-while [ $Jobs -ge 1 ]; do
-sleep 10m
-printf "."
-Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-done
+# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+# while [ $Jobs -ge 1 ]; do
+# sleep 10m
+# printf "."
+# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+# done
 for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -w -e 'Stat10'); do
-Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-while [ $Jobs -ge 1 ]; do
-sleep 10
-printf "."
-Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
-done
+# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+# while [ $Jobs -ge 1 ]; do
+# sleep 10
+# printf "."
+# Jobs=$(qstat | grep 'sub_cuffli' | wc -l)
+# done
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
@@ -792,9 +941,7 @@ cat $GffBraker $GffQuary > $GffAppended
 done
 ```
 
-```
 
-```
 
 
 In preperation for submission to ncbi, gene models were renamed and duplicate gene features were identified and removed.
@@ -851,6 +998,57 @@ done
 ```
 Stat10 - F.oxysporum_fsp_statice
 26985
+```
+
+### Fungap
+
+Gene prediction using fungap was also assessed:
+
+This was run from the new cluster
+
+```bash
+screen -a
+
+mkdir qc_rna/concat
+rm qc_rna/concat/72hpi_CzapekDox_GlucosePeptone_PDA_PDB_RNAseq_*.fq.gz
+for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v -e 'control' -e 'rep2' -e 'rep3' -e 'prelim' -e 'FO47' -e '55'); do
+Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+echo $RNADir
+ls $FileF
+ls $FileR
+cat $FileF >> qc_rna/concat/72hpi_CzapekDox_GlucosePeptone_PDA_PDB_RNAseq_F.fq.gz
+cat $FileR >> qc_rna/concat/72hpi_CzapekDox_GlucosePeptone_PDA_PDB_RNAseq_R.fq.gz
+done
+gunzip qc_rna/concat/72hpi_CzapekDox_GlucosePeptone_PDA_PDB_RNAseq_*.fq.gz
+
+conda activate fungap
+
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa | grep -e 'Stat10'); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+FileF=$(ls qc_rna/concat/*_F.fq)
+FileR=$(ls qc_rna/concat/*_R.fq)
+RefProteome=$(ls assembly/external_group/F.oxysporum_fsp_lycopersici/4287_v2/fungidb/FungiDB-29_Foxysporum4287_AnnotatedProteins.fasta)
+ReadF=$(ls qc_rna/concat/*_F.fq)
+ReadR=$(ls qc_rna/concat/*_R.fq)
+BamAlignment=$(ls ../../../../../data*/scratch*/armita/fusarium/alignment/star/$Organism/$Strain/concatenated/all_reads_concatenated.bam)
+Prefix=${Organism}_${Strain}
+OutDir=gene_pred/fungap/$Organism/${Strain}
+ProgDir=/projects/oldhome/armita/git_repos/emr_repos/tools/gene_prediction/fungap
+sbatch $ProgDir/slurm_fungap.sh $Assembly $RefProteome $ReadF $ReadR $BamAlignment $Prefix $OutDir
+done
+
+screen -a
+cd /projects/oldhome/groups/harrisonlab/project_files/fusarium
+mkdir tmp
+cd tmp
+srun --mem=40gb --cpus-per-task=40 --partition=unlimited --time=4-0:0:0 --pty bash
+/home/armita/anaconda2/envs/fungap/bin/gff3_merge -g -n -d ../gene_pred/fungap/F.oxysporum_fsp_statice/Stat10/maker_out/concat/maker_run4/assembly.maker.output/assembly_master_datastore_index.log
+/home/armita/anaconda2/envs/fungap/bin/fasta_merge -d ../gene_pred/fungap/F.oxysporum_fsp_statice/Stat10/maker_out/concat/maker_run4/assembly.maker.output/assembly_master_datastore_index.log
+
 ```
 
 

@@ -25,7 +25,10 @@ conf = ap.parse_args()
 
 #-----------------------------------------------------
 # Step 2
-# Identify the length and gene density of FoL chromosomes
+# Create a gff feature for every 100Kb of contig 
+# or alternative value if specified at input.
+# Remaining sequence at the end of a contig will be 
+# represented as a smaller feature.
 #-----------------------------------------------------
 
 size_kb = str(conf.size)
